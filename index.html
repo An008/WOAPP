@@ -179,6 +179,32 @@ input.sr-i:focus{outline:none;}
 .empty-t{font-size:17px;font-weight:700;color:var(--txt);}
 
 @media(max-width:340px){.fc-ex-name{font-size:22px;}.rs-timer{font-size:72px;}}
+
+/* ─── PROFILE / LOGIN ─── */
+#v-login{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column;align-items:center;overflow-y:auto;padding:0 20px 60px;}
+.login-logo{font-size:56px;margin:56px 0 6px;line-height:1;}
+.login-title{font-size:24px;font-weight:900;color:var(--white);letter-spacing:.14em;text-transform:uppercase;}
+.login-sub{font-size:14px;color:var(--txt2);margin-top:4px;margin-bottom:38px;}
+.user-grid{width:100%;max-width:380px;display:flex;flex-direction:column;gap:10px;}
+.user-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s;}
+.user-card:active{opacity:.7;}
+.user-card.type-training{border-left:4px solid var(--amber);}
+.user-card.type-test{border-left:4px solid var(--purple);}
+.user-av{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex-shrink:0;}
+.user-av.type-training{background:rgba(232,160,42,.18);color:var(--amber);}
+.user-av.type-test{background:rgba(155,141,232,.18);color:var(--purple);}
+.user-name{font-size:18px;font-weight:700;color:var(--white);}
+.user-meta{font-size:12px;color:var(--txt2);margin-top:3px;}
+.ub-test{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(155,141,232,.15);color:var(--purple);margin-left:6px;}
+.user-add{background:transparent;border:1.5px dashed var(--bord2);border-radius:14px;padding:16px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;color:var(--txt2);font-size:15px;font-weight:700;}
+.login-note{margin-top:14px;font-size:12px;color:var(--txt3);text-align:center;}
+#v-addprof{position:fixed;bottom:0;left:0;right:0;z-index:450;background:var(--bg2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:20px 18px 44px;display:none;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
+#v-addprof.show{display:block;transform:translateY(0);}
+.ap-handle{width:36px;height:4px;background:var(--bord2);border-radius:2px;margin:0 auto 16px;}
+.type-sel{display:flex;gap:8px;margin-top:8px;}
+.type-opt{flex:1;padding:11px 8px;border-radius:10px;border:1.5px solid var(--border);font-size:14px;font-weight:700;color:var(--txt2);cursor:pointer;text-align:center;transition:all .15s;}
+.type-opt.sel-tr{border-color:var(--amber);color:var(--amber);background:rgba(232,160,42,.08);}
+.type-opt.sel-ts{border-color:var(--purple);color:var(--purple);background:rgba(155,141,232,.08);}
 </style>
 </head>
 <body>
@@ -197,6 +223,24 @@ input.sr-i:focus{outline:none;}
     <div class="nb" id="nb-settings" onclick="showTab('settings')"><i>⚙️</i><s>Setup</s></div>
   </nav>
 </div>
+
+<div id="v-login"></div>
+
+<div id="v-addprof">
+  <div class="ap-handle"></div>
+  <div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:16px">Add Profile</div>
+  <div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--txt2);margin-bottom:7px">Name</div>
+  <input class="reg-inp" type="text" id="ap-name" placeholder="e.g. NC" maxlength="20" style="width:100%;background:var(--bg3);border:1.5px solid var(--bord2);border-radius:10px;color:var(--white);font-size:18px;padding:12px 14px;-webkit-appearance:none;">
+  <div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--txt2);margin:14px 0 7px">Profile Type</div>
+  <div class="type-sel">
+    <div class="type-opt sel-tr" id="ap-tr" onclick="setAPType('training')">&#128170; Training</div>
+    <div class="type-opt" id="ap-ts" onclick="setAPType('test')">&#9879; Test</div>
+  </div>
+  <div style="font-size:13px;color:var(--red);margin-top:8px;min-height:20px" id="ap-err"></div>
+  <button class="btn btn-green" onclick="submitAddProfile()" style="margin-top:4px">&#10003; Create Profile</button>
+  <button class="btn-outline" onclick="closeAddProfile()" style="margin-top:8px">Cancel</button>
+</div>
+
 <div id="v-overview" class="overlay">
   <div class="hdr"><div class="back" onclick="closeOverlay('v-overview')">‹</div><div><div class="hdr-ttl" id="ov-ttl"></div><div class="hdr-sub" id="ov-sub"></div></div></div>
   <div id="ov-body" style="overflow-y:auto;flex:1;"></div>
@@ -237,6 +281,147 @@ input.sr-i:focus{outline:none;}
   <div class="rs-skip" onclick="skipRest()">Skip Rest →</div>
 </div>
 <script>
+
+// ─── PROFILE & GITHUB SYNC ───────────────────────────────────────────────
+var GH_REPO = 'an008/WOAPP';
+var GH_TK_KEY = 'iron-gh-token';
+var USERS_KEY = 'iron-users';
+var DATA_PFX = 'iron-data-';
+var CUR_USER = null; // {name, type}
+var _apType = 'training';
+
+function getGHToken(){ return localStorage.getItem(GH_TK_KEY)||''; }
+function getCachedUsers(){ try{return JSON.parse(localStorage.getItem(USERS_KEY)||'[]');}catch(e){return[];} }
+function setCachedUsers(u){ localStorage.setItem(USERS_KEY,JSON.stringify(u)); }
+
+function profSessions(name){ try{var d=localStorage.getItem(DATA_PFX+name);if(!d)return 0;return Object.keys(JSON.parse(d).sessions||{}).length;}catch(e){return 0;} }
+function profLast(name){ try{var d=localStorage.getItem(DATA_PFX+name);if(!d)return 'No sessions';var s=JSON.parse(d);var dates=Object.keys(s.sessions||{}).sort().reverse();return dates.length?dates[0]:'No sessions';}catch(e){return 'No sessions';} }
+
+// ── Login Screen ─────────────────────────────────────────────────────────
+function showLogin(){
+  document.getElementById('app').style.display='none';
+  var el=document.getElementById('v-login');
+  el.style.display='flex';
+  renderLoginCards();
+  // Background refresh from GitHub (no auth needed for public read)
+  fetch('https://raw.githubusercontent.com/'+GH_REPO+'/main/profiles.json')
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(u){if(u&&u.length){setCachedUsers(u);renderLoginCards();}})
+    .catch(function(){});
+}
+
+function renderLoginCards(){
+  var users=getCachedUsers();
+  var el=document.getElementById('v-login');
+  var cards=users.map(function(u){
+    var n=profSessions(u.name);var la=profLast(u.name);var av=u.name.substring(0,2).toUpperCase();
+    return '<div class="user-card type-'+u.type+'" onclick="selectUser(''+u.name+'',''+u.type+'')">'
+      +'<div class="user-av type-'+u.type+'">'+av+'</div>'
+      +'<div style="flex:1"><div style="display:flex;align-items:center">'
+      +'<span class="user-name">'+u.name+'</span>'+(u.type==='test'?'<span class="ub-test">TEST</span>':'')+'</div>'
+      +'<div class="user-meta">'+n+' session'+(n!==1?'s':'')+' &middot; Last: '+la+'</div></div>'
+      +'<div style="font-size:18px;color:var(--txt3)">&#8250;</div></div>';
+  }).join('');
+  el.innerHTML='<div class="login-logo">&#9889;</div>'
+    +'<div class="login-title">IRON PROTOCOL</div>'
+    +'<div class="login-sub">Who's training today?</div>'
+    +'<div class="user-grid">'+cards
+    +'<div class="user-add" onclick="showAddProfile()"><span style="font-size:22px">+</span> Add Profile</div>'
+    +'</div>'
+    +'<div class="login-note">Data saved locally &middot; Sync to GitHub via Setup</div>';
+}
+
+function selectUser(name,type){
+  CUR_USER={name:name,type:type};
+  document.getElementById('v-login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  loadS();
+  curSessDate=today();
+  curSessType=S.sessions[today()]?S.sessions[today()].type:S.next;
+  showTab('today');
+}
+
+function switchProfile(){
+  CUR_USER=null;S=null;
+  ['v-overview','v-flashcard','v-breathing','v-assessment'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.classList.remove('on');
+  });
+  clearInterval(RS_INT);
+  var rs=document.getElementById('rest-screen');if(rs)rs.classList.remove('show');
+  showLogin();
+}
+
+// ── Add Profile ────────────────────────────────────────────────────────────
+function showAddProfile(){document.getElementById('ap-name').value='';document.getElementById('ap-err').textContent='';_apType='training';setAPType('training');document.getElementById('v-addprof').classList.add('show');}
+function closeAddProfile(){document.getElementById('v-addprof').classList.remove('show');}
+function setAPType(t){
+  _apType=t;
+  var tr=document.getElementById('ap-tr');var ts=document.getElementById('ap-ts');
+  if(tr)tr.className='type-opt '+(t==='training'?'sel-tr':'');
+  if(ts)ts.className='type-opt '+(t==='test'?'sel-ts':'');
+}
+function submitAddProfile(){
+  var name=(document.getElementById('ap-name').value||'').trim();
+  var errEl=document.getElementById('ap-err');
+  if(!name){errEl.textContent='Please enter a name.';return;}
+  var users=getCachedUsers();
+  if(users.find(function(u){return u.name.toLowerCase()===name.toLowerCase();})){errEl.textContent='That name already exists.';return;}
+  var newUser={name:name,type:_apType};
+  users.push(newUser);
+  setCachedUsers(users);
+  ghCommit('profiles.json',users,'Add profile: '+name);
+  closeAddProfile();
+  selectUser(name,_apType);
+}
+
+// ── GitHub Sync ────────────────────────────────────────────────────────────
+async function ghCommit(path,content,message){
+  var tk=getGHToken();if(!tk)return{ok:false,err:'No token'};
+  try{
+    // Get current SHA
+    var shaRes=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+path,{headers:{'Authorization':'token '+tk}});
+    var sha=shaRes.ok?(await shaRes.json()).sha:null;
+    var body={message:message||'Iron Protocol sync',content:btoa(unescape(encodeURIComponent(JSON.stringify(content,null,2))))};
+    if(sha)body.sha=sha;
+    var res=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Authorization':'token '+tk,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    return{ok:res.ok,err:res.ok?null:'Error '+res.status};
+  }catch(e){return{ok:false,err:e.message};}
+}
+
+async function syncUserData(){
+  if(!CUR_USER)return;
+  var el=document.getElementById('gh-status');
+  if(el){el.textContent='Syncing...';el.style.color='var(--txt2)';}
+  var result=await ghCommit('data-'+CUR_USER.name+'.json',S,'Sync '+CUR_USER.name+' '+today());
+  if(result.ok){S.lastSync=new Date().toISOString();saveS();}
+  if(el){el.textContent=result.ok?('&#10003; Synced '+new Date().toLocaleTimeString()):('&#10007; '+result.err);el.style.color=result.ok?'var(--green)':'var(--red)';}
+}
+
+async function pullUserData(){
+  if(!CUR_USER)return;
+  var el=document.getElementById('gh-status');
+  if(el){el.textContent='Pulling...';el.style.color='var(--txt2)';}
+  try{
+    var tk=getGHToken();
+    var hdrs=tk?{'Authorization':'token '+tk}:{};
+    var res=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/data-'+CUR_USER.name+'.json',{headers:hdrs});
+    if(!res.ok){if(el){el.textContent='No cloud data found yet.';el.style.color='var(--txt2)';}return;}
+    var d=await res.json();
+    var cloud=JSON.parse(atob(d.content.replace(/[\n\r]/g,'')));
+    if(!confirm('Replace local data with GitHub version? Local data will be overwritten.'))return;
+    S=cloud;saveS();renderToday();
+    if(el){el.textContent='&#10003; Pulled successfully';el.style.color='var(--green)';}
+  }catch(e){if(el){el.textContent='&#10007; '+e.message;el.style.color='var(--red)';}}
+}
+
+function clearTestData(){
+  if(!CUR_USER||CUR_USER.type!=='test'){alert('Only for Test profiles.');return;}
+  if(!confirm('Clear all training data for '+CUR_USER.name+'? Profile is kept.'))return;
+  localStorage.removeItem(DATA_PFX+CUR_USER.name);
+  loadS();renderToday();renderSettings();
+}
+
+
 // ─── DATA ───────────────────────────────────────────
 var SESSIONS={
 A:{id:'A',label:'Session A',name:'STRUCTURAL STRENGTH',color:'#E8A02A',icon:'💪',pillar:'Structural Strength',dur:'~45 min',hero:'hero-A',sc:'#E8A02A',after:'breathing',
@@ -394,12 +579,16 @@ function defaultState(){
   return{profile:{name:'',start:today(),apiKey:''},next:'A',sessions:{},journal:{},landmarks:LM.map(function(l){return Object.assign({},l,{done:false});})};
 }
 function loadS(){
-  try{var d=localStorage.getItem(SK);S=d?JSON.parse(d):defaultState();}
+  var key=CUR_USER?DATA_PFX+CUR_USER.name:SK;
+  try{var d=localStorage.getItem(key);S=d?JSON.parse(d):defaultState();}
   catch(e){S=defaultState();}
   if(!S.landmarks)S.landmarks=LM.map(function(l){return Object.assign({},l,{done:false});});
+  if(!S.profile)S.profile={};
   if(!S.profile.apiKey)S.profile.apiKey='';
+  if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;
+  if(!S.profile.start)S.profile.start=today();
 }
-function saveS(){try{localStorage.setItem(SK,JSON.stringify(S));}catch(e){}}
+function saveS(){var key=CUR_USER?DATA_PFX+CUR_USER.name:SK;try{localStorage.setItem(key,JSON.stringify(S));}catch(e){}}
 
 function today(){return new Date().toISOString().split('T')[0];}
 function fmtDate(s){var d=new Date(s+'T12:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
@@ -449,7 +638,7 @@ function renderToday(){
   document.getElementById('v-today').innerHTML=
   '<div style="padding-bottom:8px">'
   +'<div style="font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);padding:16px 18px 0">PHASE '+(ph+1)+' — '+phD.name+' · WEEK '+phWk+'</div>'
-  +'<div style="font-size:25px;font-weight:800;color:var(--white);padding:4px 18px 0;line-height:1.2">'+g+',<br>'+(S.profile.name||'Operator')+'</div>'
+  +'<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:4px 18px 0"><div style="font-size:25px;font-weight:800;color:var(--white);line-height:1.2">'+g+',<br>'+(CUR_USER?CUR_USER.name:S.profile.name||'Operator')+'</div><div onclick="switchProfile()" style="font-size:12px;font-weight:700;color:var(--txt3);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:6px;margin-bottom:2px">&#8617; Switch</div></div>'
   +'<div class="phase-card"><div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2)">Phase '+(ph+1)+' of 4</div><div style="font-size:17px;font-weight:800;color:var(--white);margin-top:2px">'+phD.name+'</div><div style="font-size:13px;color:var(--txt2);margin-top:3px">'+phD.desc+'</div><div class="pc-bar" style="height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--amber);border-radius:2px"></div></div><div style="font-size:11px;color:var(--txt3);margin-top:4px">Week '+phWk+' of '+phD.weeks+'</div></div>'
   +'<div class="sh">TODAY\'S SESSION</div>'
   +'<div class="hero '+sd.hero+'" style="cursor:pointer" onclick="beginSession(null)">'
@@ -984,8 +1173,24 @@ function renderSettings(){
   document.getElementById('v-settings').innerHTML=
   '<div class="hdr"><div class="hdr-ttl">Setup</div></div>'
   +'<div class="sh">PROFILE</div>'
-  +'<div class="sr"><div class="sr-l">Name</div><input class="sr-i" type="text" value="'+(S.profile.name||'')+'" placeholder="Operator" onchange="S.profile.name=this.value;saveS()"></div>'
+  +(CUR_USER?'<div style="background:var(--bg3);border:1px solid var(--bord2);border-radius:12px;margin:0 18px 10px;padding:14px;display:flex;align-items:center;gap:12px">'
+    +'<div class="user-av type-'+CUR_USER.type+'" style="width:42px;height:42px;font-size:16px">'+CUR_USER.name.substring(0,2).toUpperCase()+'</div>'
+    +'<div style="flex:1"><div style="font-size:16px;font-weight:700;color:var(--white)">'+CUR_USER.name+'</div>'
+    +'<div style="font-size:11px;color:var(--txt2);margin-top:2px">'+CUR_USER.type.toUpperCase()+' profile</div></div>'
+    +'<button onclick="switchProfile()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--txt2);font-size:13px;font-weight:700;cursor:pointer">Switch</button></div>'
+    +(CUR_USER.type==='test'?'<div style="padding:0 18px 8px"><button onclick="clearTestData()" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.08);color:var(--purple);font-size:13px;font-weight:700;cursor:pointer">&#128465; Clear Test Data</button></div>':'')
+    :'')
+  +'<div class="sr"><div class="sr-l">Display Name</div><input class="sr-i" type="text" value="'+(S.profile.name||'')+\"'\" placeholder=\"Operator\" onchange=\"S.profile.name=this.value;saveS()\"></div>'
   +'<div class="sr"><div class="sr-l">Programme Start</div><input class="sr-i" type="date" value="'+S.profile.start+'" onchange="S.profile.start=this.value;saveS();renderToday()"></div>'
+  +'<div class="sh">GITHUB SYNC</div>'
+  +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6">Session data stays on this device. Add your GitHub PAT to sync across devices.<br>Repo: <strong style="color:var(--white)">an008/WOAPP</strong></div>'
+  +'<div class="sr"><div class="sr-l">Personal Access Token</div><input class="sr-i" type="password" value="'+getGHToken()+'" placeholder="ghp_..." onchange="localStorage.setItem(''+GH_TK_KEY+'',this.value);renderSettings()" style="width:180px;font-size:12px"></div>'
+  +(getGHToken()?'<div style="padding:4px 18px 8px;font-size:12px;color:var(--green)">&#10003; Token saved</div>':'')
+  +'<div style="padding:0 18px 12px;display:flex;gap:8px">'
+  +'<button onclick="syncUserData()" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(61,184,122,.3);background:rgba(61,184,122,.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer">&#8593; Sync to GitHub</button>'
+  +'<button onclick="pullUserData()" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(74,158,219,.3);background:rgba(74,158,219,.08);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">&#8595; Pull from GitHub</button>'
+  +'</div>'
+  +'<div id="gh-status" style="padding:0 18px 10px;font-size:12px;color:var(--txt2)">'+(S&&S.lastSync?'Last sync: '+new Date(S.lastSync).toLocaleString():'Not yet synced')+'</div>'
   +'<div class="sh">AI COACH</div>'
   +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6"><strong style="color:var(--green)">Free & instant:</strong> Get a Groq key at <strong style="color:var(--white)">console.groq.com</strong> → API Keys → Create. Keys start with <strong style="color:var(--amber)">gsk_</strong>.<br>Also accepts Google Gemini keys (start with AIza) from aistudio.google.com.</div>'
   +'<div class="sr"><div class="sr-l" style="font-size:13px">API Key</div><input class="sr-i" type="password" value="'+(S.profile.apiKey||'')+'" placeholder="gsk_ or AIza..." onchange="S.profile.apiKey=this.value;saveS();renderSettings()" style="width:180px;font-size:12px"></div>'
@@ -1012,10 +1217,7 @@ function renderSettings(){
 }
 
 // ─── INIT ─────────────────────────────────────────────
-loadS();
-curSessDate=today();
-curSessType=S.sessions[today()]?S.sessions[today()].type:S.next;
-renderToday();
+showLogin();
 </script>
 </body>
 </html>
