@@ -1,0 +1,12 @@
+[
+  {
+    "name": "NC",
+    "pwd": "changeMe2025",
+    "type": "training"
+  },
+  {
+    "name": "Test",
+    "pwd": "test",
+    "type": "test"
+  }
+]
