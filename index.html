@@ -579,6 +579,22 @@ function renderCard(){
   var rpiHtml='';
   if(rpi){rpiHtml='<div class="rpi-card" style="background:'+rpi.bg+';border:1px solid '+rpi.c+'44"><div class="rpi-sig">'+rpi.icon+' '+rpi.label+'</div><div class="rpi-detail" style="color:'+rpi.c+'">'+rpi.detail+'</div>'+(rpi.suggestion?'<div class="rpi-sug" style="color:'+rpi.c+'">→ '+rpi.suggestion+'</div>':'')+'</div>';}
 
+  // AI assessment calibration badge
+  var al=S.profile&&S.profile.assessmentLoads&&S.profile.assessmentLoads[ex.id];
+  var alHtml='';
+  if(al){
+    var alLoad=al.weight?al.weight+' kg':al.bandLevel?al.bandLevel+' band':al.duration?al.duration+' min':'bodyweight';
+    var alVol=(al.sets||ex.s)+' sets \xd7 '+(al.reps||ex.rpp||'max')+' reps';
+    alHtml='<div style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.3);border-radius:8px;padding:10px 12px;margin-bottom:10px">'
+      +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:4px">\ud83d\udcca AI CALIBRATED TARGET</div>'
+      +'<div style="font-size:17px;font-weight:800;color:var(--white)">'+alLoad+' \xb7 '+alVol+'</div>'
+      +(al.note?'<div style="font-size:12px;color:var(--txt2);margin-top:3px">'+al.note+'</div>':'')
+      +'</div>';
+  }
+
+  // Pre-fill weight from assessment if no logged data yet
+  var prefillWt = (setData.wt!=null)?setData.wt:(al&&al.weight?al.weight:'');
+
   // YouTube link
   var ytHtml=ex.yt?'<a class="fc-yt" href="https://www.youtube.com/results?search_query='+encodeURIComponent(ex.yt)+'" target="_blank" rel="noopener">▶ Watch on YouTube</a><br>':'';
 
@@ -591,7 +607,7 @@ function renderCard(){
     var rpeButtons=[1,2,3,4,5,6,7,8,9,10].map(function(v){return '<div class="rpe-b '+(setData.rpe===v?'on':'')+'" data-v="'+v+'" onclick="fcSetRpe('+v+')">'+v+'</div>';}).join('');
     inputsHtml='<div class="fc-inputs">'
       +'<div class="fc-inp-row">'
-      +(ex.wt?'<div class="fc-ig wt"><div class="fc-il">Weight (kg)</div><input class="fc-if" type="number" inputmode="decimal" placeholder="BW" id="fc-wt" value="'+(setData.wt!=null?setData.wt:'')+'" oninput="fcSetWt(this.value)"></div>':'<div class="fc-ig wt"><div class="fc-il">Reps done'+(ex.rpp?' / '+ex.rpp:'')+'</div><input class="fc-if" type="number" inputmode="numeric" placeholder="'+(ex.rpp||'Max')+'" id="fc-rp" value="'+(setData.rp!=null?setData.rp:'')+'" oninput="fcSetRp(this.value)"></div>')
+      +(ex.wt?'<div class="fc-ig wt"><div class="fc-il">Weight (kg)</div><input class="fc-if" type="number" inputmode="decimal" placeholder="'+(al&&al.weight?al.weight+' kg (AI rec)':'BW')+'" id="fc-wt" value="'+prefillWt+'" oninput="fcSetWt(this.value)"></div>':'<div class="fc-ig wt"><div class="fc-il">Reps done'+(ex.rpp?' / '+ex.rpp:'')+'</div><input class="fc-if" type="number" inputmode="numeric" placeholder="'+(ex.rpp||'Max')+'" id="fc-rp" value="'+(setData.rp!=null?setData.rp:'')+'" oninput="fcSetRp(this.value)"></div>')
       +'</div>'
       +'<div class="fc-rpe-note">Effort (RPE 1–10)</div>'
       +'<div class="rpe-g" id="fc-rpe">'+rpeButtons+'</div>'
@@ -601,6 +617,7 @@ function renderCard(){
   var html='<div class="fc-blk-label" style="color:'+card.blkCol+'">'+card.blkName+'</div>'
     +'<div class="fc-ex-name">'+ex.n+'</div>'
     +'<div class="fc-set-info">'+(isTimed?ex.v:'Set '+(card.si+1)+' of '+card.totalSets+' · '+(ex.rpp?ex.rpp+' reps':'Max reps')+(ex.rest>0?' · '+ex.rest+'s rest after':''))+'</div>'
+    +alHtml
     +rpiHtml
     +ytHtml
     +'<div class="fc-cue">'+ex.cue+'</div>'
@@ -830,34 +847,36 @@ function submitAssessment(){
   var key=(S.profile&&S.profile.apiKey)||'';
   var el=document.getElementById('assess-ai-response');
   if(!el)return;
-  if(!key){el.innerHTML='<div style="padding:12px;background:var(--rdim);border-radius:10px;font-size:13px;color:var(--red)">No API key. Add one in Setup → AI Coach.</div>';return;}
-  el.innerHTML='<div style="padding:14px;text-align:center;color:var(--txt2);font-size:14px">🧠 Analysing your results...</div>';
+  if(!key){el.innerHTML='<div style="padding:12px;background:var(--rdim);border-radius:10px;font-size:13px;color:var(--red)">No API key. Add one in Setup \u2192 AI Coach.</div>';return;}
+  el.innerHTML='<div style="padding:14px;text-align:center;color:var(--txt2);font-size:14px">\U0001f9e0 Calibrating your programme...</div>';
   var lines=ASSESS_EXES.map(function(ex){var r=ASSESS_RESULTS[ex.id]||{};return ex.n+': '+(r.val!=null?r.val+(ex.metric==='seconds'?'s':' reps'):'not recorded')+(r.rpe?' (RPE '+r.rpe+')':'');}).join('\n');
   var ph=getPhase(),phWk=getPhaseWk();
-  var prompt='You are an elite physical preparation coach. Based on this fitness assessment, provide personalised starting loads for the Iron Protocol training programme.\n\n'
-    +'ATHLETE: 40-year-old male, corporate worker. Goals: ultra-trail endurance, explosive power, heavy carry capacity.\n'
-    +'PROGRAMME PHASE: Phase '+(ph+1)+' ('+PHASES[ph].name+'), Week '+phWk+'.\n\n'
-    +'ASSESSMENT RESULTS:\n'+lines+'\n\n'
-    +'Based on these results, provide in EXACTLY this format under 300 words:\n\n'
-    +'💪 STARTING LOADS\n'
-    +'Goblet Squat: ___ kg\n'
-    +'Dumbbell Row: ___ kg/hand\n'
-    +'Suitcase Carry: ___ kg/hand\n'
-    +'Band Pull-Apart: light / medium / heavy band\n\n'
-    +'📋 VOLUME ADJUSTMENTS\n'
-    +'[Any sets/reps changes from defaults based on results]\n\n'
-    +'🎯 PRIORITY FOCUS\n'
-    +'[2-3 sentences on the biggest gaps to address first]\n\n'
-    +'⚠️ WATCH\n'
-    +'[One specific risk or limitation to monitor]';
+  var prompt='You are an elite physical preparation coach calibrating a programme for a 40-year-old male. Goals: ultra-trail endurance, explosive power, heavy carry capacity (Finland X event). Phase '+(ph+1)+' Week '+phWk+'.\n\nASSESSMENT RESULTS:\n'+lines+'\n\nReturn ONLY valid JSON, no markdown, no backticks:\n{"loads":{"goblet":{"weight":NUMBER,"sets":NUMBER,"reps":NUMBER,"note":"string"},"db-row":{"weight":NUMBER,"sets":NUMBER,"reps":NUMBER,"note":"string"},"suitcase":{"weight":NUMBER,"sets":NUMBER,"reps":NUMBER,"note":"string"},"band-pa":{"weight":null,"bandLevel":"light|medium|heavy","sets":NUMBER,"reps":NUMBER,"note":"string"},"pushup":{"weight":null,"sets":NUMBER,"reps":NUMBER,"note":"string"},"scap-pu":{"weight":null,"sets":NUMBER,"reps":NUMBER,"note":"string"},"sl-hip":{"weight":null,"sets":NUMBER,"reps":NUMBER,"note":"string"},"tib":{"weight":null,"sets":NUMBER,"reps":NUMBER,"note":"string"},"z2":{"weight":null,"sets":1,"reps":null,"duration":MINUTES,"note":"string"},"accel":{"weight":null,"sets":NUMBER,"reps":NUMBER,"note":"string"},"broad-j":{"weight":null,"sets":NUMBER,"reps":NUMBER,"note":"string"}},"summary":"2-3 sentence assessment","priority":"single biggest gap","watch":"single injury or overload risk"}\n\nWeights in kg as integers. Sets 2-4. Reps 6-20. Conservative if weak results, higher end if strong.';
   callAI(key,prompt,function(txt){
-    if(el)el.innerHTML='<div style="background:var(--bg3);border:1px solid rgba(155,141,232,.3);border-radius:12px;padding:16px;font-size:14px;color:var(--txt);line-height:1.75;text-align:left">'
-      +'<div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:10px">PERSONALISED PROGRAMME CALIBRATION</div>'
-      +txt.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')
-      +'</div>';
+    try{
+      var d=JSON.parse(txt.replace(/```json|```/g,'').trim());
+      if(!S.profile)S.profile={};
+      S.profile.assessmentLoads=d.loads||{};
+      S.profile.assessmentSummary=d.summary||'';
+      S.profile.assessmentPriority=d.priority||'';
+      S.profile.assessmentWatch=d.watch||'';
+      S.profile.assessmentDate=today();
+      saveS();
+      if(el)el.innerHTML='<div style="background:var(--bg3);border:1px solid rgba(155,141,232,.35);border-radius:12px;padding:16px;font-size:14px;color:var(--txt);line-height:1.75">'
+        +'<div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:10px">\u2713 PROGRAMME CALIBRATED \u2014 '+today()+'</div>'
+        +'<div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:10px">'+d.summary+'</div>'
+        +'<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:3px">PRIORITY FOCUS</div>'
+        +'<div style="font-size:13px;color:var(--txt2);margin-bottom:10px">'+d.priority+'</div>'
+        +'<div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:3px">\u26a0 WATCH</div>'
+        +'<div style="font-size:13px;color:var(--txt2);margin-bottom:12px">'+d.watch+'</div>'
+        +'<div style="padding:10px 12px;background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.3);border-radius:8px;font-size:13px;color:var(--green);font-weight:700">'
+        +'\u2713 Flash cards now show your AI-calibrated loads for every exercise. Your programme has been personalised.</div>'
+        +'</div>';
+    }catch(e){
+      if(el)el.innerHTML='<div style="padding:12px;background:var(--rdim);border-radius:10px;font-size:14px;color:var(--txt);line-height:1.75"><div style="font-size:10px;font-weight:800;color:var(--red);margin-bottom:8px">Showing raw response:</div>'+txt.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')+'</div>';
+    }
   },function(err){if(el)el.innerHTML='<div style="padding:12px;background:var(--rdim);border-radius:10px;font-size:13px;color:var(--red)">Error: '+err+'</div>';});
 }
-
 // ─── AI ANALYSIS ──────────────────────────────────────
 async function callAI(key,prompt,onSuccess,onError){
   try{
@@ -985,7 +1004,11 @@ function renderSettings(){
   +'Phase 4 Readiness: <span style="color:var(--white);font-weight:700">Wks 37–48 · event prep</span><br>'
   +'<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Finland X comfortable finish: <span style="color:var(--amber);font-weight:700">~12 months</span></div></div>'
   +'<div class="sh">RESET</div>'
-  +'<div style="padding:0 18px;padding-bottom:20px"><button class="btn" style="background:rgba(227,80,80,.12);border:1px solid rgba(227,80,80,.3);color:var(--red)" onclick="if(confirm(\'Delete all training data?\')){localStorage.removeItem(\''+SK+'\');loadS();renderToday();showTab(\'today\')}">Reset All Data</button></div>';
+  +'<div style="padding:0 18px 20px">'
+  +(S.profile.assessmentDate?'<div style="background:rgba(155,141,232,.08);border:1px solid rgba(155,141,232,.25);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--purple);margin-bottom:4px">CURRENT CALIBRATION · '+S.profile.assessmentDate+'</div><div style="font-size:13px;color:var(--txt2);line-height:1.5">'+( S.profile.assessmentSummary||'Assessment complete')+'</div><div style="margin-top:8px;font-size:12px;color:var(--amber);font-weight:700">Priority: '+(S.profile.assessmentPriority||'—')+'</div><div style="font-size:12px;color:var(--red);margin-top:3px;font-weight:700">Watch: '+(S.profile.assessmentWatch||'—')+'</div></div>':'')
+  +'<button class="btn" style="background:rgba(227,80,80,.12);border:1px solid rgba(227,80,80,.3);color:var(--red);margin-bottom:8px" onclick="if(confirm(\'Delete all training data?\')){localStorage.removeItem(\''+SK+'\');loadS();renderToday();showTab(\'today\')}">Reset All Data</button>'
+  +'<button class="btn-outline" onclick="openAssessment()" style="color:var(--purple);border-color:rgba(155,141,232,.3)">Re-run Assessment</button>'
+  +'</div>';
 }
 
 // ─── INIT ─────────────────────────────────────────────
