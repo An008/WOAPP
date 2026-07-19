@@ -205,6 +205,12 @@ input.sr-i:focus{outline:none;}
 .type-opt{flex:1;padding:11px 8px;border-radius:10px;border:1.5px solid var(--border);font-size:14px;font-weight:700;color:var(--txt2);cursor:pointer;text-align:center;transition:all .15s;}
 .type-opt.sel-tr{border-color:var(--amber);color:var(--amber);background:rgba(232,160,42,.08);}
 .type-opt.sel-ts{border-color:var(--purple);color:var(--purple);background:rgba(155,141,232,.08);}
+
+/* ─── MUSCLE MAP ─── */
+.muscle-thumb{cursor:pointer;opacity:.85;transition:opacity .15s;}
+.muscle-thumb:active{opacity:1;}
+.muscle-thumb-wrap{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.muscle-thumb-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);}
 </style>
 </head>
 <body>
@@ -241,6 +247,7 @@ input.sr-i:focus{outline:none;}
   <button class="btn-outline" onclick="closeAddProfile()" style="margin-top:8px">Cancel</button>
 </div>
 
+<div id="v-musclemap" class="overlay"></div>
 <div id="v-overview" class="overlay">
   <div class="hdr"><div class="back" onclick="closeOverlay('v-overview')">‹</div><div><div class="hdr-ttl" id="ov-ttl"></div><div class="hdr-sub" id="ov-sub"></div></div></div>
   <div id="ov-body" style="overflow-y:auto;flex:1;"></div>
@@ -282,15 +289,220 @@ input.sr-i:focus{outline:none;}
 </div>
 <script>
 
+
+// ─── MUSCLE MAP SYSTEM ──────────────────────────────────────────────────────
+// P=primary (amber), S=secondary (blue-dim), _=inactive (dark)
+var MUSCLE_DATA = {
+  // front regions: quads, chest, abs, shoulders_f, biceps, tibialis, adductors, hip_flex, forearms
+  // back regions: glutes, hamstrings, lats, traps, rhomboids, rear_delt, calves, triceps, lower_back, neck_post
+  'goblet':        {f:{quads:'P',adductors:'S',abs:'S',hip_flex:'S'},    b:{glutes:'P',hamstrings:'S',lower_back:'S'}, feel:'Burning across the front of your thighs as reps accumulate. Glutes should fire on the drive up — if you only feel your lower back, stop and re-check hip hinge.'},
+  'pushup':        {f:{chest:'P',shoulders_f:'P',abs:'S'},               b:{triceps:'P'},                               feel:'Chest burn and tricep fatigue from rep 8 onwards. Core should feel braced throughout — if your lower back arches, drop to your knees.'},
+  'scap-pu':       {f:{},                                                 b:{lats:'P',rhomboids:'P',traps:'S'},          feel:'A squeeze and lift sensation behind your shoulder blades without your arms bending. Lats engaging — like trying to put your shoulder blades in your back pockets.'},
+  'band-pa':       {f:{shoulders_f:'S'},                                  b:{rear_delt:'P',rhomboids:'P',traps:'S'},     feel:'Tension across the back of your shoulders at end range. External rotation burn. If you only feel your traps: slow down and pull lower.'},
+  'db-row':        {f:{biceps:'S'},                                        b:{lats:'P',rhomboids:'P',rear_delt:'S'},     feel:'A deep pull through the side of your back (lat) as the elbow passes your torso. Bicep assist is normal but should not dominate.'},
+  'sl-hip':        {f:{hip_flex:'S'},                                      b:{glutes:'P',hamstrings:'S'},                feel:'Intense glute contraction at the top — like being punched in the glute. If you feel your lower back: squeeze glutes harder and tuck pelvis.'},
+  'pike-pu':       {f:{shoulders_f:'P',abs:'S'},                          b:{triceps:'S'},                               feel:'Shoulder burn straight down through the front delt. Harder than it looks. Your weight is shifted forward — normal.'},
+  'dead-hang':     {f:{forearms:'P',biceps:'S'},                          b:{lats:'P',lower_back:'S'},                  feel:'Grip fatigue and forearm pump. A gentle traction through the spine — shoulders should feel loose, not hunched.'},
+  'tib':           {f:{tibialis:'P'},                                      b:{},                                          feel:'Burn and pump in the muscle that runs up the outer shin (tibialis anterior). Should feel like it's about to cramp. That's correct.'},
+  'heel-d':        {f:{},                                                  b:{calves:'P'},                               feel:'Controlled eccentric stretch through the entire calf on the way down. The 4-second lowering is where the adaptation happens.'},
+  'box-step':      {f:{quads:'P',hip_flex:'S'},                           b:{glutes:'P',hamstrings:'S'},                 feel:'Front thigh and glute working together. The stepping leg should do all the work — if you're pushing off the trail leg, slow down.'},
+  'broad-j':       {f:{quads:'P',hip_flex:'S'},                           b:{glutes:'P',hamstrings:'S',calves:'S'},     feel:'Explosive hip extension — glutes and thighs firing simultaneously. The landing absorbs through bent knees. If you land stiff: too much effort, not enough hip.'},
+  'accel':         {f:{quads:'P',hip_flex:'P'},                           b:{glutes:'P',hamstrings:'P',calves:'S'},     feel:'Hip drive and front knee lift. At 70-80% effort it should feel controlled, not maximal. If your shins hurt: slow down and fix mechanics first.'},
+  'a-skip':        {f:{hip_flex:'P',quads:'S'},                           b:{glutes:'S',calves:'S'},                    feel:'Rhythmic hip flexor pull on each knee drive. Calves helping on the push-off. Shoulders and arms should feel loose.'},
+  'shadow':        {f:{shoulders_f:'P',abs:'S',chest:'S'},                b:{triceps:'S',rear_delt:'S'},                feel:'Hip rotation initiates each cross — you should feel your obliques twisting, not just your arms swinging. Stay light on feet.'},
+  'suitcase':      {f:{forearms:'P',abs:'P'},                             b:{traps:'P',glutes:'S'},                     feel:'Anti-lean tension through your obliques on the loaded side. Traps working isometrically. If you're tilting: lighter weight, same distance.'},
+  'z2':            {f:{quads:'S',hip_flex:'S'},                           b:{glutes:'S',hamstrings:'S',calves:'P'},     feel:'You should be able to hold a full sentence. If you feel your heart pounding or are mouth-breathing: slow down. Zone 2 feels embarrassingly easy.'},
+  'hip-fl':        {f:{hip_flex:'P'},                                      b:{},                                          feel:'A deep pull in the front of the hip and upper thigh of the kneeling leg. Not pain — a long, sustained tension. Breathe into it.'},
+  'breath-mf':     {f:{abs:'P'},                                           b:{},                                          feel:'CO2 discomfort when holding. A tightness in the chest and urge to breathe. This is not dangerous. This is the point. Stay calm.'},
+  'cold-s':        {f:{},                                                  b:{},                                          feel:'Cold shock response: gasp, then settle. Consciously slow your breathing. After 10 seconds the shock fades. Your nervous system is learning.'},
+  'co2':           {f:{abs:'S'},                                           b:{},                                          feel:'Same as the breath hold — CO2 accumulation creates the urge to breathe. The recovery breaths feel disproportionately good. That's the point.'},
+};
+
+// Colour map
+var MC = {P:'#E8A02A', S:'rgba(74,158,219,0.55)', _:'rgba(255,255,255,0.07)'};
+
+function muscleColor(map,key){return map&&map[key]?MC[map[key]]:MC._;}
+
+function buildMuscleSVG(md, size){
+  var s = size||80;
+  var fw = Math.round(s*0.46); var bw = s - fw - 2;
+  var h = Math.round(s*1.6);
+  var f=md.f||{}; var b=md.b||{};
+
+  // Front silhouette paths (simplified anatomical regions, 46-wide × h-tall)
+  var front = '<svg width="'+fw+'" height="'+h+'" viewBox="0 0 46 '+Math.round(h*46/fw)+'" xmlns="http://www.w3.org/2000/svg">'
+    // body outline
+    +'<ellipse cx="23" cy="7" rx="8" ry="7" fill="'+MC._+'"/>'// head
+    +'<rect x="19" y="14" width="8" height="6" rx="2" fill="'+MC._+'"/>'// neck
+    // shoulders
+    +'<ellipse cx="9" cy="23" rx="9" ry="6" fill="'+muscleColor(f,'shoulders_f')+'"/>'
+    +'<ellipse cx="37" cy="23" rx="9" ry="6" fill="'+muscleColor(f,'shoulders_f')+'"/>'
+    // chest
+    +'<rect x="13" y="20" width="20" height="14" rx="3" fill="'+muscleColor(f,'chest')+'"/>'
+    // abs
+    +'<rect x="15" y="34" width="16" height="18" rx="3" fill="'+muscleColor(f,'abs')+'"/>'
+    // biceps
+    +'<rect x="3" y="27" width="7" height="16" rx="3" fill="'+muscleColor(f,'biceps')+'"/>'
+    +'<rect x="36" y="27" width="7" height="16" rx="3" fill="'+muscleColor(f,'biceps')+'"/>'
+    // forearms
+    +'<rect x="2" y="43" width="6" height="14" rx="3" fill="'+muscleColor(f,'forearms')+'"/>'
+    +'<rect x="38" y="43" width="6" height="14" rx="3" fill="'+muscleColor(f,'forearms')+'"/>'
+    // hip flexors
+    +'<rect x="15" y="52" width="7" height="8" rx="2" fill="'+muscleColor(f,'hip_flex')+'"/>'
+    +'<rect x="24" y="52" width="7" height="8" rx="2" fill="'+muscleColor(f,'hip_flex')+'"/>'
+    // adductors (inner thigh)
+    +'<rect x="19" y="60" width="8" height="18" rx="2" fill="'+muscleColor(f,'adductors')+'"/>'
+    // quads (outer thigh front)
+    +'<rect x="11" y="60" width="9" height="22" rx="3" fill="'+muscleColor(f,'quads')+'"/>'
+    +'<rect x="26" y="60" width="9" height="22" rx="3" fill="'+muscleColor(f,'quads')+'"/>'
+    // tibialis (front shin)
+    +'<rect x="12" y="82" width="6" height="16" rx="2" fill="'+muscleColor(f,'tibialis')+'"/>'
+    +'<rect x="28" y="82" width="6" height="16" rx="2" fill="'+muscleColor(f,'tibialis')+'"/>'
+    +'</svg>';
+
+  var backH = Math.round(h*46/bw);
+  var back = '<svg width="'+bw+'" height="'+h+'" viewBox="0 0 44 '+backH+'" xmlns="http://www.w3.org/2000/svg">'
+    +'<ellipse cx="22" cy="7" rx="8" ry="7" fill="'+MC._+'"/>'
+    +'<rect x="18" y="14" width="8" height="5" rx="2" fill="'+muscleColor(b,'neck_post')+'"/>'
+    // traps
+    +'<path d="M10 19 Q22 16 34 19 L32 28 Q22 25 12 28 Z" fill="'+muscleColor(b,'traps')+'"/>'
+    // rear delts
+    +'<ellipse cx="8" cy="24" rx="8" ry="5" fill="'+muscleColor(b,'rear_delt')+'"/>'
+    +'<ellipse cx="36" cy="24" rx="8" ry="5" fill="'+muscleColor(b,'rear_delt')+'"/>'
+    // lats
+    +'<path d="M10 27 Q6 38 10 50 L18 48 L16 28 Z" fill="'+muscleColor(b,'lats')+'"/>'
+    +'<path d="M34 27 Q38 38 34 50 L26 48 L28 28 Z" fill="'+muscleColor(b,'lats')+'"/>'
+    // rhomboids
+    +'<rect x="16" y="27" width="12" height="12" rx="2" fill="'+muscleColor(b,'rhomboids')+'"/>'
+    // lower back
+    +'<rect x="17" y="39" width="10" height="12" rx="2" fill="'+muscleColor(b,'lower_back')+'"/>'
+    // triceps
+    +'<rect x="3" y="27" width="6" height="15" rx="3" fill="'+muscleColor(b,'triceps')+'"/>'
+    +'<rect x="35" y="27" width="6" height="15" rx="3" fill="'+muscleColor(b,'triceps')+'"/>'
+    // forearms back
+    +'<rect x="2" y="43" width="5" height="14" rx="3" fill="'+muscleColor(b,'forearms_b')+'"/>'
+    +'<rect x="37" y="43" width="5" height="14" rx="3" fill="'+muscleColor(b,'forearms_b')+'"/>'
+    // glutes
+    +'<ellipse cx="16" cy="60" rx="8" ry="8" fill="'+muscleColor(b,'glutes')+'"/>'
+    +'<ellipse cx="28" cy="60" rx="8" ry="8" fill="'+muscleColor(b,'glutes')+'"/>'
+    // hamstrings
+    +'<rect x="10" y="67" width="10" height="20" rx="3" fill="'+muscleColor(b,'hamstrings')+'"/>'
+    +'<rect x="24" y="67" width="10" height="20" rx="3" fill="'+muscleColor(b,'hamstrings')+'"/>'
+    // calves
+    +'<ellipse cx="15" cy="92" rx="6" ry="9" fill="'+muscleColor(b,'calves')+'"/>'
+    +'<ellipse cx="29" cy="92" rx="6" ry="9" fill="'+muscleColor(b,'calves')+'"/>'
+    +'</svg>';
+
+  return '<div style="display:flex;gap:2px;align-items:center">'+front+back+'</div>';
+}
+
+function getMuscleHTML(exId, size, showFeel){
+  var md = MUSCLE_DATA[exId];
+  if(!md) return '';
+  var svg = buildMuscleSVG(md, size||80);
+  var feel = showFeel && md.feel ? '<div style="font-size:12px;color:var(--txt2);line-height:1.6;margin-top:8px;padding:8px 10px;background:var(--bg3);border-left:2px solid var(--amber);border-radius:0 6px 6px 0"><strong style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:3px">WHAT YOU SHOULD FEEL</strong>'+md.feel+'</div>' : '';
+  return svg + feel;
+}
+
+// ── Muscle overlay (tap thumbnail to expand) ──────────────────────────────
+var _muscleExId = null;
+function openMuscleMap(exId){
+  _muscleExId = exId;
+  var md = MUSCLE_DATA[exId];
+  var blk = SESSIONS[curSessType]&&SESSIONS[curSessType].blocks.find(function(b){return b.exs.find(function(e){return e.id===exId;});});
+  var ex = blk&&blk.exs.find(function(e){return e.id===exId;});
+  var el = document.getElementById('v-musclemap');
+  if(!el)return;
+  el.innerHTML = '<div class="hdr"><div class="back" onclick="closeMuscleMap()">&#8249;</div><div class="hdr-ttl">'+(ex?ex.n:'Muscles')+'</div></div>'
+    +'<div style="overflow-y:auto;flex:1;padding:20px 18px">'
+    +'<div style="display:flex;gap:20px;justify-content:center;margin-bottom:20px">'
+    +'<div style="text-align:center"><div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:6px">FRONT</div>'
+    +buildFrontSVG(md,130)+'</div>'
+    +'<div style="text-align:center"><div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:6px">BACK</div>'
+    +buildBackSVG(md,130)+'</div></div>'
+    +'<div style="display:flex;gap:14px;margin-bottom:16px">'
+    +'<div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;background:'+MC.P+'"></div><span style="font-size:12px;color:var(--txt2)">Primary</span></div>'
+    +'<div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(74,158,219,.6)"></div><span style="font-size:12px;color:var(--txt2)">Secondary</span></div>'
+    +'</div>'
+    +(md&&md.feel?'<div style="background:var(--bg3);border-left:3px solid var(--amber);border-radius:0 10px 10px 0;padding:14px;font-size:14px;color:var(--txt);line-height:1.7"><div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:6px">WHAT YOU SHOULD FEEL</div>'+md.feel+'</div>':'')
+    +'</div>';
+  el.classList.add('on');
+}
+function closeMuscleMap(){var el=document.getElementById('v-musclemap');if(el)el.classList.remove('on');}
+
+function buildFrontSVG(md,px){
+  var f=md&&md.f||{};
+  return '<svg width="'+px+'" height="'+Math.round(px*2.6)+'" viewBox="0 0 46 120" xmlns="http://www.w3.org/2000/svg">'
+    +'<ellipse cx="23" cy="7" rx="8" ry="7" fill="'+MC._+'"/>'
+    +'<rect x="19" y="14" width="8" height="6" rx="2" fill="'+MC._+'"/>'
+    +'<ellipse cx="9" cy="23" rx="9" ry="6" fill="'+muscleColor(f,"shoulders_f")+'"/>'
+    +'<ellipse cx="37" cy="23" rx="9" ry="6" fill="'+muscleColor(f,"shoulders_f")+'"/>'
+    +'<rect x="13" y="20" width="20" height="14" rx="3" fill="'+muscleColor(f,"chest")+'"/>'
+    +'<rect x="15" y="34" width="16" height="18" rx="3" fill="'+muscleColor(f,"abs")+'"/>'
+    +'<rect x="3" y="27" width="7" height="16" rx="3" fill="'+muscleColor(f,"biceps")+'"/>'
+    +'<rect x="36" y="27" width="7" height="16" rx="3" fill="'+muscleColor(f,"biceps")+'"/>'
+    +'<rect x="2" y="43" width="6" height="14" rx="3" fill="'+muscleColor(f,"forearms")+'"/>'
+    +'<rect x="38" y="43" width="6" height="14" rx="3" fill="'+muscleColor(f,"forearms")+'"/>'
+    +'<rect x="15" y="52" width="7" height="8" rx="2" fill="'+muscleColor(f,"hip_flex")+'"/>'
+    +'<rect x="24" y="52" width="7" height="8" rx="2" fill="'+muscleColor(f,"hip_flex")+'"/>'
+    +'<rect x="19" y="60" width="8" height="18" rx="2" fill="'+muscleColor(f,"adductors")+'"/>'
+    +'<rect x="11" y="60" width="9" height="22" rx="3" fill="'+muscleColor(f,"quads")+'"/>'
+    +'<rect x="26" y="60" width="9" height="22" rx="3" fill="'+muscleColor(f,"quads")+'"/>'
+    +'<rect x="12" y="82" width="6" height="16" rx="2" fill="'+muscleColor(f,"tibialis")+'"/>'
+    +'<rect x="28" y="82" width="6" height="16" rx="2" fill="'+muscleColor(f,"tibialis")+'"/>'
+    // Labels at large size
+    +(px>=100?'<text x="23" y="27" text-anchor="middle" font-size="3.5" fill="rgba(255,255,255,.5)">Chest</text>':'')
+    +(px>=100&&f.quads&&f.quads!=='_'?'<text x="23" y="73" text-anchor="middle" font-size="3.5" fill="rgba(255,255,255,.5)">Quads</text>':'')
+    +(px>=100&&f.abs&&f.abs!=='_'?'<text x="23" y="44" text-anchor="middle" font-size="3.5" fill="rgba(255,255,255,.5)">Core</text>':'')
+    +'</svg>';
+}
+
+function buildBackSVG(md,px){
+  var b=md&&md.b||{};
+  return '<svg width="'+px+'" height="'+Math.round(px*2.6)+'" viewBox="0 0 44 120" xmlns="http://www.w3.org/2000/svg">'
+    +'<ellipse cx="22" cy="7" rx="8" ry="7" fill="'+MC._+'"/>'
+    +'<rect x="18" y="14" width="8" height="5" rx="2" fill="'+MC._+'"/>'
+    +'<path d="M10 19 Q22 16 34 19 L32 28 Q22 25 12 28 Z" fill="'+muscleColor(b,"traps")+'"/>'
+    +'<ellipse cx="8" cy="24" rx="8" ry="5" fill="'+muscleColor(b,"rear_delt")+'"/>'
+    +'<ellipse cx="36" cy="24" rx="8" ry="5" fill="'+muscleColor(b,"rear_delt")+'"/>'
+    +'<path d="M10 27 Q6 38 10 50 L18 48 L16 28 Z" fill="'+muscleColor(b,"lats")+'"/>'
+    +'<path d="M34 27 Q38 38 34 50 L26 48 L28 28 Z" fill="'+muscleColor(b,"lats")+'"/>'
+    +'<rect x="16" y="27" width="12" height="12" rx="2" fill="'+muscleColor(b,"rhomboids")+'"/>'
+    +'<rect x="17" y="39" width="10" height="12" rx="2" fill="'+muscleColor(b,"lower_back")+'"/>'
+    +'<rect x="3" y="27" width="6" height="15" rx="3" fill="'+muscleColor(b,"triceps")+'"/>'
+    +'<rect x="35" y="27" width="6" height="15" rx="3" fill="'+muscleColor(b,"triceps")+'"/>'
+    +'<ellipse cx="16" cy="60" rx="8" ry="8" fill="'+muscleColor(b,"glutes")+'"/>'
+    +'<ellipse cx="28" cy="60" rx="8" ry="8" fill="'+muscleColor(b,"glutes")+'"/>'
+    +'<rect x="10" y="67" width="10" height="20" rx="3" fill="'+muscleColor(b,"hamstrings")+'"/>'
+    +'<rect x="24" y="67" width="10" height="20" rx="3" fill="'+muscleColor(b,"hamstrings")+'"/>'
+    +'<ellipse cx="15" cy="92" rx="6" ry="9" fill="'+muscleColor(b,"calves")+'"/>'
+    +'<ellipse cx="29" cy="92" rx="6" ry="9" fill="'+muscleColor(b,"calves")+'"/>'
+    +(px>=100&&b.glutes&&b.glutes!=='_'?'<text x="22" y="63" text-anchor="middle" font-size="3.5" fill="rgba(255,255,255,.5)">Glutes</text>':'')
+    +(px>=100&&b.lats&&b.lats!=='_'?'<text x="22" y="40" text-anchor="middle" font-size="3.5" fill="rgba(255,255,255,.5)">Lats</text>':'')
+    +'</svg>';
+}
+
 // ─── PROFILE & GITHUB SYNC ───────────────────────────────────────────────
 var GH_REPO = 'an008/WOAPP';
-var GH_TK_KEY = 'iron-gh-token';
+var ENC_TK_KEY = 'iron-enc-tk'; // encrypted PAT
 var USERS_KEY = 'iron-users';
 var DATA_PFX = 'iron-data-';
 var CUR_USER = null; // {name, type}
 var _apType = 'training';
 
-function getGHToken(){ return localStorage.getItem(GH_TK_KEY)||''; }
+// ── PAT encryption (XOR + base64 — keeps token out of plain localStorage) ──
+function _xor(s,k){var r='';for(var i=0;i<s.length;i++)r+=String.fromCharCode(s.charCodeAt(i)^k.charCodeAt(i%k.length));return r;}
+function isSyncConfigured(){return!!localStorage.getItem(ENC_TK_KEY);}
+function configureSync(token,pwd){if(!token.startsWith('ghp_')||pwd.length<3)return false;localStorage.setItem(ENC_TK_KEY,btoa(_xor(token,pwd)));return true;}
+function removeSync(){localStorage.removeItem(ENC_TK_KEY);}
+function _decryptToken(pwd){var enc=localStorage.getItem(ENC_TK_KEY);if(!enc)return null;try{var dec=_xor(atob(enc),pwd);return dec.startsWith('ghp_')?dec:null;}catch(e){return null;}}
+async function _askSync(){
+  if(!isSyncConfigured()){alert('GitHub sync not configured. Go to Setup \u2192 GitHub Sync.');return null;}
+  var pwd=prompt('Sync password:');if(!pwd)return null;
+  var tk=_decryptToken(pwd);
+  if(!tk){alert('Incorrect password.');return null;}
+  return tk;
+}
 function getCachedUsers(){ try{return JSON.parse(localStorage.getItem(USERS_KEY)||'[]');}catch(e){return[];} }
 function setCachedUsers(u){ localStorage.setItem(USERS_KEY,JSON.stringify(u)); }
 
@@ -369,19 +581,18 @@ function submitAddProfile(){
   var newUser={name:name,type:_apType};
   users.push(newUser);
   setCachedUsers(users);
-  ghCommit('profiles.json',users,'Add profile: '+name);
+  _askSync().then(function(tk){if(tk)ghCommit('profiles.json',users,'Add profile: '+name,tk);});
   closeAddProfile();
   selectUser(name,_apType);
 }
 
 // ── GitHub Sync ────────────────────────────────────────────────────────────
-async function ghCommit(path,content,message){
-  var tk=getGHToken();if(!tk)return{ok:false,err:'No token'};
+async function ghCommit(path,data,message,tk){
+  if(!tk)return{ok:false,err:'No token'};
   try{
-    // Get current SHA
     var shaRes=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+path,{headers:{'Authorization':'token '+tk}});
     var sha=shaRes.ok?(await shaRes.json()).sha:null;
-    var body={message:message||'Iron Protocol sync',content:btoa(unescape(encodeURIComponent(JSON.stringify(content,null,2))))};
+    var body={message:message||'Iron Protocol sync',content:btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))))};
     if(sha)body.sha=sha;
     var res=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/'+path,{method:'PUT',headers:{'Authorization':'token '+tk,'Content-Type':'application/json'},body:JSON.stringify(body)});
     return{ok:res.ok,err:res.ok?null:'Error '+res.status};
@@ -390,22 +601,22 @@ async function ghCommit(path,content,message){
 
 async function syncUserData(){
   if(!CUR_USER)return;
+  var tk=await _askSync();if(!tk)return;
   var el=document.getElementById('gh-status');
   if(el){el.textContent='Syncing...';el.style.color='var(--txt2)';}
-  var result=await ghCommit('data-'+CUR_USER.name+'.json',S,'Sync '+CUR_USER.name+' '+today());
+  var result=await ghCommit('data-'+CUR_USER.name+'.json',S,'Sync '+CUR_USER.name+' '+today(),tk);
   if(result.ok){S.lastSync=new Date().toISOString();saveS();}
   if(el){el.textContent=result.ok?('&#10003; Synced '+new Date().toLocaleTimeString()):('&#10007; '+result.err);el.style.color=result.ok?'var(--green)':'var(--red)';}
 }
 
 async function pullUserData(){
   if(!CUR_USER)return;
+  var tk=await _askSync();if(!tk)return;
   var el=document.getElementById('gh-status');
   if(el){el.textContent='Pulling...';el.style.color='var(--txt2)';}
   try{
-    var tk=getGHToken();
-    var hdrs=tk?{'Authorization':'token '+tk}:{};
-    var res=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/data-'+CUR_USER.name+'.json',{headers:hdrs});
-    if(!res.ok){if(el){el.textContent='No cloud data found yet.';el.style.color='var(--txt2)';}return;}
+    var res=await fetch('https://api.github.com/repos/'+GH_REPO+'/contents/data-'+CUR_USER.name+'.json',{headers:{'Authorization':'token '+tk}});
+    if(!res.ok){if(el){el.textContent='No cloud data found.';el.style.color='var(--txt2)';}return;}
     var d=await res.json();
     var cloud=JSON.parse(atob(d.content.replace(/[\n\r]/g,'')));
     if(!confirm('Replace local data with GitHub version? Local data will be overwritten.'))return;
@@ -414,6 +625,14 @@ async function pullUserData(){
   }catch(e){if(el){el.textContent='&#10007; '+e.message;el.style.color='var(--red)';}}
 }
 
+function configureSyncUI(){
+  var tk=(document.getElementById('cfg-tk').value||'').trim();
+  var pwd=(document.getElementById('cfg-pwd').value||'').trim();
+  var errEl=document.getElementById('cfg-err');
+  if(!tk.startsWith('ghp_')){errEl.textContent='Token must start with ghp_';return;}
+  if(pwd.length<3){errEl.textContent='Password must be at least 3 characters';return;}
+  if(configureSync(tk,pwd)){renderSettings();}else{errEl.textContent='Configuration failed.';}
+}
 function clearTestData(){
   if(!CUR_USER||CUR_USER.type!=='test'){alert('Only for Test profiles.');return;}
   if(!confirm('Clear all training data for '+CUR_USER.name+'? Profile is kept.'))return;
@@ -785,7 +1004,8 @@ function renderCard(){
   var prefillWt = (setData.wt!=null)?setData.wt:(al&&al.weight?al.weight:'');
 
   // YouTube link
-  var ytHtml=ex.yt?'<a class="fc-yt" href="https://www.youtube.com/results?search_query='+encodeURIComponent(ex.yt)+'" target="_blank" rel="noopener">▶ Watch on YouTube</a><br>':'';
+  var ytHtml=ex.yt?'<a class="fc-yt" href="https://www.youtube.com/results?search_query='+encodeURIComponent(ex.yt)+'" target="_blank" rel="noopener">▶ Watch on YouTube</a>':'';
+  var mmHtml=MUSCLE_DATA[ex.id]?'<div class="muscle-thumb-wrap" onclick="openMuscleMap(\''+ex.id+'\')">'+getMuscleHTML(ex.id,68,false)+'<div class="muscle-thumb-lbl">Tap · muscles<br>worked &amp; feel</div></div>':'';
 
   // Message
   var msg=MSGS[FC_MSG_IDX%MSGS.length];
@@ -809,6 +1029,7 @@ function renderCard(){
     +alHtml
     +rpiHtml
     +ytHtml
+    +mmHtml
     +'<div class="fc-cue">'+ex.cue+'</div>'
     +inputsHtml
     +'<div class="fc-msg">'+msg+'</div>'
@@ -1183,18 +1404,21 @@ function renderSettings(){
   +'<div class="sr"><div class="sr-l">Display Name</div><input class="sr-i" type="text" value="'+(S.profile.name||'')+\"'\" placeholder=\"Operator\" onchange=\"S.profile.name=this.value;saveS()\"></div>'
   +'<div class="sr"><div class="sr-l">Programme Start</div><input class="sr-i" type="date" value="'+S.profile.start+'" onchange="S.profile.start=this.value;saveS();renderToday()"></div>'
   +'<div class="sh">GITHUB SYNC</div>'
-  +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6">Session data stays on this device. Add your GitHub PAT to sync across devices.<br>Repo: <strong style="color:var(--white)">an008/WOAPP</strong></div>'
-  +'<div class="sr"><div class="sr-l">Personal Access Token</div><input class="sr-i" type="password" value="'+getGHToken()+'" placeholder="ghp_..." onchange="localStorage.setItem(''+GH_TK_KEY+'',this.value);renderSettings()" style="width:180px;font-size:12px"></div>'
-  +(getGHToken()?'<div style="padding:4px 18px 8px;font-size:12px;color:var(--green)">&#10003; Token saved</div>':'')
-  +'<div style="padding:0 18px 12px;display:flex;gap:8px">'
-  +'<button onclick="syncUserData()" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(61,184,122,.3);background:rgba(61,184,122,.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer">&#8593; Sync to GitHub</button>'
-  +'<button onclick="pullUserData()" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(74,158,219,.3);background:rgba(74,158,219,.08);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">&#8595; Pull from GitHub</button>'
-  +'</div>'
-  +'<div id="gh-status" style="padding:0 18px 10px;font-size:12px;color:var(--txt2)">'+(S&&S.lastSync?'Last sync: '+new Date(S.lastSync).toLocaleString():'Not yet synced')+'</div>'
-  +'<div class="sh">AI COACH</div>'
-  +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6"><strong style="color:var(--green)">Free & instant:</strong> Get a Groq key at <strong style="color:var(--white)">console.groq.com</strong> → API Keys → Create. Keys start with <strong style="color:var(--amber)">gsk_</strong>.<br>Also accepts Google Gemini keys (start with AIza) from aistudio.google.com.</div>'
-  +'<div class="sr"><div class="sr-l" style="font-size:13px">API Key</div><input class="sr-i" type="password" value="'+(S.profile.apiKey||'')+'" placeholder="gsk_ or AIza..." onchange="S.profile.apiKey=this.value;saveS();renderSettings()" style="width:180px;font-size:12px"></div>'
-  +(S.profile.apiKey?'<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">✓ '+(S.profile.apiKey.startsWith('gsk_')?'Groq (Llama 3.1)':'Google Gemini')+' connected</div>':'<div style="padding:4px 18px 10px;font-size:12px;color:var(--txt3)">No key — AI disabled</div>')
+  +(isSyncConfigured()?
+    '<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6"><span style="color:var(--green)">&#10003; Sync configured.</span> Password required each time you sync.</div>'
+    +'<div style="padding:0 18px 10px;display:flex;gap:8px">'
+    +'<button onclick="syncUserData()" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(61,184,122,.3);background:rgba(61,184,122,.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer">&#8593; Sync to GitHub</button>'
+    +'<button onclick="pullUserData()" style="flex:1;padding:9px;border-radius:8px;border:1px solid rgba(74,158,219,.3);background:rgba(74,158,219,.08);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">&#8595; Pull from GitHub</button>'
+    +'</div>'
+    +'<div id="gh-status" style="padding:0 18px 6px;font-size:12px;color:var(--txt2)">'+(S&&S.lastSync?'Last sync: '+new Date(S.lastSync).toLocaleString():' ')+'</div>'
+    +'<div style="padding:0 18px 10px"><button onclick="removeSync();renderSettings()" style="padding:8px 14px;border-radius:8px;border:1px solid rgba(227,80,80,.25);background:transparent;color:var(--txt3);font-size:12px;cursor:pointer">Remove sync config</button></div>'
+    :
+    '<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6">Enter your GitHub PAT and a sync password. The PAT is encrypted — you only enter it once, and you'll need the password each time you sync.</div>'
+    +'<div class="sr"><div class="sr-l">GitHub PAT</div><input class="sr-i" type="password" id="cfg-tk" placeholder="ghp_..." style="width:180px;font-size:12px"></div>'
+    +'<div class="sr"><div class="sr-l">Sync Password</div><input class="sr-i" type="password" id="cfg-pwd" placeholder="min 3 chars" style="width:180px;font-size:12px"></div>'
+    +'<div style="padding:6px 18px 4px"><div style="font-size:12px;color:var(--red);min-height:18px" id="cfg-err"></div></div>'
+    +'<div style="padding:0 18px 10px"><button onclick="configureSyncUI()" class="btn btn-green">&#128274; Lock &amp; Save</button></div>'
+  )
   +'<div class="sh">STATUS</div>'
   +'<div class="sr"><div class="sr-l">Phase</div><div class="sr-v">Phase '+(ph+1)+' — '+PHASES[ph].name+'</div></div>'
   +'<div class="sr"><div class="sr-l">Phase Week</div><div class="sr-v">'+phWk+'</div></div>'
