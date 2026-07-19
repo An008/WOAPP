@@ -169,7 +169,7 @@ input.sr-i:focus{outline:none;}
     <button class="ls-btn" onclick="doLogin()">&#9654; Sign In</button>
     <div class="ls-err" id="ls-err"></div>
   </div>
-  <div class="ls-note">Users managed in <strong>users.json</strong> in your GitHub repo<br>Data syncs automatically via GitHub</div>
+  <div class="ls-note">Edit <strong>USERS</strong> in index.html to add or change passwords<br>Data syncs automatically via GitHub</div>
 </div>
 
 <!-- APP -->
@@ -234,6 +234,14 @@ var GH_REPO = 'an008/WOAPP';
 // To rotate: replace the parts below with your new token, split at any point
 var _T1='ghp_', _T2='OVIJoBnl0', _T3='Hg2A5nPWwfEnpu', _T4='TvKBZER1NlHOS';
 function _RTK(){return _T1+_T2+_T3+_T4;}
+
+// ─── STEP 2: EDIT USERS HERE — name, password, type (training or test) ──────
+// To add a user: add another line like the ones below, commit the file
+var USERS=[
+  {name:'NC',  pwd:'woapp1', type:'training'},
+  {name:'Test',pwd:'test',   type:'test'}
+];
+// ────────────────────────────────────────────────────────────────────────────
 // ───────────────────────────────────────────────────────────────────────────
 
 // ═══════════════════════════════════════════════════════════
@@ -414,34 +422,43 @@ function saveS(){try{localStorage.setItem(SK+'-'+(CUR_USER?CUR_USER.name:''),JSO
 function _gh_url(path){return 'https://api.github.com/repos/'+GH_REPO+'/contents/'+path;}
 function _gh_raw(path){return 'https://raw.githubusercontent.com/'+GH_REPO+'/main/'+path;}
 
-async function doLogin(){
+function doLogin(){
   var name=(document.getElementById('ls-name').value||'').trim();
   var pwd=(document.getElementById('ls-pwd').value||'').trim();
   var errEl=document.getElementById('ls-err');
-  if(!name||!pwd){errEl.textContent='Please enter your name and password.';return;}
-  errEl.textContent='Signing in...';
-  try{
-    // Fetch user list from GitHub (public read)
-    var res=await fetch(_gh_raw('users.json')+'?t='+Date.now());
-    if(!res.ok)throw new Error('Could not reach users list. Check internet connection.');
-    var users=await res.json();
-    var user=users.find(function(u){return u.name.toLowerCase()===name.toLowerCase()&&u.pwd===pwd;});
-    if(!user){errEl.textContent='Name or password incorrect.';return;}
-    CUR_USER={name:user.name,type:user.type||'training'};
-    errEl.textContent='Loading your data...';
-    // Try to pull latest data from GitHub
-    var dataRes=await fetch(_gh_raw('data-'+user.name+'.json')+'?t='+Date.now());
-    if(dataRes.ok){
-      var cloudData=await dataRes.json();
-      localStorage.setItem(SK+'-'+user.name,JSON.stringify(cloudData));
-    }
-    loadS();
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    curSessDate=today();
-    curSessType=S.sessions[today()]?S.sessions[today()].type:S.next;
-    showTab('today');
-  }catch(e){errEl.textContent='Error: '+e.message;}
+  if(!name||!pwd){errEl.textContent='Enter your name and password.';return;}
+  // Check credentials against local USERS array — no network needed
+  var user=USERS.find(function(u){return u.name.toLowerCase()===name.toLowerCase()&&u.pwd===pwd;});
+  if(!user){errEl.textContent='Name or password incorrect.';return;}
+  CUR_USER={name:user.name,type:user.type||'training'};
+  errEl.textContent='Loading...';
+  // Pull latest data from GitHub in background (non-blocking)
+  var tk=_RTK();
+  if(tk&&tk.indexOf('REPLACE')===-1){
+    fetch('https://api.github.com/repos/'+GH_REPO+'/contents/data-'+user.name+'.json',
+      {headers:{'Authorization':'token '+tk}})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(d&&d.content){
+        try{
+          var cloud=JSON.parse(atob(d.content.replace(/\n/g,'')));
+          localStorage.setItem(SK+'-'+user.name,JSON.stringify(cloud));
+        }catch(e){}
+      }
+      _enterApp();
+    })
+    .catch(function(){_enterApp();});
+  } else {
+    _enterApp();
+  }
+}
+function _enterApp(){
+  loadS();
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  curSessDate=today();
+  curSessType=S.sessions[today()]?S.sessions[today()].type:S.next;
+  showTab('today');
 }
 
 async function autoSyncToGH(){
