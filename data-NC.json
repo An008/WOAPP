@@ -1,0 +1,89 @@
+{
+  "profile": {
+    "name": "NC",
+    "start": "2026-07-19",
+    "apiKey": ""
+  },
+  "next": "A",
+  "sessions": {},
+  "journal": {},
+  "landmarks": [
+    {
+      "id": "l1",
+      "i": "&#127939;",
+      "g": "Run 5km non-stop (any pace)",
+      "p": "Aerobic",
+      "done": false
+    },
+    {
+      "id": "l2",
+      "i": "&#128170;",
+      "g": "20 consecutive push-ups, full ROM",
+      "p": "Strength",
+      "done": false
+    },
+    {
+      "id": "l3",
+      "i": "&#127939;",
+      "g": "First dead-hang pull-up",
+      "p": "Strength",
+      "done": false
+    },
+    {
+      "id": "l4",
+      "i": "&#127947;",
+      "g": "Carry 15kg × 1km non-stop",
+      "p": "Carry",
+      "done": false
+    },
+    {
+      "id": "l5",
+      "i": "&#9889;",
+      "g": "6 × 40m sprint, full 4 min rest",
+      "p": "Power",
+      "done": false
+    },
+    {
+      "id": "l6",
+      "i": "&#127756;",
+      "g": "60s exhale breath hold, 3 rounds",
+      "p": "Fortitude",
+      "done": false
+    },
+    {
+      "id": "l7",
+      "i": "&#127939;",
+      "g": "Run 45 min non-stop Zone 2",
+      "p": "Aerobic",
+      "done": false
+    },
+    {
+      "id": "l8",
+      "i": "&#127947;",
+      "g": "Carry 20kg × 5km",
+      "p": "Carry",
+      "done": false
+    },
+    {
+      "id": "l9",
+      "i": "&#128170;",
+      "g": "10 consecutive pull-ups",
+      "p": "Strength",
+      "done": false
+    },
+    {
+      "id": "l10",
+      "i": "&#127944;",
+      "g": "Trail run 90 min continuous",
+      "p": "Aerobic",
+      "done": false
+    },
+    {
+      "id": "l11",
+      "i": "&#127942;",
+      "g": "Finland X completion",
+      "p": "All Pillars",
+      "done": false
+    }
+  ]
+}
