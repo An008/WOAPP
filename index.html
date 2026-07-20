@@ -242,6 +242,14 @@ var USERS=[
   {name:'Test',pwd:'test',   type:'test'}
 ];
 // ────────────────────────────────────────────────────────────────────────────
+
+// ─── VERSION ─────────────────────────────────────────────────────────────────
+// v1.0.0 — 2025-07: Working prototype — login, sessions A/B/C, flash cards,
+//           assessment, AI coach, muscle maps, auto-sync to GitHub
+// v1.1.0 — 2025-07: Training reminders (browser notifications) + daily macro
+//           check-in with progress bars per session type
+var APP_VERSION = '1.1.0';
+
 // ───────────────────────────────────────────────────────────────────────────
 
 // ═══════════════════════════════════════════════════════════
@@ -346,6 +354,13 @@ var PHASES=[
 {num:3,name:'INTEGRATION',weeks:16,desc:'All 5 pillars operating. Trail runs begin.'},
 {num:4,name:'READINESS',weeks:12,desc:'Event-specific preparation. Long efforts. Heavy loads.'}
 ];
+
+var MACRO_TARGETS={
+  A:{kcal:2550,protein:175,carbs:278,fat:82},
+  B:{kcal:2400,protein:170,carbs:250,fat:80},
+  C:{kcal:2550,protein:175,carbs:278,fat:82},
+  REST:{kcal:1750,protein:160,carbs:100,fat:75}
+};
 
 var LM=[
 {id:'l1',i:'&#127939;',g:'Run 5km non-stop (any pace)',p:'Aerobic'},
@@ -459,6 +474,8 @@ function _enterApp(){
   curSessDate=today();
   curSessType=S.sessions[today()]?S.sessions[today()].type:S.next;
   showTab('today');
+  // Ask for notification permission then start checks
+  requestNotifPermission().then(function(){startNotifCheck();});
 }
 
 async function autoSyncToGH(){
@@ -476,7 +493,8 @@ async function autoSyncToGH(){
 
 // Auto-sync when app goes to background
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='hidden'&&CUR_USER&&S)autoSyncToGH();
+  if(document.visibilityState==='hidden'&&CUR_USER&&S){autoSyncToGH();}
+  else if(document.visibilityState==='visible'){checkTrainingNotif();}
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -493,6 +511,119 @@ function showTab(id){
 }
 function openOv(id){document.getElementById(id).classList.add('on');}
 function closeOv(id){document.getElementById(id).classList.remove('on');}
+
+
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+var _notifInt=null;
+
+function requestNotifPermission(){
+  if(!('Notification' in window))return Promise.resolve(false);
+  if(Notification.permission==='granted')return Promise.resolve(true);
+  return Notification.requestPermission().then(function(p){return p==='granted';});
+}
+
+function checkTrainingNotif(){
+  if(!S||!CUR_USER)return;
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  var td=today();
+  if(localStorage.getItem('iron-notif-'+td))return;
+  var remindTime=(S.profile&&S.profile.remindTime)||'18:00';
+  var parts=remindTime.split(':');
+  var remindMins=parseInt(parts[0]||18)*60+parseInt(parts[1]||0);
+  var now=new Date();
+  var nowMins=now.getHours()*60+now.getMinutes();
+  if(nowMins<remindMins)return;
+  var comp=sessComp(td);
+  if(comp.pct>=100)return;
+  var type=(S.sessions[td]?S.sessions[td].type:S.next)||'A';
+  var sd=SESSIONS[type];
+  try{
+    new Notification('Iron Protocol',{
+      body:sd.name+' — '+sd.dur+' · tap to open',
+      tag:'iron-train-'+td,
+      requireInteraction:false
+    });
+    localStorage.setItem('iron-notif-'+td,'1');
+  }catch(e){}
+}
+
+function startNotifCheck(){
+  clearInterval(_notifInt);
+  _notifInt=setInterval(checkTrainingNotif,60000);
+  checkTrainingNotif();
+}
+
+// ─── MACRO CHECK-IN ──────────────────────────────────────────────────────────
+function getMacroTargets(){
+  var td=today();
+  var type=(S.sessions[td]?S.sessions[td].type:S.next)||'A';
+  return MACRO_TARGETS[type]||MACRO_TARGETS.REST;
+}
+
+function buildMacroCard(){
+  var td=today();
+  var logged=(S.macros&&S.macros[td])||{protein:0,carbs:0,fat:0};
+  var t=getMacroTargets();
+  var kcalLogged=Math.round(logged.protein*4+logged.carbs*4+logged.fat*9);
+  var kcalPct=Math.min(100,Math.round(kcalLogged/t.kcal*100));
+  var kcalCol=kcalPct>=90?'var(--green)':kcalPct>=60?'var(--amber)':'var(--txt3)';
+
+  function bar(label,val,target){
+    var pct=Math.min(100,Math.round(val/target*100));
+    var col=pct>=90?'var(--green)':pct>=60?'var(--amber)':'var(--txt3)';
+    return '<div style="margin-bottom:9px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+      +'<span style="font-size:12px;font-weight:700;color:var(--txt2)">'+label+'</span>'
+      +'<span style="font-size:12px;font-weight:800;color:'+col+';font-variant-numeric:tabular-nums">'+val+'g <span style="color:var(--txt3);font-weight:600">/ '+target+'g</span></span>'
+      +'</div>'
+      +'<div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">'
+      +'<div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:3px;transition:width .4s"></div>'
+      +'</div></div>';
+  }
+
+  return '<div style="margin:10px 18px 0;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div><div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3)">TODAY&#39;S MACROS</div>'
+    +'<div style="font-size:15px;font-weight:800;color:'+kcalCol+';margin-top:2px;font-variant-numeric:tabular-nums">'+kcalLogged+' <span style="font-size:12px;color:var(--txt3);font-weight:600">/ '+t.kcal+' kcal</span></div></div>'
+    +'<button onclick="showMacroSheet()" style="padding:7px 13px;border-radius:8px;border:1px solid var(--bord2);background:var(--bg3);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer">Log</button>'
+    +'</div>'
+    +bar('Protein',logged.protein,t.protein)
+    +bar('Carbs',logged.carbs,t.carbs)
+    +bar('Fat',logged.fat,t.fat)
+    +'</div>';
+}
+
+function showMacroSheet(){
+  var td=today();
+  var logged=(S.macros&&S.macros[td])||{protein:0,carbs:0,fat:0};
+  var t=getMacroTargets();
+  var el=document.getElementById('macro-sheet');
+  if(el)el.remove();
+  var div=document.createElement('div');
+  div.id='macro-sheet';
+  div.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:600;background:var(--bg2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:20px 18px 44px;box-shadow:0 -8px 32px rgba(0,0,0,.4)';
+  div.innerHTML='<div style="width:36px;height:4px;background:var(--bord2);border-radius:2px;margin:0 auto 18px"></div>'
+    +'<div style="font-size:17px;font-weight:800;color:var(--white);margin-bottom:4px">Log Today&#39;s Macros</div>'
+    +'<div style="font-size:12px;color:var(--txt2);margin-bottom:18px">Target: '+t.protein+'g protein &middot; '+t.carbs+'g carbs &middot; '+t.fat+'g fat &middot; '+t.kcal+' kcal</div>'
+    +['Protein','Carbs','Fat'].map(function(n){var k=n.toLowerCase();return '<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px">'+n+' (g)</div><input type="number" inputmode="numeric" id="ml-'+k+'" value="'+logged[k]+'" placeholder="0" style="width:100%;background:var(--bg3);border:1.5px solid var(--bord2);border-radius:10px;color:var(--white);font-size:18px;padding:11px 14px;-webkit-appearance:none"></div>';}).join('')
+    +'<button onclick="saveMacroLog()" class="btn btn-g" style="margin-bottom:8px">&#10003; Save</button>'
+    +'<button onclick="document.getElementById(\'macro-sheet\').remove()" class="btn" style="background:transparent;border:1px solid var(--border);color:var(--txt2)">Cancel</button>';
+  document.body.appendChild(div);
+}
+
+function saveMacroLog(){
+  var td=today();
+  if(!S.macros)S.macros={};
+  S.macros[td]={
+    protein:parseInt(document.getElementById('ml-protein').value)||0,
+    carbs:parseInt(document.getElementById('ml-carbs').value)||0,
+    fat:parseInt(document.getElementById('ml-fat').value)||0
+  };
+  saveS();
+  var el=document.getElementById('macro-sheet');if(el)el.remove();
+  renderToday();
+}
+
 
 // ═══════════════════════════════════════════════════════════
 // TODAY
@@ -513,6 +644,7 @@ function renderToday(){
   +'<button class="btn" style="background:rgba(255,255,255,.13)">'+(comp.pct>=100?'&#10003; SESSION COMPLETE':'&#9654; '+(comp.pct>0?'CONTINUE':'START')+' SESSION')+'</button>'
   +'</div>'
   +'<div style="padding:0 18px;margin-top:10px;display:flex;gap:8px"><button class="btn" style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.2);color:var(--purple);font-size:13px" onclick="openAssessment()">&#128202; Run Assessment</button></div>'
+  +buildMacroCard()
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px;margin-top:10px"><div class="stat"><div class="stat-v">'+totalSess()+'</div><div class="stat-l">Sessions Done</div></div><div class="stat"><div class="stat-v">'+phWk+'</div><div class="stat-l">Week of Program</div></div></div>'
   +'<div class="sh">LANDMARKS</div>'
   +'<div style="padding:0 18px">'+S.landmarks.slice(0,6).map(function(lm){return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')">'+'<i>'+lm.i+'</i><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--white)">'+lm.g+'</div><div style="font-size:11px;color:var(--txt2)">'+lm.p+'</div></div>'+'<div class="lm-c '+(lm.done?'yes':'')+'">'+( lm.done?'&#10003;':'&#9675;')+'</div></div>';}).join('')+'</div>'
@@ -933,7 +1065,15 @@ function renderSettings(){
   +'<div class="sr"><div class="sr-l">Next session</div><div style="display:flex;gap:6px">'+['A','B','C'].map(function(t){return '<button onclick="S.next=\''+t+'\';saveS();renderSettings();" style="padding:8px 14px;border-radius:8px;border:1px solid '+(S.next===t?'var(--amber)':'var(--border)')+';background:'+(S.next===t?'rgba(232,160,42,.15)':'var(--bg3)')+';color:'+(S.next===t?'var(--amber)':'var(--txt2)')+';font-weight:700;font-size:13px;cursor:pointer">'+t+'</button>';}).join('')+'</div></div>'
   +'<div class="sh">TIMELINE</div>'
   +'<div style="padding:14px 18px;background:var(--card);margin:0 18px;border-radius:12px;border:1px solid var(--border);font-size:14px;color:var(--txt2);line-height:1.85">Phase 1 Foundation: <span style="color:var(--white);font-weight:700">Weeks 1\u20138</span><br>Phase 2 Development: <span style="color:var(--white);font-weight:700">Weeks 9\u201320</span><br>Phase 3 Integration: <span style="color:var(--white);font-weight:700">Weeks 21\u201336</span><br>Phase 4 Readiness: <span style="color:var(--white);font-weight:700">Weeks 37\u201348</span><br><div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Finland X: <span style="color:var(--amber);font-weight:700">~12 months</span></div></div>'
-  +'<div style="height:30px"></div>';
+  +'<div class="sh">REMINDERS</div>'
+  +'<div class="sr"><div class="sr-l">Daily training reminder</div><input class="sr-i" type="time" value="'+(S.profile.remindTime||'18:00')+'" onchange="S.profile.remindTime=this.value;saveS()"></div>'
+  +('Notification' in window?
+    Notification.permission==='granted'?
+      '<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">&#10003; Notifications enabled</div>':
+      '<div style="padding:4px 18px 10px"><button onclick="requestNotifPermission().then(function(){renderSettings();})" style="width:calc(100% - 36px);margin:0 18px;padding:10px;border-radius:8px;border:1px solid rgba(74,158,219,.3);background:rgba(74,158,219,.08);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">&#128276; Enable Notifications</button></div>'
+  :'<div style="padding:4px 18px 10px;font-size:12px;color:var(--txt3)">Notifications not supported in this browser</div>')
+  +'<div style="padding:20px 18px 6px;text-align:center;font-size:11px;color:var(--txt3)">IRON PROTOCOL v'+APP_VERSION+'</div>'
+  +'<div style="height:20px"></div>';
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
