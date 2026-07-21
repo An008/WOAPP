@@ -5,23 +5,7 @@
     "apiKey": ""
   },
   "next": "A",
-  "sessions": {
-    "2026-07-20": {
-      "type": "A",
-      "exercises": {},
-      "started": "2026-07-20T20:43:36.532Z"
-    },
-    "2026-07-21": {
-      "type": "A",
-      "exercises": {
-        "scap-pu": {
-          "sets": [],
-          "comp": false
-        }
-      },
-      "started": "2026-07-21T07:47:44.328Z"
-    }
-  },
+  "sessions": {},
   "journal": {},
   "landmarks": [
     {
@@ -29,7 +13,7 @@
       "i": "&#127939;",
       "g": "Run 5km non-stop (any pace)",
       "p": "Aerobic",
-      "done": true
+      "done": false
     },
     {
       "id": "l2",
@@ -48,14 +32,14 @@
     {
       "id": "l4",
       "i": "&#127947;",
-      "g": "Carry 15kg ÃÂÃÂ 1km non-stop",
+      "g": "Carry 15kg × 1km non-stop",
       "p": "Carry",
       "done": false
     },
     {
       "id": "l5",
       "i": "&#9889;",
-      "g": "6 ÃÂÃÂ 40m sprint, full 4 min rest",
+      "g": "6 × 40m sprint, full 4 min rest",
       "p": "Power",
       "done": false
     },
@@ -76,7 +60,7 @@
     {
       "id": "l8",
       "i": "&#127947;",
-      "g": "Carry 20kg ÃÂÃÂ 5km",
+      "g": "Carry 20kg × 5km",
       "p": "Carry",
       "done": false
     },
