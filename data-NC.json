@@ -13,7 +13,12 @@
     },
     "2026-07-21": {
       "type": "A",
-      "exercises": {},
+      "exercises": {
+        "scap-pu": {
+          "sets": [],
+          "comp": false
+        }
+      },
       "started": "2026-07-21T07:47:44.328Z"
     }
   },
