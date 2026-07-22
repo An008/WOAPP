@@ -314,9 +314,9 @@ blocks:[
 {id:'gb-act',n:'Glute Bridge Activation',v:'2 \u00d7 15',t:'r',s:2,rpp:15,rest:0,wt:false,cue:'Squeeze glutes at top. 2s hold. Activates posterior chain before sprinting.',yt:'glute bridge activation',feel:'Glute contraction at the top. If you feel your lower back: squeeze harder through the heel.'},
 {id:'a-march',n:'A-March',v:'2 \u00d7 20m',t:'r',s:2,rpp:1,rest:0,wt:false,cue:'Exaggerated marching. Knee to hip height. Arms pump opposite. Teaches sprint mechanics.',yt:'A march sprint drill',feel:'Hip flexor driving the knee up. Arms counterbalancing. Coordination building.'}
 ]},
-{id:'JUMP',n:'JUMP TRAINING',col:'#E35050',exs:[
-{id:'box-step',n:'Box Step-up',v:'3 \u00d7 6/side',t:'r',s:3,rpp:6,rest:90,wt:false,cue:'Full control up. Drive knee to 90° at top. Slow eccentric down. No jump yet — build single-leg strength first.',yt:'box step up controlled',feel:'Front thigh and glute working together. The stepping leg does all the work.'},
-{id:'broad-j',n:'Broad Jump',v:'3 \u00d7 3',t:'r',s:3,rpp:3,rest:180,wt:false,cue:'Max distance. Swing arms, load hips, explode. Land SOFT with bent knees. 3 FULL minutes between sets.',yt:'broad jump training',feel:'Explosive hip extension — glutes and thighs firing simultaneously. Land soft — if you land stiff, too much effort and not enough hip.'}
+{id:'JUMP',n:'COMPLEX PAIRS — JUMP',col:'#E35050',exs:[
+{id:'box-step',n:'Box Step-up',v:'3 \u00d7 6/side',t:'r',s:3,rpp:6,rest:30,wt:false,cue:'COMPLEX PRIMER: Take ONLY 30 seconds rest after this set, then go immediately to Broad Jumps. The post-activation potentiation (PAP) window is 30–60 seconds — longer and the effect is lost. Full control up, drive knee to 90°, slow eccentric. The hip extensors fire hard here — that\'s the neural prime.',yt:'box step up complex training PAP',feel:'Front thigh and glute working together. The stepping leg does all the work.'},
+{id:'broad-j',n:'Broad Jump',v:'3 \u00d7 3',t:'r',s:3,rpp:3,rest:240,wt:false,cue:'COMPLEX POWER: Execute within 30 seconds of the Box Step-up set — your hip extensors are post-activated. Full arm swing, aggressive hip hinge, explode. Land soft, knees bent absorbing. After jumping: 4 FULL minutes before the next complex (CNS needs full recovery to express the same power again). If you don\'t feel more explosive than usual: rest after step-up was too long.',yt:'broad jump PAP complex training',feel:'Explosive hip extension — glutes and thighs firing simultaneously. Land soft — if you land stiff, too much effort and not enough hip.'}
 ]},
 {id:'SPRINT',n:'SPRINT MECHANICS',col:'#E8A02A',exs:[
 {id:'a-skip',n:'A-Skip',v:'4 \u00d7 20m',t:'r',s:4,rpp:1,rest:90,wt:false,cue:'Rhythmic skip with exaggerated knee drive. Arm drives opposite. Master this before worrying about speed.',yt:'A skip sprint drill',feel:'Rhythmic hip flexor pull on each knee drive. Calves helping on the push-off. Stay light.'},
@@ -433,6 +433,7 @@ function today(){return new Date().toISOString().split('T')[0];}
 function fmtDate(s){var d=new Date(s+'T12:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 function getPhase(){var w=Math.floor((new Date()-new Date(S.profile.start))/604800000);return w<8?0:w<20?1:w<36?2:3;}
 function getPhaseWk(){var w=Math.floor((new Date()-new Date(S.profile.start))/604800000),ph=getPhase(),off=0;for(var i=0;i<ph;i++)off+=PHASES[i].weeks;return Math.max(1,w-off+1);}
+function isDeloadWeek(){return S&&S.profile&&S.profile.start&&(getPhaseWk()%4===0);}
 function totalSess(){return Object.keys(S.sessions).filter(function(d){return sessComp(d).pct>0;}).length;}
 function sessComp(date){
   var sess=S.sessions[date];if(!sess)return{pct:0,done:0,total:0};
@@ -703,6 +704,7 @@ function renderToday(){
   +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div class="h-bar"><div class="h-fill" style="width:'+comp.pct+'%;background:'+sd.col+'"></div></div><div style="font-size:14px;font-weight:800;color:var(--white);width:40px;text-align:right">'+comp.pct+'%</div></div>'
   +'<button class="btn" style="background:rgba(255,255,255,.13)">'+(comp.pct>=100?'&#10003; SESSION COMPLETE':'&#9654; '+(comp.pct>0?'CONTINUE':'START')+' SESSION')+'</button>'
   +'</div>'
+  +(isDeloadWeek()?'<div style="margin:10px 18px 0;padding:12px 14px;background:rgba(74,158,219,.08);border:1px solid rgba(74,158,219,.25);border-radius:10px"><div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK — Matveyev Wave Loading</div><div style="font-size:12px;color:var(--txt2);margin-top:3px">Reduce all main work sets by 1. Keep the same weight. Your body recovers; the neural adaptation holds. This produces more total adaptation than a third consecutive progressive week.</div></div>':'')
   +'<div style="padding:0 18px;margin-top:10px;display:flex;gap:8px"><button class="btn" style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.2);color:var(--purple);font-size:13px" onclick="openAssessment()">&#128202; Run Assessment</button></div>'
   +buildReassessmentBanner()
   +buildMacroCard()
@@ -760,10 +762,13 @@ function beginSession(){
 // ═══════════════════════════════════════════════════════════
 function buildCards(){
   var sd=SESSIONS[curSessType],cards=[];
+  var DL=isDeloadWeek();
+  var WB=['B1','B2','B3','JUMP','SPRINT','BOX','CARRY','RUN'];
   sd.blocks.forEach(function(blk){
     blk.exs.forEach(function(ex){
-      var ns=ex.t==='time'?1:ex.s;
-      for(var i=0;i<ns;i++)cards.push({blkId:blk.id,blkName:blk.n,blkCol:blk.col,exId:ex.id,ex:ex,si:i,totalSets:ns});
+      var fs=ex.t==='time'?1:ex.s;
+      var ns=DL&&WB.indexOf(blk.id)>=0?Math.max(1,fs-1):fs;
+      for(var i=0;i<ns;i++)cards.push({blkId:blk.id,blkName:blk.n,blkCol:blk.col,exId:ex.id,ex:ex,si:i,totalSets:ns,dl:DL&&WB.indexOf(blk.id)>=0});
     });
   });
   return cards;
@@ -833,7 +838,8 @@ function renderFC(){
   }
   var html='<div class="fc-blk" style="color:'+card.blkCol+'">'+card.blkName+'</div>'
     +'<div class="fc-name">'+ex.n+'</div>'
-    +'<div class="fc-set">'+(isTimed?ex.v:'Set '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' reps':'Max')+(ex.rest>0?' \xb7 '+ex.rest+'s rest':''))+'</div>'
+    +(card.dl?'<div style="display:inline-block;padding:2px 8px;background:rgba(74,158,219,.15);border:1px solid rgba(74,158,219,.3);border-radius:4px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px">DELOAD WEEK — same weight, 1 fewer set</div>':'')
+  +'<div class="fc-set">'+(isTimed?ex.v:'Set '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' reps':'Max')+(ex.rest>0?' \xb7 '+ex.rest+'s rest':''))+'</div>'
     +alHtml+rpiHtml
     +mmHtml
     +(ytHtml?ytHtml+'<br>':'')
