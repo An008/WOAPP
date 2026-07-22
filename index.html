@@ -1035,6 +1035,10 @@ function submitAssessment(){
   callAI(key,prompt,function(txt){
     try{
       var d=extractJSON(txt);
+      if(!d){
+        if(el)el.innerHTML='<div style="background:var(--bg3);border:1px solid rgba(227,80,80,.3);border-radius:12px;padding:14px;font-size:13px;color:var(--txt);line-height:1.75"><div style="font-size:11px;font-weight:800;color:var(--red);margin-bottom:8px">Could not parse JSON — raw response:</div>'+txt.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>';
+        return;
+      }
       if(!S.profile)S.profile={};
       if(!S.assessmentHistory)S.assessmentHistory=[];
       S.assessmentHistory.push({date:today(),phase:ph+1,phaseWeek:phWk,loads:d.loads||{},summary:d.summary||'',priority:d.priority||'',watch:d.watch||''});
