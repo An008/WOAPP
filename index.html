@@ -954,7 +954,7 @@ function renderAsCard(){
   +(ex.yt?'<a class="fc-yt" href="https://www.youtube.com/results?search_query='+encodeURIComponent(ex.yt)+'" target="_blank" rel="noopener">&#9654; Watch</a><br>':'')
   +'<div class="fc-cue" style="margin-bottom:12px">'+ex.cue+'</div>'
   +'<div class="fc-inp-box">'
-  +(ex.t!=='time'||ex.id==='as-400'?'<div class="fc-ig" style="margin-bottom:10px"><div class="fc-il">Result ('+(ex.id==='as-400'?'seconds':ex.rpp?'reps':'seconds')+')</div><input class="fc-if" type="number" inputmode="numeric" id="as-val" value="'+(r.val||'')+'" oninput="asVal(this.value)"></div>':'')
+  +(ex.id!=='as-sq'?'<div class="fc-ig" style="margin-bottom:10px"><div class="fc-il">'+(ex.t==='time'?'Hold time (seconds)':'Reps achieved')+'</div><input class="fc-if" type="number" inputmode="numeric" id="as-val" value="'+(r.val||'')+"'" oninput="asVal(this.value)"></div>':'')
   +'<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px">Effort (RPE)</div><div class="rpe-g">'+rpeB+'</div>'
   +'</div></div>'
   +'<div style="position:fixed;bottom:0;left:0;right:0;padding:14px 18px;background:var(--bg);border-top:1px solid var(--border)"><button class="fc-done" onclick="asNext()">&#10003; Logged \u2014 Next Test</button></div>';
