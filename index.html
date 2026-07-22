@@ -560,6 +560,39 @@ function getMacroTargets(){
   return MACRO_TARGETS[type]||MACRO_TARGETS.REST;
 }
 
+function getLoadsHTML(loads){
+  if(!loads)return '';
+  var LN={'goblet':'Goblet Squat','db-row':'DB Row','suitcase':'Suitcase Carry','band-pa':'Band Pull-Apart','pushup':'Push-up','z2':'Zone 2 Run'};
+  var html='<div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:8px">PRESCRIBED LOADS</div>';
+  Object.keys(loads).forEach(function(k){
+    var l=loads[k];if(!l)return;
+    var v=l.weight?l.weight+'kg':l.bandLevel?l.bandLevel+' band':l.duration?l.duration+'min':'BW';
+    var vol=l.sets&&l.reps?l.sets+'×'+l.reps:l.duration?l.duration+'min':'';
+    var note=(l.note&&l.note!=='str')?'<div style="font-size:11px;color:var(--txt3);padding:2px 0 4px;font-style:italic">'+l.note+'</div>':'';
+    html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--txt)">'+(LN[k]||k)+'</span><span style="font-size:13px;font-weight:700;color:var(--amber)">'+v+(vol?' · '+vol:'')+'</span></div>'+note;
+  });
+  return html;
+}
+function buildReassessmentBanner(){
+  if(!S.profile||!S.profile.assessmentDate)return '';
+  var nextDate=S.profile.nextAssessmentDate||addDays(S.profile.assessmentDate,56);
+  var days=daysUntil(nextDate);
+  var count=(S.assessmentHistory&&S.assessmentHistory.length)||1;
+  if(days>7)return '';
+  var overdue=days<=0;
+  var col=overdue?'var(--amber)':'var(--blue)';
+  var bg=overdue?'rgba(232,160,42,.08)':'rgba(74,158,219,.07)';
+  var bord=overdue?'rgba(232,160,42,.25)':'rgba(74,158,219,.2)';
+  var msg=overdue?'Reassessment overdue':'Reassessment in '+days+' day'+(days!==1?'s':'');
+  var sub=overdue?'Was due '+nextDate+' \u00b7 '+count+' previous assessment'+(count!==1?'s':''):
+                  'Scheduled '+nextDate+' \u00b7 '+count+' previous'+(count!==1?' assessments':' assessment');
+  return '<div style="margin:10px 18px 0;background:'+bg+';border:1px solid '+bord+';border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="openAssessment()">'
+    +'<div style="font-size:20px">&#128202;</div>'
+    +'<div style="flex:1"><div style="font-size:13px;font-weight:800;color:'+col+'">'+msg+'</div>'
+    +'<div style="font-size:12px;color:var(--txt2);margin-top:2px">'+sub+'</div></div>'
+    +'<div style="font-size:12px;font-weight:700;color:'+col+'">Run &#8250;</div></div>';
+}
+
 function buildMacroCard(){
   var td=today();
   var logged=(S.macros&&S.macros[td])||{protein:0,carbs:0,fat:0};
@@ -644,6 +677,7 @@ function renderToday(){
   +'<button class="btn" style="background:rgba(255,255,255,.13)">'+(comp.pct>=100?'&#10003; SESSION COMPLETE':'&#9654; '+(comp.pct>0?'CONTINUE':'START')+' SESSION')+'</button>'
   +'</div>'
   +'<div style="padding:0 18px;margin-top:10px;display:flex;gap:8px"><button class="btn" style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.2);color:var(--purple);font-size:13px" onclick="openAssessment()">&#128202; Run Assessment</button></div>'
+  +buildReassessmentBanner()
   +buildMacroCard()
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px;margin-top:10px"><div class="stat"><div class="stat-v">'+totalSess()+'</div><div class="stat-l">Sessions Done</div></div><div class="stat"><div class="stat-v">'+phWk+'</div><div class="stat-l">Week of Program</div></div></div>'
   +'<div class="sh">LANDMARKS</div>'
@@ -972,6 +1006,22 @@ function renderAsComplete(){
     +'<button class="btn" style="margin-top:10px;max-width:280px;background:transparent;border:1px solid var(--border);color:var(--txt2)" onclick="closeOv(\'v-assessment\')">Skip</button>'
     +'<div id="as-ai-resp" style="margin-top:16px;width:100%;max-width:360px;text-align:left"></div></div>';
 }
+// ─── ASSESSMENT HELPERS ────────────────────────────────────────────────────
+function addDays(dateStr,n){var d=new Date(dateStr+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
+function daysUntil(dateStr){return Math.ceil((new Date(dateStr+'T12:00:00')-new Date())/86400000);}
+function extractJSON(txt){
+  txt=txt.replace(/```json\s*/g,'').replace(/```\s*/g,'');
+  try{return JSON.parse(txt.trim());}catch(e){}
+  var start=txt.indexOf('{');
+  if(start===-1)return null;
+  var depth=0;
+  for(var i=start;i<txt.length;i++){
+    if(txt[i]==='{')depth++;
+    else if(txt[i]==='}'){depth--;if(depth===0){try{return JSON.parse(txt.substring(start,i+1));}catch(e2){return null;}}}
+  }
+  return null;
+}
+
 function submitAssessment(){
   var key=S.profile.apiKey,el=document.getElementById('as-ai-resp');
   if(!el)return;
@@ -979,16 +1029,21 @@ function submitAssessment(){
   el.innerHTML='<div style="padding:14px;text-align:center;color:var(--txt2);font-size:14px">Calibrating programme...</div>';
   var lines=ASSESS_EXES.map(function(ex){var r=AS_RES[ex.id]||{};return ex.n+': '+(r.val!=null?r.val+'s/reps':'not recorded')+(r.rpe?' RPE '+r.rpe:'');}).join('\n');
   var ph=getPhase(),phWk=getPhaseWk();
-  var prompt='Elite coach calibrating Iron Protocol for 40yo male, goals: ultra-trail endurance, explosive power.\nPhase '+(ph+1)+' Week '+phWk+'.\n\nASSESSMENT:\n'+lines+'\n\nReturn ONLY valid JSON:\n{"loads":{"goblet":{"weight":N,"sets":N,"reps":N,"note":"str"},"db-row":{"weight":N,"sets":N,"reps":N,"note":"str"},"suitcase":{"weight":N,"sets":N,"reps":N,"note":"str"},"band-pa":{"weight":null,"bandLevel":"light|medium|heavy","sets":N,"reps":N,"note":"str"},"pushup":{"weight":null,"sets":N,"reps":N,"note":"str"},"z2":{"weight":null,"sets":1,"reps":null,"duration":N,"note":"str"}},"summary":"2-3 sentence overall assessment","priority":"single biggest gap","watch":"single risk"}\n\nConservative if weak, higher end if strong.';
+    var prompt='Elite coach calibrating Iron Protocol. 40yo male. Phase '+(ph+1)+' Week '+phWk+'.\nASSESSMENT:\n'+lines+'\n\nReturn ONLY raw JSON, nothing outside {}:\n{\"loads\":{\"goblet\":{\"weight\":N,\"sets\":N,\"reps\":N,\"note\":\"coaching cue\"},\"db-row\":{\"weight\":N,\"sets\":N,\"reps\":N,\"note\":\"coaching cue\"},\"suitcase\":{\"weight\":N,\"sets\":N,\"reps\":N,\"note\":\"coaching cue\"},\"band-pa\":{\"weight\":null,\"bandLevel\":\"light|medium|heavy\",\"sets\":N,\"reps\":N,\"note\":\"coaching cue\"},\"pushup\":{\"weight\":null,\"sets\":N,\"reps\":N,\"note\":\"coaching cue\"},\"z2\":{\"weight\":null,\"sets\":1,\"reps\":null,\"duration\":N_MAX_35,\"note\":\"coaching cue\"}},\"summary\":\"2 sentences\",\"priority\":\"single gap\",\"watch\":\"single risk\"}\nWeights kg integers. Sets 2-4. Reps 6-20. z2 max 35min. Note must be real cue not placeholder.';
+
   callAI(key,prompt,function(txt){
     try{
-      var d=JSON.parse(txt.replace(/```json|```/g,'').trim());
+      var d=extractJSON(txt);
       if(!S.profile)S.profile={};
+      if(!S.assessmentHistory)S.assessmentHistory=[];
+      S.assessmentHistory.push({date:today(),phase:ph+1,phaseWeek:phWk,loads:d.loads||{},summary:d.summary||'',priority:d.priority||'',watch:d.watch||''});
+      S.profile.nextAssessmentDate=addDays(today(),56);
       S.profile.assessmentLoads=d.loads||{};
       S.profile.assessmentSummary=d.summary||'';
       S.profile.assessmentDate=today();
       saveS();
-      el.innerHTML='<div style="background:var(--bg3);border:1px solid rgba(155,141,232,.3);border-radius:12px;padding:14px;font-size:14px;color:var(--txt);line-height:1.75"><div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:8px">&#10003; PROGRAMME CALIBRATED</div><div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px">'+d.summary+'</div><div style="font-size:12px;color:var(--amber)">Priority: '+d.priority+'</div><div style="font-size:12px;color:var(--red);margin-top:4px">Watch: '+d.watch+'</div><div style="margin-top:10px;font-size:12px;color:var(--green)">&#10003; Flash cards now show your AI-calibrated loads.</div></div>';
+      el.innerHTML='<div style="background:var(--bg3);border:1px solid rgba(155,141,232,.3);border-radius:12px;padding:14px;font-size:14px;color:var(--txt);line-height:1.75"><div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple);margin-bottom:8px">&#10003; PROGRAMME CALIBRATED</div><div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px">'+d.summary+'</div><div style="font-size:12px;color:var(--amber)">Priority: '+d.priority+'</div><div style="font-size:12px;color:var(--red);margin-top:4px">Watch: '+d.watch+'</div><div style="margin-top:10px;font-size:12px;color:var(--green)">&#10003; Programme updated. Next assessment: '+(S.profile.nextAssessmentDate||'in 8 weeks')+'</div>'
+      +'<div style="margin-top:10px;">'+getLoadsHTML(d.loads)+'</div>';
     }catch(e){el.innerHTML='<div style="padding:12px;background:var(--bg3);border-radius:10px;font-size:13px;color:var(--txt);line-height:1.6">'+txt.replace(/\n/g,'<br>')+'</div>';}
   },function(err){el.innerHTML='<div style="padding:12px;background:rgba(227,80,80,.1);border-radius:10px;font-size:13px;color:var(--red)">Error: '+err+'</div>';});
 }
