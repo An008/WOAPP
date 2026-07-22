@@ -406,6 +406,11 @@ var FEEL={
 // STATE
 // ═══════════════════════════════════════════════════════════
 var SK='iron-v2';
+// ─── API KEY — persists independently of profile data ────────────────────────
+var AI_KEY_STORE='iron-ai-key';
+function getApiKey(){return localStorage.getItem(AI_KEY_STORE)||(S&&S.profile&&S.profile.apiKey)||'';}
+function setApiKey(k){localStorage.setItem(AI_KEY_STORE,k);if(S&&S.profile){S.profile.apiKey=k;saveS();}}
+
 var S=null;
 var CUR_USER=null;
 var curSessType='A', curSessDate='';
@@ -661,6 +666,18 @@ function saveMacroLog(){
 // ═══════════════════════════════════════════════════════════
 // TODAY
 // ═══════════════════════════════════════════════════════════
+
+// ─── PHASE-ADAPTIVE LANDMARKS ───────────────────────────────────────────────
+var PHASE_LM=[
+  ['l2','l3','l1','l6','l4'],   // Phase 1 Foundation
+  ['l4','l1','l7','l5','l9'],   // Phase 2 Development
+  ['l7','l8','l9','l5','l10'],  // Phase 3 Integration
+  ['l11','l8','l10','l9','l7']  // Phase 4 Readiness
+];
+function getActiveLandmarks(){
+  var ph=Math.min(getPhase(),3);
+  return PHASE_LM[ph].map(function(id){return S.landmarks.find(function(lm){return lm.id===id;});}).filter(Boolean);
+}
 function renderToday(){
   var ph=getPhase(),phD=PHASES[ph],phWk=getPhaseWk(),pct=Math.min(100,Math.round(phWk/phD.weeks*100));
   var td=today(),ex=S.sessions[td],type=ex?ex.type:S.next,sd=SESSIONS[type],comp=sessComp(td);
@@ -686,6 +703,15 @@ function renderToday(){
   +'</div>';
 }
 function toggleLm(id){var lm=S.landmarks.find(function(l){return l.id===id;});if(lm){lm.done=!lm.done;saveS();renderToday();}}
+
+function clearTestData(){
+  if(!CUR_USER){alert('Not logged in.');return;}
+  var typed=prompt('Type CLEAR to erase all training data for '+CUR_USER.name+'. This cannot be undone.');
+  if(typed!=='CLEAR'){alert('Cancelled.');return;}
+  localStorage.removeItem(DATA_PFX+CUR_USER.name);
+  loadS();renderToday();renderSettings();
+  alert('Data cleared for '+CUR_USER.name+'.');
+}
 function doLogout(){S=null;CUR_USER=null;document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('ls-name').value='';document.getElementById('ls-pwd').value='';document.getElementById('ls-err').textContent='';}
 
 // ═══════════════════════════════════════════════════════════
