@@ -13,14 +13,14 @@
       "i": "&#127939;",
       "g": "Run 5km non-stop (any pace)",
       "p": "Aerobic",
-      "done": false
+      "done": true
     },
     {
       "id": "l2",
       "i": "&#128170;",
       "g": "20 consecutive push-ups, full ROM",
       "p": "Strength",
-      "done": false
+      "done": true
     },
     {
       "id": "l3",
@@ -32,14 +32,14 @@
     {
       "id": "l4",
       "i": "&#127947;",
-      "g": "Carry 15kg × 1km non-stop",
+      "g": "Carry 15kg Ã 1km non-stop",
       "p": "Carry",
       "done": false
     },
     {
       "id": "l5",
       "i": "&#9889;",
-      "g": "6 × 40m sprint, full 4 min rest",
+      "g": "6 Ã 40m sprint, full 4 min rest",
       "p": "Power",
       "done": false
     },
@@ -60,7 +60,7 @@
     {
       "id": "l8",
       "i": "&#127947;",
-      "g": "Carry 20kg × 5km",
+      "g": "Carry 20kg Ã 5km",
       "p": "Carry",
       "done": false
     },
