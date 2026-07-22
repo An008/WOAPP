@@ -2,7 +2,8 @@
   "profile": {
     "name": "NC",
     "start": "2026-07-19",
-    "apiKey": ""
+    "apiKey": "",
+    "height": 164
   },
   "next": "A",
   "sessions": {},
@@ -32,14 +33,14 @@
     {
       "id": "l4",
       "i": "&#127947;",
-      "g": "Carry 15kg Ã 1km non-stop",
+      "g": "Carry 15kg ÃÂ 1km non-stop",
       "p": "Carry",
       "done": false
     },
     {
       "id": "l5",
       "i": "&#9889;",
-      "g": "6 Ã 40m sprint, full 4 min rest",
+      "g": "6 ÃÂ 40m sprint, full 4 min rest",
       "p": "Power",
       "done": false
     },
@@ -60,7 +61,7 @@
     {
       "id": "l8",
       "i": "&#127947;",
-      "g": "Carry 20kg Ã 5km",
+      "g": "Carry 20kg ÃÂ 5km",
       "p": "Carry",
       "done": false
     },
@@ -85,5 +86,6 @@
       "p": "All Pillars",
       "done": false
     }
-  ]
+  ],
+  "measurements": []
 }
