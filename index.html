@@ -433,7 +433,7 @@ function sessComp(date){
 }
 function getOrCreate(date,type){if(!S.sessions[date])S.sessions[date]={type:type,exercises:{},started:new Date().toISOString()};return S.sessions[date];}
 function defaultState(){return{profile:{name:'',start:today(),apiKey:''},next:'A',sessions:{},journal:{},landmarks:LM.map(function(l){return Object.assign({},l,{done:false});})};}
-function loadS(){var d=localStorage.getItem(SK+'-'+(CUR_USER?CUR_USER.name:''));S=d?JSON.parse(d):defaultState();if(!S.landmarks)S.landmarks=LM.map(function(l){return Object.assign({},l,{done:false});});if(!S.profile)S.profile={};if(!S.profile.apiKey)S.profile.apiKey='';if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;if(!S.profile.start)S.profile.start=today();}
+function loadS(){var d=localStorage.getItem(SK+'-'+(CUR_USER?CUR_USER.name:''));S=d?JSON.parse(d):defaultState();if(!S.landmarks)S.landmarks=LM.map(function(l){return Object.assign({},l,{done:false});});if(!S.profile)S.profile={};if(!S.profile.apiKey)S.profile.apiKey=localStorage.getItem(AI_KEY_STORE)||'';if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;if(!S.profile.start)S.profile.start=today();}
 function saveS(){try{localStorage.setItem(SK+'-'+(CUR_USER?CUR_USER.name:''),JSON.stringify(S));}catch(e){}}
 
 // ═══════════════════════════════════════════════════════════
