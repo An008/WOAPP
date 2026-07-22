@@ -1171,7 +1171,7 @@ function renderSettings(){
 +(S.profile&&S.profile.assessmentDate?'&#128202; Re-run Assessment':'&#128202; Run Assessment')+'</button></div>'
 +'<div class="sh">AI COACH</div>'
   +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6">Free Groq key at <strong style="color:var(--white)">console.groq.com</strong> (keys start with gsk_). Also accepts Google AI keys (AIza).</div>'
-  +'<div class="sr"><div class="sr-l">API Key</div><input class="sr-i" type="password" value="'+(S.profile.apiKey||'')+'" placeholder="gsk_ or AIza..." onchange="setApiKey(this.value);renderSettings()" style="width:180px;font-size:12px"></div>'
+  +'<div class="sr"><div class="sr-l">API Key</div><input class="sr-i" type="password" value="'+getApiKey()+'" placeholder="gsk_ or AIza..." onchange="setApiKey(this.value);renderSettings()" style="width:180px;font-size:12px"></div>'
   +(getApiKey()?'<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">&#10003; '+(getApiKey().startsWith('gsk_')?'Groq connected':'Gemini connected')+'</div>':'')
   +'<div class="sh">OVERRIDE NEXT SESSION</div>'
   +'<div class="sr"><div class="sr-l">Next session</div><div style="display:flex;gap:6px">'+['A','B','C'].map(function(t){return '<button onclick="S.next=\''+t+'\';saveS();renderSettings();" style="padding:8px 14px;border-radius:8px;border:1px solid '+(S.next===t?'var(--amber)':'var(--border)')+';background:'+(S.next===t?'rgba(232,160,42,.15)':'var(--bg3)')+';color:'+(S.next===t?'var(--amber)':'var(--txt2)')+';font-weight:700;font-size:13px;cursor:pointer">'+t+'</button>';}).join('')+'</div></div>'
