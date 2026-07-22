@@ -679,6 +679,7 @@ function renderToday(){
   +'<div style="padding:0 18px;margin-top:10px;display:flex;gap:8px"><button class="btn" style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.2);color:var(--purple);font-size:13px" onclick="openAssessment()">&#128202; Run Assessment</button></div>'
   +buildReassessmentBanner()
   +buildMacroCard()
+  +(S.profile&&S.profile.assessmentDate?'<div style="margin:10px 18px 0;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--purple);border-radius:0 10px 10px 0;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--purple)">PROGRAMME CALIBRATED</div><div style="font-size:12px;color:var(--txt2);margin-top:1px">'+S.profile.assessmentDate+' &middot; '+((S.assessmentHistory&&S.assessmentHistory.length)||1)+' assessment'+(((S.assessmentHistory&&S.assessmentHistory.length)||1)!==1?'s':'')+'</div></div><div style="font-size:12px;font-weight:700;color:var(--purple);cursor:pointer" onclick="showTab(\"settings\")">View &rsaquo;</div></div>':'')
   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px;margin-top:10px"><div class="stat"><div class="stat-v">'+totalSess()+'</div><div class="stat-l">Sessions Done</div></div><div class="stat"><div class="stat-v">'+phWk+'</div><div class="stat-l">Week of Program</div></div></div>'
   +'<div class="sh">LANDMARKS</div>'
   +'<div style="padding:0 18px">'+S.landmarks.slice(0,6).map(function(lm){return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')">'+'<i>'+lm.i+'</i><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--white)">'+lm.g+'</div><div style="font-size:11px;color:var(--txt2)">'+lm.p+'</div></div>'+'<div class="lm-c '+(lm.done?'yes':'')+'">'+( lm.done?'&#10003;':'&#9675;')+'</div></div>';}).join('')+'</div>'
@@ -1112,7 +1113,33 @@ function renderSettings(){
   +'<div class="sr"><div class="sr-l">Phase</div><div style="color:var(--amber);font-size:14px">Phase '+(ph+1)+' \u2014 '+PHASES[ph].name+'</div></div>'
   +'<div class="sr"><div class="sr-l">Phase Week</div><div style="color:var(--amber);font-size:14px">'+phWk+'</div></div>'
   +(S.profile.assessmentDate?'<div class="sr"><div class="sr-l">Last Assessment</div><div style="color:var(--green);font-size:13px">'+S.profile.assessmentDate+'</div></div>':'')
-  +'<div class="sh">AI COACH</div>'
+  +'<div class="sh">ASSESSMENT</div>'
++(S.profile&&S.profile.assessmentDate?
+  '<div style="margin:0 18px 10px;background:var(--bg3);border:1px solid rgba(155,141,232,.3);border-radius:12px;padding:14px">'
+  +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+  +'<div><div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)">Last assessment</div>'
+  +'<div style="font-size:14px;font-weight:700;color:var(--white)">'+S.profile.assessmentDate+'</div></div>'
+  +(S.profile.nextAssessmentDate?'<div style="text-align:right"><div style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3)">Next</div>'
+  +'<div style="font-size:14px;font-weight:700;color:var(--amber)">'+S.profile.nextAssessmentDate+'</div></div>':'')
+  +'</div>'
+  +(S.profile.assessmentSummary?'<div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:10px">'+S.profile.assessmentSummary+'</div>':'')
+  +(S.profile.assessmentLoads?getLoadsHTML(S.profile.assessmentLoads):'')
+  +'</div>'
+  +(S.assessmentHistory&&S.assessmentHistory.length>1?
+    '<div class="sh" style="padding-top:8px">ASSESSMENT HISTORY</div>'
+    +S.assessmentHistory.slice().reverse().slice(0,5).map(function(a){
+      return '<div style="padding:10px 18px;border-bottom:1px solid var(--border)">'
+        +'<div style="display:flex;justify-content:space-between">'
+        +'<span style="font-size:13px;font-weight:700;color:var(--white)">'+a.date+'</span>'
+        +'<span style="font-size:12px;color:var(--txt2)">Phase '+a.phase+' Wk '+a.phaseWeek+'</span></div>'
+        +(a.priority?'<div style="font-size:12px;color:var(--amber);margin-top:2px">Priority: '+a.priority+'</div>':'')
+        +'</div>';
+    }).join('')
+  :'')
+:'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2)">No assessment completed yet. Tap below to calibrate your starting loads.</div>')
++'<div style="padding:0 18px 12px"><button onclick="closeOv(\'v-assessment\');openAssessment()" class="btn" style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.3);color:var(--purple);">'
++(S.profile&&S.profile.assessmentDate?'&#128202; Re-run Assessment':'&#128202; Run Assessment')+'</button></div>'
++'<div class="sh">AI COACH</div>'
   +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6">Free Groq key at <strong style="color:var(--white)">console.groq.com</strong> (keys start with gsk_). Also accepts Google AI keys (AIza).</div>'
   +'<div class="sr"><div class="sr-l">API Key</div><input class="sr-i" type="password" value="'+(S.profile.apiKey||'')+'" placeholder="gsk_ or AIza..." onchange="S.profile.apiKey=this.value;saveS();renderSettings()" style="width:180px;font-size:12px"></div>'
   +(S.profile.apiKey?'<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">&#10003; '+(S.profile.apiKey.startsWith('gsk_')?'Groq connected':'Gemini connected')+'</div>':'')
