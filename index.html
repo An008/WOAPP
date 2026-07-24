@@ -1222,8 +1222,19 @@ function renderSettings(){
   +'<div class="sr"><div class="sr-l">Daily training reminder</div><input class="sr-i" type="time" value="'+(S.profile.remindTime||'18:00')+'" onchange="S.profile.remindTime=this.value;saveS()"></div>'
   +('Notification' in window?
     Notification.permission==='granted'?
-      '<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">&#10003; Notifications enabled</div>':
-      '<div style="padding:4px 18px 10px"><button onclick="requestNotifPermission().then(function(){renderSettings();})" style="width:calc(100% - 36px);margin:0 18px;padding:10px;border-radius:8px;border:1px solid rgba(74,158,219,.3);background:rgba(74,158,219,.08);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">&#128276; Enable Notifications</button></div>'
+      '<div style="padding:6px 18px 12px">'
+    +'<div style="padding:10px 14px;background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.2);border-radius:10px;margin-bottom:8px">'  
+    +'<div style="font-size:12px;font-weight:800;color:var(--green)">\u2713 Enabled \u2014 fires at '+(S.profile.remindTime||'18:00')+' if session not done</div></div>'
+    +'<button onclick="testNotif()" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(61,184,122,.3);background:rgba(61,184,122,.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer">Send Test Notification</button></div>':
+      Notification.permission==='denied'?
+    '<div style="padding:6px 18px 12px"><div style="padding:10px 14px;background:rgba(227,80,80,.08);border:1px solid rgba(227,80,80,.2);border-radius:10px">'
+    +'<div style="font-size:12px;font-weight:800;color:var(--red)">\u2715 Blocked by browser</div>'
+    +'<div style="font-size:11px;color:var(--txt2);margin-top:3px">Browser Settings \u2192 Notifications \u2192 allow an008.github.io</div></div></div>'
+    :'<div style="padding:6px 18px 12px">'
+    +'<div style="padding:10px 14px;background:rgba(74,158,219,.08);border:1px solid rgba(74,158,219,.2);border-radius:10px;margin-bottom:8px">'
+    +'<div style="font-size:12px;font-weight:700;color:var(--blue)">Not enabled yet</div>'
+    +'<div style="font-size:11px;color:var(--txt2);margin-top:2px">Tap the button below \u2014 a permission dialog will appear.</div></div>'
+    +'<button onclick="requestNotifPermission().then(function(){renderSettings();})" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(74,158,219,.3);background:rgba(74,158,219,.08);color:var(--blue);font-size:13px;font-weight:700;cursor:pointer">Enable Training Reminders</button></div>'
   :'<div style="padding:4px 18px 10px;font-size:12px;color:var(--txt3)">Notifications not supported in this browser</div>')
   +'<div style="padding:20px 18px 6px;text-align:center;font-size:11px;color:var(--txt3)">IRON PROTOCOL v'+APP_VERSION+'</div>'
   +'<div style="height:20px"></div>';
