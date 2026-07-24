@@ -5,8 +5,299 @@
     "apiKey": "",
     "height": 164
   },
-  "next": "A",
-  "sessions": {},
+  "next": "B",
+  "sessions": {
+    "2026-07-24": {
+      "type": "A",
+      "exercises": {
+        "wu1": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 6
+            }
+          ],
+          "comp": true
+        },
+        "wu2": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 10,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 10,
+              "rpe": 6
+            }
+          ],
+          "comp": true
+        },
+        "wu3": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 6
+            }
+          ],
+          "comp": true
+        },
+        "scap-pu": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 7
+            }
+          ],
+          "comp": true
+        },
+        "band-pa": {
+          "sets": [
+            {
+              "done": true,
+              "wt": 10,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": 10,
+              "rp": null,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": 10,
+              "rp": null,
+              "rpe": 7
+            }
+          ],
+          "comp": true
+        },
+        "db-row": {
+          "sets": [
+            {
+              "done": true,
+              "wt": 20,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": 20,
+              "rp": null,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": 20,
+              "rp": null,
+              "rpe": 8
+            }
+          ],
+          "comp": true
+        },
+        "dead-hang": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 30,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 33,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 40,
+              "rpe": 8
+            }
+          ],
+          "comp": true
+        },
+        "pushup": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 20,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 17,
+              "rpe": 8
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 15,
+              "rpe": 8
+            }
+          ],
+          "comp": true
+        },
+        "pike-pu": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 8
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 8
+            }
+          ],
+          "comp": true
+        },
+        "goblet": {
+          "sets": [
+            {
+              "done": true,
+              "wt": 10,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": 10,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": 10,
+              "rp": null,
+              "rpe": 6
+            }
+          ],
+          "comp": true
+        },
+        "sl-hip": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 7
+            }
+          ],
+          "comp": true
+        },
+        "tib": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 6
+            }
+          ],
+          "comp": true
+        },
+        "heel-d": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 7
+            }
+          ],
+          "comp": true
+        },
+        "rev-curl": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": null,
+              "rpe": 7
+            }
+          ],
+          "comp": true
+        },
+        "breath-mf": {
+          "sets": [],
+          "comp": true
+        }
+      },
+      "started": "2026-07-24T16:45:14.046Z"
+    }
+  },
   "journal": {},
   "landmarks": [
     {
@@ -33,14 +324,14 @@
     {
       "id": "l4",
       "i": "&#127947;",
-      "g": "Carry 15kg ÃÂ 1km non-stop",
+      "g": "Carry 15kg ÃÂÃÂ 1km non-stop",
       "p": "Carry",
       "done": false
     },
     {
       "id": "l5",
       "i": "&#9889;",
-      "g": "6 ÃÂ 40m sprint, full 4 min rest",
+      "g": "6 ÃÂÃÂ 40m sprint, full 4 min rest",
       "p": "Power",
       "done": false
     },
@@ -61,7 +352,7 @@
     {
       "id": "l8",
       "i": "&#127947;",
-      "g": "Carry 20kg ÃÂ 5km",
+      "g": "Carry 20kg ÃÂÃÂ 5km",
       "p": "Carry",
       "done": false
     },
