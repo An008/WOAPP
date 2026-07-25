@@ -10,13 +10,17 @@ function beginSession(forceType,forceDate){
   // date+type if one exists, otherwise creates it.
   if(forceType){curSessType=forceType;}
   else{var _p=planToday();curSessType=_p.mode==='train'?_p.type:'REST';}
-  getOrCreate(td,curSessType);saveS();
+  var _s=getOrCreate(td,curSessType);
+  if(!_s.mode)_s.mode=(S.profile&&S.profile.loadout)||'base';
+  MISSION_MODE=_s.mode;
+  saveS();
   var sd=SESSIONS[curSessType];
   document.getElementById('ov-ttl').textContent=sd.name;
   document.getElementById('ov-sub').textContent=sd.dur;
   var comp=compFor(td,curSessType);
   var html=comp.pct>0?'<div style="padding:10px 18px;display:flex;align-items:center;gap:10px;background:var(--bg3);border-bottom:1px solid var(--border)"><div class="h-bar"><div class="h-fill" style="width:'+comp.pct+'%;background:'+sd.col+'"></div></div><div style="font-size:13px;font-weight:800;color:'+sd.col+'">'+comp.pct+'%</div></div>':'';
   var sess=getOrCreate(td,curSessType);
+  MISSION_MODE=loadoutFor(curSessDate,curSessType);
   sd.blocks.forEach(function(blk){
     html+='<div class="blk-hdr"><div class="blk-n" style="color:'+blk.col+'">'+blk.n+'</div></div>';
     blk.exs.forEach(function(ex){
@@ -41,10 +45,12 @@ function beginSession(forceType,forceDate){
 // ===========================================================
 function buildCards(){
   var sd=SESSIONS[curSessType],cards=[];
+  MISSION_MODE=loadoutFor(curSessDate,curSessType);
   var DL=isDeloadWeek();
   var WB=['B1','B2','B3','JUMP','SPRINT','BOX','CARRY','RUN'];
   sd.blocks.forEach(function(blk){
-    blk.exs.forEach(function(ex){
+    blk.exs.forEach(function(ex0){
+      var ex=resolveEx(ex0);
       var fs=ex.t==='time'?1:ex.s;
       var ns=DL&&WB.indexOf(blk.id)>=0?Math.max(1,fs-1):fs;
       for(var i=0;i<ns;i++)cards.push({blkId:blk.id,blkName:blk.n,blkCol:blk.col,exId:ex.id,ex:ex,si:i,totalSets:ns,dl:DL&&WB.indexOf(blk.id)>=0});
@@ -126,7 +132,7 @@ function renderFC(){
   var html='<div class="fc-blk" style="color:'+card.blkCol+'">'+card.blkName+'</div>'
     +'<div class="fc-name">'+ex.n+'</div>'
     +(card.dl?'<div style="display:inline-block;padding:2px 8px;background:rgba(74,158,219,.15);border:1px solid rgba(74,158,219,.3);border-radius:4px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px">DELOAD WEEK \u2014 same weight, 1 fewer set</div>':'')
-  +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);margin-bottom:4px">OBJECTIVE '+(FC_IDX+1)+' OF '+FC_CARDS.length+'</div>'+'<div class="fc-set">'+(isTimed?ex.v:'Serial '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' actions':'Max actions')+(ex.rest>0?' \xb7 '+ex.rest+'s regroup':''))+'</div>'
+  +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+'<span style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">OBJECTIVE '+(FC_IDX+1)+' OF '+FC_CARDS.length+'</span>'+(ex.fieldVariant?'<span style="font-size:8px;font-weight:800;letter-spacing:.12em;color:#4A9EDB;background:rgba(74,158,219,.12);border:1px solid rgba(74,158,219,.3);border-radius:4px;padding:2px 6px">FIELD</span>':'')+'</div>'+'<div class="fc-set">'+(isTimed?ex.v:'Serial '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' actions':'Max actions')+(ex.rest>0?' \xb7 '+ex.rest+'s regroup':''))+'</div>'
     +alHtml+rpiHtml
     +mmHtml
     +(ytHtml?ytHtml+'<br>':'')
