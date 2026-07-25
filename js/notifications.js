@@ -22,9 +22,9 @@ function checkTrainingNotif(){
   var now=new Date();
   var nowMins=now.getHours()*60+now.getMinutes();
   if(nowMins<remindMins)return;
-  var comp=sessComp(td);
+  var comp=compFor(td,type);
   if(comp.pct>=100)return;
-  var type=(S.sessions[td]?S.sessions[td].type:S.next)||'A';
+  var type=S.next||'A';
   var sd=SESSIONS[type];
   try{
     new Notification('Iron Protocol',{
