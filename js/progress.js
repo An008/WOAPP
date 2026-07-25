@@ -8,15 +8,55 @@
 var XP={session:100,partial:40,goal:250,assessment:150,measurement:25,journal:15,phase:500};
 
 var RANKS=[
-  {min:1, name:'NOVICE'},
-  {min:5, name:'CONDITIONED'},
-  {min:10,name:'CAPABLE'},
-  {min:15,name:'HARDENED'},
-  {min:20,name:'RESILIENT'},
-  {min:25,name:'IRON'}
+  {min:1, name:'RECRUIT',        note:'In processing. Building the base.'},
+  {min:5, name:'CANDIDATE',      note:'Accepted for selection. Volume rising.'},
+  {min:10,name:'SELECTION',      note:'Under assessment. Load and endurance tested.'},
+  {min:15,name:'OPERATOR',       note:'Qualified. Capable across all mission types.'},
+  {min:20,name:'SENIOR OPERATOR',note:'Proven under fatigue. Consistently mission capable.'},
+  {min:25,name:'TIER ONE',       note:'Full qualification. The task now is holding it.'}
 ];
 
-function xpToNext(level){return 400+50*level;}
+
+// --- OPERATIONAL READINESS ---------------------------------------------------
+// Rank is earned and never lost. Readiness is current and must be held. This is
+// the mechanic that gives "maintaining the rank" teeth once Tier One is reached.
+var READY_STATES=[
+  {min:85,name:'FULLY MISSION CAPABLE',short:'FMC', col:'#3DB87A'},
+  {min:60,name:'MISSION CAPABLE',      short:'MC',  col:'#E8A02A'},
+  {min:35,name:'DEGRADED',             short:'DEG', col:'#E35050'},
+  {min:0, name:'NON-OPERATIONAL',      short:'NOP', col:'#E35050'}
+];
+
+function readiness(){
+  var t=today();
+  var startGap=S.profile&&S.profile.start?daysBetween(S.profile.start,t):0;
+  if(startGap<0)startGap=0;
+  // expectation ramps over the first three weeks, then holds at 9 per 21 days
+  var expected=Math.max(1,Math.min(9,Math.floor(startGap/7*3)||1));
+  var recent=trainingDates().filter(function(d){return daysBetween(d,t)<21;}).length;
+  var adherence=Math.min(100,Math.round(recent/expected*100));
+  var gap=Math.max(0,daysSinceTraining());
+  var recency=gap<=3?100:gap<=5?80:gap<=7?55:gap<=14?25:0;
+  var score=Math.round(adherence*0.6+recency*0.4);
+  var st=READY_STATES[READY_STATES.length-1];
+  for(var i=0;i<READY_STATES.length;i++){if(score>=READY_STATES[i].min){st=READY_STATES[i];break;}}
+  return {score:score,adherence:adherence,recency:recency,expected:expected,
+          recent:recent,gap:gap,state:st};
+}
+
+// Sustainment begins once every prescribed mission has been executed
+function isSustainment(){return completedTraining()>=totalPlannedSessions();}
+function sustainmentDays(){
+  if(!isSustainment())return 0;
+  var d=trainingDates();
+  if(!d.length)return 0;
+  return daysBetween(d[Math.min(totalPlannedSessions()-1,d.length-1)],today());
+}
+
+// Tuned so executing every prescribed mission plus standards and
+// assessments arrives at TIER ONE (T25) - qualification and programme
+// completion are the same moment.
+function xpToNext(level){return 300+40*level;}
 
 function xpBreakdown(){
   var b={sessions:0,partial:0,goals:0,assessments:0,measurements:0,journal:0,phases:0};
@@ -54,21 +94,23 @@ function levelState(){
 
 // Compact level strip for the Today screen
 function xpBar(){
-  var L=levelState();
+  var L=levelState(), R=readiness(), sus=isSustainment();
   return '<div style="margin:12px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px">'
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">'
-    +'<div style="display:flex;align-items:baseline;gap:8px">'
-    +'<span style="font-size:15px;font-weight:900;color:var(--amber);letter-spacing:-.02em">LVL '+L.level+'</span>'
-    +'<span style="font-size:9px;font-weight:800;letter-spacing:.16em;color:var(--txt3)">'+L.rank+'</span></div>'
-    +'<span style="font-size:10px;font-weight:700;color:var(--txt3);font-variant-numeric:tabular-nums">'+L.into+' / '+L.need+' XP</span>'
+    +'<div style="display:flex;align-items:baseline;gap:8px;min-width:0">'
+    +'<span style="font-size:14px;font-weight:900;color:var(--amber);letter-spacing:-.01em;white-space:nowrap">'+L.rank+'</span>'
+    +'<span style="font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--txt3)">T'+L.level+'</span></div>'
+    +'<span style="font-size:9px;font-weight:800;letter-spacing:.12em;color:'+R.state.col+';white-space:nowrap">'+R.state.short+' '+R.score+'%</span>'
     +'</div>'
     +'<div style="display:flex;gap:3px">'
     +[0,1,2,3,4,5,6,7,8,9].map(function(i){
-       var on=L.pct>i*10;
-       var partial=!on&&L.pct>i*10-10&&L.pct>0&&Math.floor(L.pct/10)===i;
-       return '<div style="flex:1;height:5px;border-radius:2px;background:'+(on?'var(--amber)':'rgba(255,255,255,.07)')+'"></div>';
+       var on=(sus?R.score:L.pct)>i*10;
+       return '<div style="flex:1;height:5px;border-radius:2px;background:'+(on?(sus?R.state.col:'var(--amber)'):'rgba(255,255,255,.07)')+'"></div>';
      }).join('')
-    +'</div></div>';
+    +'</div>'
+    +'<div style="font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--txt3);margin-top:6px">'
+    +(sus?'SUSTAINMENT \u00b7 HOLD READINESS':'MERIT '+L.into+' / '+L.need+' TO NEXT RANK')+'</div>'
+    +'</div>';
 }
 
 // --- DEVELOPMENT MAP ---------------------------------------------------------
@@ -129,15 +171,31 @@ function renderDevelopment(){
 
   var h='';
 
-  // rank card
+  // operator dossier
+  var R=readiness(), sus=isSustainment();
   h+='<div style="margin:0 16px 12px;border-radius:22px;overflow:hidden;background:linear-gradient(160deg,rgba(232,160,42,.16),var(--card) 62%);border:1px solid rgba(232,160,42,.22);padding:18px">'
-   +'<div style="display:flex;align-items:center;gap:16px">'
-   +progressRing(L.pct,84,8,'var(--amber)','rgba(255,255,255,.07)',String(L.level),'LVL')
+   +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">'
+   +progressRing(sus?R.score:L.pct,84,8,sus?R.state.col:'var(--amber)','rgba(255,255,255,.07)',String(L.level),'TIER')
    +'<div style="flex:1;min-width:0">'
-   +'<div style="font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--txt3)">RANK</div>'
-   +'<div style="font-size:21px;font-weight:900;color:var(--amber);letter-spacing:-.02em;line-height:1.1;margin-top:2px">'+L.rank+'</div>'
-   +'<div style="font-size:11px;color:var(--txt2);margin-top:4px;font-variant-numeric:tabular-nums">'+L.total.toLocaleString()+' XP total \u00b7 '+L.into+' / '+L.need+' to next</div>'
-   +'</div></div></div>';
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--txt3)">OPERATOR</div>'
+   +'<div style="font-size:20px;font-weight:900;color:var(--amber);letter-spacing:-.02em;line-height:1.1;margin-top:2px">'+L.rank+'</div>'
+   +'<div style="font-size:11px;color:var(--txt2);margin-top:4px;line-height:1.45">'+L.note+'</div>'
+   +'</div></div>'
+   +'<div style="display:flex;gap:9px">'
+   +'<div style="flex:1;background:rgba(10,14,22,.3);border-radius:12px;padding:10px 12px">'
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--txt3)">READINESS</div>'
+   +'<div style="font-size:17px;font-weight:900;color:'+R.state.col+';font-variant-numeric:tabular-nums;line-height:1.2">'+R.score+'%</div>'
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.08em;color:'+R.state.col+'">'+R.state.name+'</div></div>'
+   +'<div style="flex:1;background:rgba(10,14,22,.3);border-radius:12px;padding:10px 12px">'
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--txt3)">'+(sus?'SUSTAINED':'MERIT')+'</div>'
+   +'<div style="font-size:17px;font-weight:900;color:var(--white);font-variant-numeric:tabular-nums;line-height:1.2">'+(sus?sustainmentDays()+'d':L.total.toLocaleString())+'</div>'
+   +'<div style="font-size:9px;color:var(--txt3)">'+(sus?'since qualification':L.into+' / '+L.need+' to next')+'</div></div>'
+   +'</div>'
+   +'<div style="font-size:10px;color:var(--txt3);line-height:1.55;margin-top:11px">'
+   +(sus
+     ? 'All prescribed missions executed. Rank is held, not earned again \u2014 readiness is now the only measure.'
+     : 'Rank is earned by completed missions and never lost. Readiness reflects the last 21 days and must be held.')
+   +'</div></div>';
 
   // development silhouette
   h+='<div style="margin:0 16px 12px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px">'
@@ -165,16 +223,28 @@ function renderDevelopment(){
 
   // XP ledger - shows exactly where every point came from
   var rows=[
-    ['Sessions completed',c.sessions,XP.session,b.sessions],
-    ['Sessions partial',c.partial,XP.partial,b.partial],
-    ['Goals achieved',c.goals,XP.goal,b.goals],
+    ['Missions executed',c.sessions,XP.session,b.sessions],
+    ['Missions partial',c.partial,XP.partial,b.partial],
+    ['Standards met',c.goals,XP.goal,b.goals],
     ['Assessments',c.assessments,XP.assessment,b.assessments],
     ['Measurements logged',c.measurements,XP.measurement,b.measurements],
     ['Journal entries',c.journal,XP.journal,b.journal],
     ['Phases completed',c.phases,XP.phase,b.phases]
   ].filter(function(r){return r[1]>0;});
 
-  h+='<div class="sh">XP LEDGER</div><div style="padding:0 16px">';
+  h+='<div class="sh">READINESS BREAKDOWN</div><div style="padding:0 16px">'
+   +'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">'
+   +'<div><div style="font-size:12px;font-weight:600;color:var(--txt)">Mission adherence</div>'
+   +'<div style="font-size:10px;color:var(--txt3)">'+R.recent+' of '+R.expected+' expected in last 21 days</div></div>'
+   +'<div style="font-size:13px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">'+R.adherence+'%</div></div>'
+   +'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">'
+   +'<div><div style="font-size:12px;font-weight:600;color:var(--txt)">Recency</div>'
+   +'<div style="font-size:10px;color:var(--txt3)">'+(R.gap>900?'No mission logged yet':R.gap===0?'Mission today':R.gap+' day'+(R.gap!==1?'s':'')+' since last mission')+'</div></div>'
+   +'<div style="font-size:13px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">'+R.recency+'%</div></div>'
+   +'<div style="font-size:10px;color:var(--txt3);line-height:1.55;padding:8px 0">Readiness = 60% adherence + 40% recency. It decays when missions are missed and recovers when they are executed.</div>'
+   +'</div>';
+
+  h+='<div class="sh">MERIT LEDGER</div><div style="padding:0 16px">';
   if(!rows.length){
     h+='<div style="font-size:12px;color:var(--txt2);padding-bottom:10px">No XP yet. Complete a session to start.</div>';
   }else{
@@ -186,10 +256,10 @@ function renderDevelopment(){
     }).join('');
     h+='<div style="display:flex;justify-content:space-between;padding:11px 0 4px">'
       +'<div style="font-size:12px;font-weight:800;color:var(--white);letter-spacing:.04em">TOTAL</div>'
-      +'<div style="font-size:15px;font-weight:900;color:var(--amber);font-variant-numeric:tabular-nums">'+b.total.toLocaleString()+' XP</div></div>';
+      +'<div style="font-size:15px;font-weight:900;color:var(--amber);font-variant-numeric:tabular-nums">'+b.total.toLocaleString()+' MERIT</div></div>';
   }
   h+='<div style="font-size:10px;color:var(--txt3);line-height:1.6;padding:8px 0 4px">'
-   +'XP is recalculated from your session log every time this screen opens. It records what you have done \u2014 it is not a score to chase. '
+   +'Merit is recalculated from your mission log every time this screen opens. It records what you have executed \u2014 it is not a score to chase. '
    +'RPE remains the only measure of how hard the work actually was.</div>';
   h+='</div>';
 
