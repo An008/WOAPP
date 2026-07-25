@@ -19,7 +19,20 @@
     ]
   },
   "next": "A",
-  "sessions": {},
+  "sessions": {
+    "2026-07-25|A": {
+      "type": "A",
+      "date": "2026-07-25",
+      "exercises": {
+        "wu1": {
+          "sets": [],
+          "comp": false
+        }
+      },
+      "started": "2026-07-25T15:53:16.649Z",
+      "mode": "field"
+    }
+  },
   "journal": {},
   "landmarks": [
     {
