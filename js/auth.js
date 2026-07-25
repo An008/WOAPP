@@ -22,9 +22,19 @@ function doLogin(){
       if(d&&d.content){
         try{
           var cloud=JSON.parse(atob(d.content.replace(/\n/g,'')));
-          // Never let a thinner cloud copy erase local work.
+          // A dated __reset marker in the cloud file forces a clean slate once.
           var localRaw=localStorage.getItem(SK+'-'+user.name);
           var keep=cloud;
+          var forced=false;
+          if(cloud&&cloud.__reset){
+            var seen=null;
+            try{seen=localRaw?(JSON.parse(localRaw).__resetSeen||null):null;}catch(e){}
+            if(seen!==cloud.__reset){
+              keep=cloud;keep.__resetSeen=cloud.__reset;forced=true;
+              localStorage.setItem(SK+'-'+user.name,JSON.stringify(keep));
+            }
+          }
+          if(!forced){
           if(localRaw){
             try{
               var loc=JSON.parse(localRaw);
@@ -36,6 +46,7 @@ function doLogin(){
             }catch(e){}
           }
           localStorage.setItem(SK+'-'+user.name,JSON.stringify(keep));
+          }
         }catch(e){}
       }
       _enterApp();
