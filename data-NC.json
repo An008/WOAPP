@@ -2,302 +2,10 @@
   "profile": {
     "name": "NC",
     "start": "2026-07-19",
-    "apiKey": "",
-    "height": 164
+    "apiKey": ""
   },
-  "next": "B",
-  "sessions": {
-    "2026-07-24": {
-      "type": "A",
-      "exercises": {
-        "wu1": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 5,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 5,
-              "rpe": 6
-            }
-          ],
-          "comp": true
-        },
-        "wu2": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 10,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 10,
-              "rpe": 6
-            }
-          ],
-          "comp": true
-        },
-        "wu3": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 5,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 5,
-              "rpe": 6
-            }
-          ],
-          "comp": true
-        },
-        "scap-pu": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 8,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 8,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 8,
-              "rpe": 7
-            }
-          ],
-          "comp": true
-        },
-        "band-pa": {
-          "sets": [
-            {
-              "done": true,
-              "wt": 10,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": 10,
-              "rp": null,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": 10,
-              "rp": null,
-              "rpe": 7
-            }
-          ],
-          "comp": true
-        },
-        "db-row": {
-          "sets": [
-            {
-              "done": true,
-              "wt": 20,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": 20,
-              "rp": null,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": 20,
-              "rp": null,
-              "rpe": 8
-            }
-          ],
-          "comp": true
-        },
-        "dead-hang": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 30,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 33,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 40,
-              "rpe": 8
-            }
-          ],
-          "comp": true
-        },
-        "pushup": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 20,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 17,
-              "rpe": 8
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 15,
-              "rpe": 8
-            }
-          ],
-          "comp": true
-        },
-        "pike-pu": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": 8,
-              "rpe": 8
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": 8,
-              "rpe": 8
-            }
-          ],
-          "comp": true
-        },
-        "goblet": {
-          "sets": [
-            {
-              "done": true,
-              "wt": 10,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": 10,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": 10,
-              "rp": null,
-              "rpe": 6
-            }
-          ],
-          "comp": true
-        },
-        "sl-hip": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 7
-            }
-          ],
-          "comp": true
-        },
-        "tib": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 6
-            }
-          ],
-          "comp": true
-        },
-        "heel-d": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 6
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 7
-            }
-          ],
-          "comp": true
-        },
-        "rev-curl": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 7
-            },
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": 7
-            }
-          ],
-          "comp": true
-        },
-        "breath-mf": {
-          "sets": [],
-          "comp": true
-        }
-      },
-      "started": "2026-07-24T16:45:14.046Z"
-    }
-  },
+  "next": "A",
+  "sessions": {},
   "journal": {},
   "landmarks": [
     {
@@ -305,14 +13,14 @@
       "i": "&#127939;",
       "g": "Run 5km non-stop (any pace)",
       "p": "Aerobic",
-      "done": true
+      "done": false
     },
     {
       "id": "l2",
       "i": "&#128170;",
       "g": "20 consecutive push-ups, full ROM",
       "p": "Strength",
-      "done": true
+      "done": false
     },
     {
       "id": "l3",
@@ -324,14 +32,14 @@
     {
       "id": "l4",
       "i": "&#127947;",
-      "g": "Carry 15kg ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 1km non-stop",
+      "g": "Carry 15kg × 1km non-stop",
       "p": "Carry",
       "done": false
     },
     {
       "id": "l5",
       "i": "&#9889;",
-      "g": "6 ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 40m sprint, full 4 min rest",
+      "g": "6 × 40m sprint, full 4 min rest",
       "p": "Power",
       "done": false
     },
@@ -352,7 +60,7 @@
     {
       "id": "l8",
       "i": "&#127947;",
-      "g": "Carry 20kg ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 5km",
+      "g": "Carry 20kg × 5km",
       "p": "Carry",
       "done": false
     },
@@ -377,6 +85,5 @@
       "p": "All Pillars",
       "done": false
     }
-  ],
-  "measurements": []
+  ]
 }
