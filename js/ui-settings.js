@@ -12,6 +12,18 @@ function renderSettings(){
   +'<div style="flex:1"><div style="font-size:16px;font-weight:700;color:var(--white)">'+CUR_USER.name+'</div><div style="font-size:11px;color:var(--txt2);margin-top:2px">'+CUR_USER.type.toUpperCase()+' profile</div></div>'
   +'<button onclick="doLogout()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--txt2);font-size:13px;font-weight:700;cursor:pointer">Sign out</button></div>'
   +(CUR_USER.type==='test'?'<div style="padding:0 18px 10px"><button onclick="if(confirm(\'Clear all training data for '+CUR_USER.name+'?\')){localStorage.removeItem(\''+SK+'-'+CUR_USER.name+'\');loadS();renderToday();renderSettings();}" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.08);color:var(--purple);font-size:13px;font-weight:700;cursor:pointer">&#128465; Clear Test Data</button></div>':'')
+  +'<div class="sh">DEFAULT LOADOUT</div>'
+  +'<div style="padding:0 18px 6px;display:flex;gap:8px">'
+  +['base','field'].map(function(m){
+     var L=LOADOUTS[m],on=((S.profile&&S.profile.loadout)||'base')===m;
+     return '<div onclick="S.profile.loadout=\''+m+'\';saveS();renderSettings();" style="flex:1;padding:11px;border-radius:12px;cursor:pointer;text-align:center;border:1px solid '+(on?L.col:'var(--border)')+';background:'+(on?'rgba(232,160,42,.08)':'var(--bg3)')+'">'
+       +'<div style="font-size:12px;font-weight:900;letter-spacing:.08em;color:'+(on?L.col:'var(--txt3)')+'">'+L.name+'</div>'
+       +'<div style="font-size:10px;color:var(--txt3);margin-top:2px">'+L.label+'</div></div>';
+   }).join('')
+  +'</div>'
+  +'<div style="padding:2px 18px 10px;font-size:11px;color:var(--txt3);line-height:1.55">'
+  +LOADOUTS[(S.profile&&S.profile.loadout)||'base'].note
+  +' Field swaps equipment objectives for bodyweight and improvised-load equivalents that hit the same targets. It can be changed per mission before starting.</div>'
   +'<div class="sh">PROGRAMME</div>'
   +'<div class="sr"><div class="sr-l">Age</div><input class="sr-i" type="number" inputmode="numeric" value="'+(S.profile.age||40)+'" onchange="S.profile.age=parseInt(this.value)||40;saveS();"></div>'
   +'<div class="sr"><div class="sr-l">Height (cm)</div><input class="sr-i" type="number" inputmode="numeric" value="'+(S.profile.height||164)+'" onchange="S.profile.height=parseInt(this.value)||164;saveS()"></div>'
