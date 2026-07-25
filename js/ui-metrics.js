@@ -13,6 +13,18 @@ function calcBMI(weight,height){
   return Math.round(weight/Math.pow(height/100,2)*10)/10;
 }
 
+var METRICS_MODE='recovery';
+function setMetricsMode(m){METRICS_MODE=m;renderMetrics();}
+
+function metricsToggle(){
+  return '<div style="padding:0 16px 14px"><div style="display:flex;gap:1px;background:var(--border);border-radius:12px;overflow:hidden">'
+    +[['recovery','Recovery'],['composition','Composition']].map(function(x){
+      var on=METRICS_MODE===x[0];
+      return '<div onclick="setMetricsMode(\''+x[0]+'\')" style="flex:1;padding:10px;text-align:center;cursor:pointer;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:'
+        +(on?'var(--bg3)':'var(--card)')+';color:'+(on?'var(--amber)':'var(--txt3)')+'">'+x[1]+'</div>';
+    }).join('')+'</div></div>';
+}
+
 function renderMetrics(){
   var el=document.getElementById('v-metrics');
   var ms=S.measurements||[];
@@ -143,9 +155,12 @@ function renderMetrics(){
     }).join('');
   }
 
-  el.innerHTML='<div class="hdr"><div class="hdr-ttl">Measurements</div></div>'
+  var body=METRICS_MODE==='recovery'
+    ? renderRecovery()
+    : (banner+'<div style="height:4px"></div>'+achHtml+form+histHtml);
+  el.innerHTML='<div class="hdr"><div class="hdr-ttl">Body State</div></div>'
     +'<div style="padding-bottom:calc(var(--nav-h)+20px)">'
-    +banner+'<div style="height:4px"></div>'+achHtml+form+histHtml+'</div>';
+    +metricsToggle()+body+'</div>';
 
   // Live Navy BF estimation
   function updateNavy(){
@@ -155,6 +170,7 @@ function renderMetrics(){
     var el2=document.getElementById('navy-est');
     if(el2)el2.textContent=est?'Navy BF estimate: '+est+'% (from waist/neck/height)':'';
   }
+  if(METRICS_MODE!=='composition')return;
   setTimeout(function(){
     var wEl=document.getElementById('mf-waist'),nEl=document.getElementById('mf-neck');
     if(wEl)wEl.addEventListener('input',updateNavy);
