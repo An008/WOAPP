@@ -196,7 +196,8 @@ function showComplete(){
 
 // -- RPE Indicator -------------------------------------------------------------
 function getRPEInd(exId){
-  var dates=Object.keys(S.sessions).filter(function(d){return S.sessions[d].type===curSessType&&d!==curSessDate;}).sort().reverse().slice(0,2);
+  var self=sessKey(curSessDate,curSessType);
+  var dates=Object.keys(S.sessions).filter(function(d){return S.sessions[d]&&S.sessions[d].type===curSessType&&d!==self;}).sort().reverse().slice(0,2);
   if(!dates.length)return null;
   var rpes=[],lastWt=null;
   dates.forEach(function(d){var ed=S.sessions[d].exercises[exId];if(!ed||!ed.sets)return;ed.sets.forEach(function(s){if(s.done&&s.rpe)rpes.push(s.rpe);if(s.done&&s.wt!=null&&lastWt===null)lastWt=s.wt;});});
