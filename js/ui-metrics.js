@@ -18,7 +18,7 @@ function setMetricsMode(m){METRICS_MODE=m;renderMetrics();}
 
 function metricsToggle(){
   return '<div style="padding:0 16px 14px"><div style="display:flex;gap:1px;background:var(--border);border-radius:12px;overflow:hidden">'
-    +[['recovery','Recovery'],['composition','Composition']].map(function(x){
+    +[['recovery','Recovery'],['development','Develop'],['composition','Body']].map(function(x){
       var on=METRICS_MODE===x[0];
       return '<div onclick="setMetricsMode(\''+x[0]+'\')" style="flex:1;padding:10px;text-align:center;cursor:pointer;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:'
         +(on?'var(--bg3)':'var(--card)')+';color:'+(on?'var(--amber)':'var(--txt3)')+'">'+x[1]+'</div>';
@@ -155,8 +155,8 @@ function renderMetrics(){
     }).join('');
   }
 
-  var body=METRICS_MODE==='recovery'
-    ? renderRecovery()
+  var body=METRICS_MODE==='recovery' ? renderRecovery()
+    : METRICS_MODE==='development' ? renderDevelopment()
     : (banner+'<div style="height:4px"></div>'+achHtml+form+histHtml);
   el.innerHTML='<div class="hdr"><div class="hdr-ttl">Body State</div></div>'
     +'<div style="padding-bottom:calc(var(--nav-h)+20px)">'
