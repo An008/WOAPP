@@ -13,6 +13,7 @@ function renderSettings(){
   +'<button onclick="doLogout()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--txt2);font-size:13px;font-weight:700;cursor:pointer">Sign out</button></div>'
   +(CUR_USER.type==='test'?'<div style="padding:0 18px 10px"><button onclick="if(confirm(\'Clear all training data for '+CUR_USER.name+'?\')){localStorage.removeItem(\''+SK+'-'+CUR_USER.name+'\');loadS();renderToday();renderSettings();}" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.08);color:var(--purple);font-size:13px;font-weight:700;cursor:pointer">&#128465; Clear Test Data</button></div>':'')
   +'<div class="sh">PROGRAMME</div>'
+  +'<div class="sr"><div class="sr-l">Age</div><input class="sr-i" type="number" inputmode="numeric" value="'+(S.profile.age||40)+'" onchange="S.profile.age=parseInt(this.value)||40;saveS();"></div>'
   +'<div class="sr"><div class="sr-l">Height (cm)</div><input class="sr-i" type="number" inputmode="numeric" value="'+(S.profile.height||164)+'" onchange="S.profile.height=parseInt(this.value)||164;saveS()"></div>'
   +'<div class="sr"><div class="sr-l">Start Date</div><input class="sr-i" type="date" value="'+S.profile.start+'" onchange="S.profile.start=this.value;saveS();renderToday()"></div>'
   +'<div class="sr"><div class="sr-l">Phase</div><div style="color:var(--amber);font-size:14px">Phase '+(ph+1)+' \u2014 '+PHASES[ph].name+'</div></div>'
