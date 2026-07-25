@@ -77,9 +77,9 @@ function fcJumpTo(blkId,exId){
   var fr=fcFrontier();
   if(idx>fr){
     var nx=FC_CARDS[fr];
-    alert('Exercises run in order.\n\nNext up: '+nx.ex.n+
+    alert('Objectives are secured in order.\n\nNext objective: '+nx.ex.n+
           (nx.totalSets>1?'  (set '+(nx.si+1)+' of '+nx.totalSets+')':'')+
-          '\n\nThe sequence is deliberate - warm-up prepares the joints, the main work follows, prehab and breathing close it out.');
+          '\n\nThe sequence is deliberate: warm-up prepares the joints, main effort follows, prehab and breathing close the mission out.');
     idx=fr;
   }
   FC_IDX=idx>=0?idx:0;
@@ -119,14 +119,14 @@ function renderFC(){
     var rpeB=[1,2,3,4,5,6,7,8,9,10].map(function(v){return '<div class="rpe-b '+(setData.rpe===v?'on':'')+'" data-v="'+v+'" onclick="fcRpe('+v+')">'+v+'</div>';}).join('');
     var prefill=(setData.wt!=null?setData.wt:(al&&al.weight?al.weight:''));
     inputsHtml='<div class="fc-inp-box"><div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px">'
-      +(ex.wt?'<div class="fc-ig"><div class="fc-il">Weight (kg)</div><input class="fc-if" type="number" inputmode="decimal" id="fc-wt" placeholder="'+(al&&al.weight?al.weight+' kg (AI rec)':'BW')+'" value="'+prefill+'" oninput="fcWt(this.value)"></div>':'<div class="fc-ig"><div class="fc-il">Reps done'+(ex.rpp?' / '+ex.rpp:'')+'</div><input class="fc-if" type="number" inputmode="numeric" id="fc-rp" placeholder="'+(ex.rpp||'Max')+'" value="'+(setData.rp!=null?setData.rp:'')+'" oninput="fcRp(this.value)"></div>')
+      +(ex.wt?'<div class="fc-ig"><div class="fc-il">Weight (kg)</div><input class="fc-if" type="number" inputmode="decimal" id="fc-wt" placeholder="'+(al&&al.weight?al.weight+' kg (AI rec)':'BW')+'" value="'+prefill+'" oninput="fcWt(this.value)"></div>':'<div class="fc-ig"><div class="fc-il">Actions completed'+(ex.rpp?' / '+ex.rpp:'')+'</div><input class="fc-if" type="number" inputmode="numeric" id="fc-rp" placeholder="'+(ex.rpp||'Max')+'" value="'+(setData.rp!=null?setData.rp:'')+'" oninput="fcRp(this.value)"></div>')
       +'</div><div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px">Effort (RPE)</div>'
       +'<div class="rpe-g" id="fc-rpe">'+rpeB+'</div></div>';
   }
   var html='<div class="fc-blk" style="color:'+card.blkCol+'">'+card.blkName+'</div>'
     +'<div class="fc-name">'+ex.n+'</div>'
     +(card.dl?'<div style="display:inline-block;padding:2px 8px;background:rgba(74,158,219,.15);border:1px solid rgba(74,158,219,.3);border-radius:4px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px">DELOAD WEEK \u2014 same weight, 1 fewer set</div>':'')
-  +'<div class="fc-set">'+(isTimed?ex.v:'Set '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' reps':'Max')+(ex.rest>0?' \xb7 '+ex.rest+'s rest':''))+'</div>'
+  +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);margin-bottom:4px">OBJECTIVE '+(FC_IDX+1)+' OF '+FC_CARDS.length+'</div>'+'<div class="fc-set">'+(isTimed?ex.v:'Serial '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' actions':'Max actions')+(ex.rest>0?' \xb7 '+ex.rest+'s regroup':''))+'</div>'
     +alHtml+rpiHtml
     +mmHtml
     +(ytHtml?ytHtml+'<br>':'')
@@ -141,7 +141,7 @@ function renderFC(){
   document.getElementById('fc-body').innerHTML=html;
   document.getElementById('fc-body').scrollTop=0;
   var btn=document.getElementById('fc-done-btn');
-  btn.textContent=isDone?'&#10003; Done \u2014 Next Exercise':'&#10003; Done \u2014 Log '+(isTimed?'Activity':'Set '+(card.si+1));
+  btn.textContent=isDone?'&#10003; OBJECTIVE SECURED \u2014 NEXT':'&#10003; LOG '+(isTimed?'ACTIVITY':'SERIAL '+(card.si+1));
   btn.style.background=isDone?'rgba(61,184,122,.25)':'var(--green)';
   btn.style.border=isDone?'1px solid rgba(61,184,122,.4)':'none';
 }
@@ -195,13 +195,13 @@ function showComplete(){
   document.getElementById('fc-pct').textContent='100%';
   document.getElementById('fc-body').innerHTML='<div class="sc-screen">'
     +'<div style="font-size:60px;margin-bottom:14px">&#127942;</div>'
-    +'<div style="font-size:22px;font-weight:900;color:var(--white);margin-bottom:6px">Session Complete!</div>'
-    +'<div style="font-size:14px;color:var(--txt2);margin-bottom:28px">'+sd.name+' done</div>'
+    +'<div style="font-size:22px;font-weight:900;color:var(--white);margin-bottom:6px">MISSION ACCOMPLISHED</div>'
+    +'<div style="font-size:14px;color:var(--txt2);margin-bottom:28px">'+sd.name+' \u2014 all objectives secured</div>'
     +'<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px">'
     +(sd.after==='breathing'?'<button class="btn" style="background:rgba(74,158,219,.15);border:1px solid rgba(74,158,219,.25)" onclick="openBreath()">&#127756; Breathing Protocol</button>':'')
-    +(sd.after==='journal'?'<button class="btn" style="background:rgba(155,141,232,.15);border:1px solid rgba(155,141,232,.25)" onclick="openJournalEntry();closeOv(\'v-flashcard\')">&#128214; Session Journal</button>':'')
-    +'<button class="btn" style="background:rgba(155,141,232,.12);border:1px solid rgba(155,141,232,.2);color:var(--purple)" onclick="analyzeSession()">&#129504; Analyse with AI Coach</button>'
-    +'<button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--txt2)" onclick="closeOv(\'v-flashcard\');showTab(\'today\')">&#8592; Back to Today</button>'
+    +(sd.after==='journal'?'<button class="btn" style="background:rgba(155,141,232,.15);border:1px solid rgba(155,141,232,.25)" onclick="openJournalEntry();closeOv(\'v-flashcard\')">&#128214; Mission Debrief</button>':'')
+    +'<button class="btn" style="background:rgba(155,141,232,.12);border:1px solid rgba(155,141,232,.2);color:var(--purple)" onclick="analyzeSession()">&#129504; Request Debrief \u2014 AI Command</button>'
+    +'<button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--txt2)" onclick="closeOv(\'v-flashcard\');showTab(\'today\')">&#8592; Return to Base</button>'
     +'</div><div id="ai-resp-fc" style="margin-top:16px;width:100%;max-width:360px;text-align:left"></div></div>';
 }
 
@@ -264,7 +264,7 @@ function buildMuscleThumb(exId){
 function showRest(secs,doneEx,nextEx,cb){
   clearInterval(RS_INT);RS_TOTAL=RS_LEFT=secs;RS_CB=cb;
   document.getElementById('rs-t').textContent=secs+'s';
-  document.getElementById('rs-ex').textContent='&#10003; '+doneEx+' \u2014 Next: '+nextEx;
+  document.getElementById('rs-ex').textContent='&#10003; '+doneEx+' secured \u2014 Next objective: '+nextEx;
   document.getElementById('rs-bf').style.width='100%';
   document.getElementById('rest-screen').classList.add('show');
   RS_INT=setInterval(function(){
