@@ -113,6 +113,62 @@ function xpBar(){
     +'</div>';
 }
 
+
+// --- OPERATOR ATTRIBUTES -----------------------------------------------------
+// Physical state read off the Body tab measurements, not self-reported.
+function operatorFatigue(){
+  if(typeof muscleRecovery!=='function')return null;
+  var rec=muscleRecovery();
+  var ks=Object.keys(rec);
+  if(!ks.length)return null;
+  var trained=ks.filter(function(k){return rec[k].days!==null;});
+  if(!trained.length)return 0;
+  var mean=ks.reduce(function(a,k){return a+rec[k].pct;},0)/ks.length;
+  return Math.max(0,Math.min(100,Math.round(100-mean)));
+}
+
+function attributeBand(){
+  var comp=(typeof bodyComp==='function')?bodyComp():null;
+  var fat=operatorFatigue();
+  var mt=(typeof macroTargets==='function')?macroTargets('A'):null;
+
+  function cell(label,val,unit,col,sub){
+    return '<div style="flex:1;min-width:0;background:rgba(10,14,22,.3);border-radius:12px;padding:10px 11px">'
+      +'<div style="font-size:8px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--txt3)">'+label+'</div>'
+      +'<div style="font-size:16px;font-weight:900;color:'+(col||'var(--white)')+';font-variant-numeric:tabular-nums;line-height:1.25">'
+      +val+(unit?'<span style="font-size:10px;font-weight:700;color:var(--txt3)">'+unit+'</span>':'')+'</div>'
+      +(sub?'<div style="font-size:8px;font-weight:700;color:var(--txt3);margin-top:1px">'+sub+'</div>':'')
+      +'</div>';
+  }
+  if(!comp){
+    return '<div style="margin-top:9px;padding:11px 13px;background:rgba(10,14,22,.3);border-radius:12px;font-size:11px;color:var(--txt2);line-height:1.5">'
+      +'ATTRIBUTES unavailable \u2014 log a bodyweight in the Body tab to populate the operator profile.</div>';
+  }
+  var bfCol=comp.bf>25?'#E35050':comp.bf>BF_CUT_THRESHOLD?'#E8A02A':'#3DB87A';
+  var ftCol=fat===null?'var(--txt3)':fat>=60?'#E35050':fat>=30?'#E8A02A':'#3DB87A';
+  return '<div style="margin-top:9px">'
+    +'<div style="font-size:8px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);margin-bottom:7px">ATTRIBUTES</div>'
+    +'<div style="display:flex;gap:7px;margin-bottom:7px">'
+    +cell('Mass',comp.weight,'kg',null,'BMI '+comp.bmi)
+    +cell('Body Fat',comp.bf,'%',bfCol,comp.manual?'measured':'Cedars-Sinai')
+    +'</div>'
+    +'<div style="display:flex;gap:7px">'
+    +cell('Lean Mass',comp.lbm,'kg','#3DB87A',null)
+    +cell('Fatigue',fat===null?'-':fat,'%',ftCol,fat===null?'no data':fat>=60?'high':fat>=30?'moderate':'low')
+    +'</div>'
+    +(mt&&mt.derived?'<div style="margin-top:7px;padding:9px 11px;border-radius:11px;background:'
+      +(mt.cutting?'rgba(227,80,80,.1)':'rgba(61,184,122,.1)')+';border:1px solid '
+      +(mt.cutting?'rgba(227,80,80,.25)':'rgba(61,184,122,.25)')+'">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+      +'<span style="font-size:9px;font-weight:800;letter-spacing:.13em;color:'+(mt.cutting?'#E35050':'#3DB87A')+'">'
+      +(mt.cutting?'CUTTING PHASE':'MAINTENANCE')+'</span>'
+      +'<span style="font-size:13px;font-weight:900;color:var(--white);font-variant-numeric:tabular-nums">'+mt.kcal+' kcal</span></div>'
+      +'<div style="font-size:9px;color:var(--txt3);margin-top:2px">'
+      +(mt.cutting?'Body fat above '+BF_CUT_THRESHOLD+'% \u2014 deficit applied':'Body fat at or below '+BF_CUT_THRESHOLD+'% \u2014 holding')
+      +' \u00b7 '+mt.protein+'g protein</div></div>':'')
+    +'</div>';
+}
+
 // --- DEVELOPMENT MAP ---------------------------------------------------------
 // Cumulative weighted set volume per muscle group across every logged session.
 var DEV_TARGET=300;   // weighted sets = fully developed on the silhouette
@@ -191,6 +247,7 @@ function renderDevelopment(){
    +'<div style="font-size:17px;font-weight:900;color:var(--white);font-variant-numeric:tabular-nums;line-height:1.2">'+(sus?sustainmentDays()+'d':L.total.toLocaleString())+'</div>'
    +'<div style="font-size:9px;color:var(--txt3)">'+(sus?'since qualification':L.into+' / '+L.need+' to next')+'</div></div>'
    +'</div>'
+   +attributeBand()
    +'<div style="font-size:10px;color:var(--txt3);line-height:1.55;margin-top:11px">'
    +(sus
      ? 'All prescribed missions executed. Rank is held, not earned again \u2014 readiness is now the only measure.'
