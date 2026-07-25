@@ -10,9 +10,8 @@ function beginSession(forceType,forceDate){
   // date+type if one exists, otherwise creates it.
   if(forceType){curSessType=forceType;}
   else{var _p=planToday();curSessType=_p.mode==='train'?_p.type:'REST';}
-  var _s=getOrCreate(td,curSessType);
-  if(!_s.mode)_s.mode=(S.profile&&S.profile.loadout)||'base';
-  MISSION_MODE=_s.mode;
+  getOrCreate(td,curSessType);
+  MISSION_MODE=loadoutFor(td,curSessType);
   saveS();
   var sd=SESSIONS[curSessType];
   document.getElementById('ov-ttl').textContent=sd.name;
@@ -23,7 +22,8 @@ function beginSession(forceType,forceDate){
   MISSION_MODE=loadoutFor(curSessDate,curSessType);
   sd.blocks.forEach(function(blk){
     html+='<div class="blk-hdr"><div class="blk-n" style="color:'+blk.col+'">'+blk.n+'</div></div>';
-    blk.exs.forEach(function(ex){
+    blk.exs.forEach(function(ex0){
+      var ex=resolveEx(ex0);
       var ed=sess.exercises[ex.id]||{};
       var isDone=ed.comp;
       var isPart=!isDone&&ed.sets&&ed.sets.some(function(s){return s.done;});
@@ -98,6 +98,7 @@ function renderFC(){
   if(FC_IDX>=FC_CARDS.length){showComplete();return;}
   var card=FC_CARDS[FC_IDX],ex=card.ex;
   var sess=getOrCreate(curSessDate,curSessType);
+  stampLoadout();
   if(!sess.exercises[ex.id])sess.exercises[ex.id]={sets:[],comp:false};
   var ed=sess.exercises[ex.id];
   var isTimed=ex.t==='time';
@@ -159,8 +160,13 @@ function fcRpe(v){
   var g=document.getElementById('fc-rpe');
   if(g)g.querySelectorAll('.rpe-b').forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.v)===v);});
 }
+function stampLoadout(){
+  var k=sessKey(curSessDate,curSessType);
+  if(S.sessions[k]&&!S.sessions[k].mode)S.sessions[k].mode=MISSION_MODE||'base';
+}
 function ensureSet(exId,si){
   var sess=getOrCreate(curSessDate,curSessType);
+  stampLoadout();
   if(!sess.exercises[exId])sess.exercises[exId]={sets:[],comp:false};
   while(sess.exercises[exId].sets.length<=si)sess.exercises[exId].sets.push({done:false,wt:null,rp:null,rpe:null});
   return sess.exercises[exId].sets[si];
