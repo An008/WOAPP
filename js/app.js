@@ -6,3 +6,10 @@ window.onload=function(){
   var el=document.getElementById('ls-name');
   if(el)el.focus();
 };
+
+// Register the service worker early - notifications depend on it.
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
