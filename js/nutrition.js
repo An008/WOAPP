@@ -10,12 +10,72 @@ var CUT_DEFICIT=0.75;      // 25 per cent below maintenance
 var KCAL_PER_KG=7700;      // energy in 1 kg of bodyweight
 var DEFAULT_ACTIVITY=1.35; // desk job + 3 missions/week (was 1.60 - far too high)
 
-// Cedars-Sinai / Deurenberg. BMI-based, validated against this operator's DEXA.
+// --- BODY FAT ESTIMATION -----------------------------------------------------
+// Validated against this operator's DEXA (30.3% at 71.3kg / 164cm / 93.5cm waist):
+//   RFM         28.9%   -1.4 pts
+//   US Navy     25.7%   -4.6 pts
+//   Deurenberg  24.8%   -5.5 pts
+// Every formula under-reads, so RFM is the base (closest, and waist-driven so it
+// tracks real fat loss) and a DEXA reference removes the remaining bias.
+
+// Relative Fat Mass - Woolcott & Bergman. Male: 64 - 20*(height/waist)
+function bodyFatRFM(waist,heightCm){
+  if(!waist||!heightCm||waist<=0)return null;
+  return Math.round((64-20*(heightCm/waist))*10)/10;
+}
+// US Navy - circumference based
+function bodyFatNavy(waist,neck,heightCm){
+  if(!waist||!neck||!heightCm||waist<=neck)return null;
+  return Math.round((495/(1.0324-0.19077*Math.log10(waist-neck)
+    +0.15456*Math.log10(heightCm))-450)*10)/10;
+}
+// Cedars-Sinai / Deurenberg - BMI based
 function bodyFatCedars(weight,heightCm,age,sexMale){
   if(!weight||!heightCm)return null;
   var bmi=weight/Math.pow(heightCm/100,2);
   var s=(sexMale===false)?0:1;
   return Math.round((1.20*bmi+0.23*(age||40)-10.8*s-5.4)*10)/10;
+}
+
+// Raw (uncalibrated) estimate from a measurement record
+function rawEstimate(m){
+  if(!m)return null;
+  var h=S.profile.height||164;
+  var r=bodyFatRFM(m.waist,h);
+  if(r!=null)return r;
+  var n=bodyFatNavy(m.waist,m.neck,h);
+  if(n!=null)return n;
+  return bodyFatCedars(m.weight,h,S.profile.age||40,true);
+}
+
+// Calibration against gold-standard scans. One reference gives an offset; two or
+// more fit a line, so the correction adapts across the range.
+function bfCalibration(){
+  var refs=(S.profile&&S.profile.bfReferences)||[];
+  var pts=[];
+  refs.forEach(function(r){
+    if(!r||r.value==null)return;
+    var est=(r.estimate!=null)?r.estimate
+      :rawEstimate({waist:r.waist,neck:r.neck,weight:r.weight});
+    if(est!=null)pts.push({est:est,ref:r.value,date:r.date,method:r.method||'DEXA'});
+  });
+  if(!pts.length)return {mode:'none',n:0};
+  if(pts.length===1)return {mode:'offset',n:1,offset:Math.round((pts[0].ref-pts[0].est)*100)/100,
+                            ref:pts[0]};
+  var n=pts.length,sx=0,sy=0,sxx=0,sxy=0;
+  pts.forEach(function(p){sx+=p.est;sy+=p.ref;sxx+=p.est*p.est;sxy+=p.est*p.ref;});
+  var den=n*sxx-sx*sx;
+  if(Math.abs(den)<1e-9)return {mode:'offset',n:n,offset:Math.round((sy/n-sx/n)*100)/100,ref:pts[n-1]};
+  var slope=(n*sxy-sx*sy)/den, icpt=(sy-slope*sx)/n;
+  return {mode:'linear',n:n,slope:slope,intercept:icpt,ref:pts[n-1]};
+}
+
+function applyCalibration(est){
+  if(est==null)return null;
+  var c=bfCalibration();
+  if(c.mode==='offset')return Math.round((est+c.offset)*10)/10;
+  if(c.mode==='linear')return Math.round((c.slope*est+c.intercept)*10)/10;
+  return est;
 }
 
 // Latest measurement carrying a bodyweight
@@ -29,11 +89,17 @@ function bodyComp(){
   var m=latestWeighIn();
   if(!m)return null;
   var h=S.profile.height||164, age=S.profile.age||40;
-  var bf=(m.bodyFat!=null&&m.bodyFat>0)?m.bodyFat:bodyFatCedars(m.weight,h,age,true);
+  var manual=(m.bodyFat!=null&&m.bodyFat>0);
+  var raw=rawEstimate(m);
+  var cal=bfCalibration();
+  var bf=manual?m.bodyFat:applyCalibration(raw);
+  if(bf==null)bf=bodyFatCedars(m.weight,h,age,true);
   var lbm=Math.round(m.weight*(1-bf/100)*10)/10;
-  return {date:m.date,weight:m.weight,bf:bf,lbm:lbm,
+  return {date:m.date,weight:m.weight,bf:bf,lbm:lbm,raw:raw,
           bmi:Math.round(m.weight/Math.pow(h/100,2)*10)/10,
-          manual:(m.bodyFat!=null&&m.bodyFat>0),
+          manual:manual,calibrated:(!manual&&cal.mode!=='none'),cal:cal,
+          navy:bodyFatNavy(m.waist,m.neck,h),
+          cedars:bodyFatCedars(m.weight,h,age,true),
           phase:bf>BF_CUT_THRESHOLD?'cut':'maintain'};
 }
 
@@ -98,7 +164,7 @@ function macroTargets(type){
   target=Math.round(target/10)*10;
 
   // protein scales off LEAN mass, higher while cutting to protect it
-  var protein=Math.round(comp.lbm*(cutting?2.8:2.2));
+  var protein=Math.round(comp.lbm*(cutting?3.0:2.2));
   var fat=Math.round(comp.weight*0.8);
   var carbs=Math.max(0,Math.round((target-protein*4-fat*9)/4));
 
