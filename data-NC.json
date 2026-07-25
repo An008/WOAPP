@@ -1,5 +1,5 @@
 {
-  "__reset": "2026-07-25T15:09:45Z",
+  "__reset": "2026-07-25T15:47:47Z",
   "profile": {
     "name": "NC",
     "start": "2026-07-25",
@@ -7,13 +7,31 @@
     "age": 40,
     "apiKey": "",
     "loadout": "base",
-    "remindTime": "18:00"
+    "remindTime": "18:00",
+    "activity": 1.35,
+    "bfReferences": [
+      {
+        "date": "2026-07-25",
+        "value": 30.3,
+        "waist": 93.5,
+        "method": "DEXA"
+      }
+    ]
   },
   "next": "A",
   "sessions": {},
   "journal": {},
   "landmarks": [],
-  "measurements": [],
+  "measurements": [
+    {
+      "date": "2026-07-25",
+      "weight": 71.3,
+      "neck": 37,
+      "waist": 93.5,
+      "hip": 94.5,
+      "chest": 93.5
+    }
+  ],
   "macros": {},
   "assessmentHistory": []
 }
