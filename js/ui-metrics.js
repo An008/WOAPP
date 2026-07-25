@@ -47,6 +47,7 @@ function renderMetrics(){
     var whr=cur.waist&&cur.hip?(Math.round(cur.waist/cur.hip*100)/100):null;
     var lean=cur.bodyFat&&cur.weight?Math.round(cur.weight*(1-cur.bodyFat/100)*10)/10:null;
     var navy=navyBF(cur.waist,cur.neck,h);
+    var cedars=bodyFatCedars(cur.weight,h,S.profile.age||40,true);
     banner+='<div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin-bottom:12px">CURRENT SNAPSHOT \u00b7 '+cur.date+'</div>';
     banner+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">';
     var metrics=[
@@ -67,7 +68,10 @@ function renderMetrics(){
     });
     banner+='</div>';
     if(whr)banner+='<div style="font-size:12px;color:var(--txt2)">WHR: <strong style="color:var(--white)">'+whr+'</strong>'+(whr<0.90?' \u2014 <span style="color:var(--green)">good</span>':' \u2014 <span style="color:var(--amber)">monitor</span>')+'</div>';
-    if(navy&&!cur.bodyFat)banner+='<div style="font-size:12px;color:var(--txt2);margin-top:4px">Navy BF estimate: <strong style="color:var(--blue)">'+navy+'%</strong></div>';
+    if(!cur.bodyFat){
+      banner+='<div style="font-size:12px;color:var(--txt2);margin-top:4px">Cedars-Sinai: <strong style="color:var(--amber)">'+cedars+'%</strong>'
+        +(navy?' <span style="color:var(--txt3)">\u00b7 Navy '+navy+'%</span>':'')+'</div>';
+    }
     if(prev)banner+='<div style="font-size:11px;color:var(--txt3);margin-top:6px">vs '+prev.date+(cur.weight&&prev.weight?delta(cur,prev,'weight','kg',true):'')+(cur.bodyFat&&prev.bodyFat?delta(cur,prev,'bodyFat','%',true):'')+(cur.waist&&prev.waist?delta(cur,prev,'waist','cm',false):'')+'</div>';
   } else {
     banner+='<div style="font-size:13px;color:var(--txt2)">No measurements yet. Record your first entry below.</div>';
@@ -167,8 +171,9 @@ function renderMetrics(){
     var w=parseFloat(document.getElementById('mf-waist')&&document.getElementById('mf-waist').value||cur&&cur.waist||0);
     var n=parseFloat(document.getElementById('mf-neck')&&document.getElementById('mf-neck').value||cur&&cur.neck||0);
     var est=navyBF(w,n,h);
+    var ced=bodyFatCedars(parseFloat(document.getElementById('mf-weight')&&document.getElementById('mf-weight').value||cur&&cur.weight||0),h,S.profile.age||40,true);
     var el2=document.getElementById('navy-est');
-    if(el2)el2.textContent=est?'Navy BF estimate: '+est+'% (from waist/neck/height)':'';
+    if(el2)el2.textContent=(ced?'Cedars-Sinai: '+ced+'%':'')+(est?'   Navy: '+est+'%':'');
   }
   if(METRICS_MODE!=='composition')return;
   setTimeout(function(){
