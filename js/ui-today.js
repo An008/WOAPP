@@ -196,6 +196,7 @@ function renderToday(){
    +'<div style="font-size:22px;font-weight:800;color:var(--white);letter-spacing:-.025em">'+g+', '+CUR_USER.name+'</div>'
    +'<div onclick="doLogout()" style="font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer;padding:6px 10px;border:1px solid var(--border);border-radius:10px">Exit</div></div>';
 
+  h+=xpBar();
   h+='<div style="display:flex;align-items:center;gap:9px;padding:11px 16px 0">'
    +'<span style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);background:rgba(232,160,42,.1);border:1px solid rgba(232,160,42,.22);border-radius:20px;padding:5px 11px;white-space:nowrap">PHASE '+(ph+1)+' \u00b7 '+phD.name+'</span>'
    +'<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden">'
