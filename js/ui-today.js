@@ -230,7 +230,21 @@ function renderToday(){
    +'<div style="font-size:19px;font-weight:900;color:#0A0E16;letter-spacing:-.03em;line-height:1.15;margin-top:3px">'+sd.name+'</div>'
    +'<div style="font-size:11px;font-weight:700;color:rgba(10,14,22,.6);margin-top:3px">'+sd.dur+'</div>'
    +'</div></div>'
-   +'<div style="padding:0 18px 16px">'
+   +'<div style="padding:0 18px 10px">'
+   +'<div style="display:flex;gap:1px;background:rgba(10,14,22,.16);border-radius:11px;overflow:hidden;margin-bottom:9px">'
+   +['base','field'].map(function(m){
+      var L=LOADOUTS[m], on=loadoutFor(td,type)===m, lock=comp.pct>0;
+      return '<div onclick="'+(lock?'':'setLoadout(\''+m+'\')')+'" style="flex:1;padding:8px 4px;text-align:center;cursor:'+(lock?'default':'pointer')+';background:'+(on?'#0A0E16':'transparent')+';opacity:'+(lock&&!on?'.3':'1')+'">'
+        +'<div style="font-size:10px;font-weight:900;letter-spacing:.1em;color:'+(on?L.col:'rgba(10,14,22,.5)')+'">'+L.name+'</div>'
+        +'<div style="font-size:8px;font-weight:700;color:'+(on?'rgba(255,255,255,.45)':'rgba(10,14,22,.35)')+'">'+L.label+'</div></div>';
+    }).join('')
+   +'</div>'
+   +'<div style="font-size:9px;color:rgba(10,14,22,.55);font-weight:700;text-align:center;margin-bottom:9px">'
+   +(comp.pct>0?'Loadout locked for this mission'
+     :loadoutFor(td,type)==='field'
+       ?fieldSwapCount(type)+' objectives swapped to bodyweight / improvised'
+       :'Full equipment')
+   +'</div>'
    +'<button onclick="beginSession()" style="width:100%;padding:13px;border:none;border-radius:14px;background:#0A0E16;color:'+sd.col+';font-size:13px;font-weight:900;letter-spacing:.06em;cursor:pointer">'+label+'</button></div>'
    +'<div style="display:flex;gap:1px;background:rgba(10,14,22,.14)">'
    +planStrip().map(function(x){
