@@ -81,7 +81,17 @@ function renderSettings(){
       '<div style="padding:6px 18px 12px">'
     +'<div style="padding:10px 14px;background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.2);border-radius:10px;margin-bottom:8px">'  
     +'<div style="font-size:12px;font-weight:800;color:var(--green)">\u2713 Enabled \u2014 fires at '+(S.profile.remindTime||'18:00')+' if session not done</div></div>'
-    +'<button onclick="testNotif()" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(61,184,122,.3);background:rgba(61,184,122,.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer">Send Test Notification</button></div>':
+    +'<button onclick="testNotif()" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(61,184,122,.3);background:rgba(61,184,122,.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer">Send Test Notification</button>'
+        +'<div id="notif-diag" style="font-size:11px;margin-top:7px;min-height:15px;color:var(--txt3)"></div>'
+        +(function(){var d=notifDiagnostics();
+          return '<div style="font-size:10px;color:var(--txt3);margin-top:6px;line-height:1.6">'
+            +'API '+(d.api?'yes':'NO')+' \u00b7 permission '+d.permission
+            +' \u00b7 service worker '+(d.sw?(d.swReady?'ready':'supported'):'NO')
+            +' \u00b7 https '+(d.secure?'yes':'NO')
+            +(d.standalone?' \u00b7 installed':' \u00b7 browser tab')
+            +(d.lastError?'<br><span style="color:var(--red)">last error: '+d.lastError+'</span>':'')
+            +'</div>';})()
+        +'</div>':
       Notification.permission==='denied'?
     '<div style="padding:6px 18px 12px"><div style="padding:10px 14px;background:rgba(227,80,80,.08);border:1px solid rgba(227,80,80,.2);border-radius:10px">'
     +'<div style="font-size:12px;font-weight:800;color:var(--red)">\u2715 Blocked by browser</div>'
@@ -100,9 +110,19 @@ function renderSettings(){
 // --- MEASUREMENTS + GOALS/ACHIEVEMENTS -------------------------------------
 
 function testNotif(){
-  if(!('Notification' in window)||Notification.permission!=='granted'){alert('Enable notifications in Setup tab first.');return;}
-  try{new Notification('Iron Protocol',{body:'Reminders are active. You will be notified at '+(S&&S.profile&&S.profile.remindTime?S.profile.remindTime:'18:00')+'.',tag:'iron-test'});}catch(e){alert('Notification error: '+e.message);}
+  var el=document.getElementById('notif-diag');
+  fireNotification('Iron Protocol','Test transmission received. Reminders are active.','iron-test')
+    .then(function(ok){
+      var d=notifDiagnostics();
+      if(el){
+        el.style.color=ok?'var(--green)':'var(--red)';
+        el.textContent=ok?'Sent. If nothing appeared, check OS notification settings for your browser.'
+          :('Failed: '+(d.lastError||'unknown'));
+      }
+      if(!ok&&!el)alert('Notification failed: '+(d.lastError||'unknown'));
+    });
 }
+
 function clearTestData(){
   if(!CUR_USER){alert('Not logged in.');return;}
   var typed=prompt('Type CLEAR to erase all training data for '+CUR_USER.name+'. This cannot be undone.');
