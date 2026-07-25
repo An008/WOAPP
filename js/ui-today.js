@@ -3,12 +3,6 @@
 // ASCII-ONLY: no byte above 0x7F may appear in this file.
 
 // --- MACRO CHECK-IN ----------------------------------------------------------
-function getMacroTargets(){
-  var td=today();
-  var type=(S.sessions[td]?S.sessions[td].type:S.next)||'A';
-  return MACRO_TARGETS[type]||MACRO_TARGETS.REST;
-}
-
 function getLoadsHTML(loads){
   if(!loads)return '';
   var LN={'goblet':'Goblet Squat','db-row':'DB Row','suitcase':'Suitcase Carry','band-pa':'Band Pull-Apart','pushup':'Push-up','z2':'Zone 2 Run'};
@@ -42,43 +36,10 @@ function buildReassessmentBanner(){
     +'<div style="font-size:12px;font-weight:700;color:'+col+'">Run &#8250;</div></div>';
 }
 
-function buildMacroCard(){
-  var td=today();
-  var logged=(S.macros&&S.macros[td])||{protein:0,carbs:0,fat:0};
-  var t=getMacroTargets();
-  var kcalLogged=Math.round(logged.protein*4+logged.carbs*4+logged.fat*9);
-  var kcalPct=Math.min(100,Math.round(kcalLogged/t.kcal*100));
-  var kcalCol=kcalPct>=90?'var(--green)':kcalPct>=60?'var(--amber)':'var(--txt3)';
-
-  function bar(label,val,target){
-    var pct=Math.min(100,Math.round(val/target*100));
-    var col=pct>=90?'var(--green)':pct>=60?'var(--amber)':'var(--txt3)';
-    return '<div style="margin-bottom:9px">'
-      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
-      +'<span style="font-size:12px;font-weight:700;color:var(--txt2)">'+label+'</span>'
-      +'<span style="font-size:12px;font-weight:800;color:'+col+';font-variant-numeric:tabular-nums">'+val+'g <span style="color:var(--txt3);font-weight:600">/ '+target+'g</span></span>'
-      +'</div>'
-      +'<div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">'
-      +'<div style="height:100%;width:'+pct+'%;background:'+col+';border-radius:3px;transition:width .4s"></div>'
-      +'</div></div>';
-  }
-
-  return '<div style="margin:10px 18px 0;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
-    +'<div><div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3)">TODAY&#39;S MACROS</div>'
-    +'<div style="font-size:15px;font-weight:800;color:'+kcalCol+';margin-top:2px;font-variant-numeric:tabular-nums">'+kcalLogged+' <span style="font-size:12px;color:var(--txt3);font-weight:600">/ '+t.kcal+' kcal</span></div></div>'
-    +'<button onclick="showMacroSheet()" style="padding:7px 13px;border-radius:8px;border:1px solid var(--bord2);background:var(--bg3);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer">Log</button>'
-    +'</div>'
-    +bar('Protein',logged.protein,t.protein)
-    +bar('Carbs',logged.carbs,t.carbs)
-    +bar('Fat',logged.fat,t.fat)
-    +'</div>';
-}
-
 function showMacroSheet(){
   var td=today();
   var logged=(S.macros&&S.macros[td])||{protein:0,carbs:0,fat:0};
-  var t=getMacroTargets();
+  var t=getMacroTargets(S.next||'A');
   var el=document.getElementById('macro-sheet');
   if(el)el.remove();
   var div=document.createElement('div');
@@ -122,39 +83,181 @@ function getActiveLandmarks(){
   var ph=Math.min(getPhase(),3);
   return PHASE_LM[ph].map(function(id){return S.landmarks.find(function(lm){return lm.id===id;});}).filter(Boolean);
 }
-function renderToday(){
-  var ph=getPhase(),phD=PHASES[ph],phWk=getPhaseWk(),pct=Math.min(100,Math.round(phWk/phD.weeks*100));
-  var td=today(),ex=S.sessions[td];
-  var todayType=ex?ex.type:S.next;
-  var comp=sessComp(td);
-  var heroType=(comp.pct>=100)?S.next:todayType;
-  var sd=SESSIONS[heroType];
-  var hr=new Date().getHours(),g=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
-  document.getElementById('v-today').innerHTML='<div style="padding-bottom:8px">'
-  +'<div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);padding:14px 18px 0">PHASE '+(ph+1)+' \u2014 '+phD.name+' \u00b7 WEEK '+phWk+'</div>'
-  +'<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:4px 18px 0"><div style="font-size:24px;font-weight:800;color:var(--white);line-height:1.2">'+g+',<br>'+CUR_USER.name+'</div><div onclick="doLogout()" style="font-size:12px;font-weight:700;color:var(--txt3);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:6px">Sign out</div></div>'
-  +'<div style="margin:12px 18px 0;background:var(--bg3);border:1px solid var(--bord2);border-radius:14px;padding:13px 16px"><div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt2)">'+phD.name+'</div><div style="font-size:16px;font-weight:800;color:var(--white);margin-top:2px">'+phD.desc+'</div><div style="margin-top:8px;height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--amber);border-radius:2px"></div></div><div style="font-size:11px;color:var(--txt3);margin-top:3px">Week '+phWk+' of '+phD.weeks+'</div></div>'
-  +(comp.pct>=100&&heroType!==todayType?'<div style="margin:8px 18px 0;padding:8px 12px;background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.25);border-radius:8px;display:flex;align-items:center;gap:8px"><div style="font-size:13px;color:var(--green)">\u2713</div><div style="font-size:12px;font-weight:700;color:var(--green)">'+SESSIONS[todayType].name+' complete today</div></div>':'')
-  +'<div class="sh">TODAY</div>'
-  +'<div class="hero '+sd.hero+'" style="cursor:pointer" onclick="beginSession()">'
-  +'<div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+sd.col+';opacity:.8;margin-bottom:4px">'+(comp.pct>=100&&heroType!==todayType?'NEXT \u2014 ':'')+sd.icon+' '+sd.name+'</div>'
-  +'<div style="font-size:20px;font-weight:900;color:var(--white);margin-bottom:12px">'+sd.dur+'</div>'
-  +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div class="h-bar"><div class="h-fill" style="width:'+comp.pct+'%;background:'+sd.col+'"></div></div><div style="font-size:14px;font-weight:800;color:var(--white);width:40px;text-align:right">'+comp.pct+'%</div></div>'
-  +'<button class="btn" style="background:rgba(255,255,255,.13)">'+(comp.pct>=100?'&#10003; SESSION COMPLETE':'&#9654; '+(comp.pct>0?'CONTINUE':'START')+' SESSION')+'</button>'
-  +'</div>'
-  +(isDeloadWeek()?'<div style="margin:10px 18px 0;padding:12px 14px;background:rgba(74,158,219,.08);border:1px solid rgba(74,158,219,.25);border-radius:10px"><div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK \u2014 Matveyev Wave Loading</div><div style="font-size:12px;color:var(--txt2);margin-top:3px">Reduce all main work sets by 1. Keep the same weight. Your body recovers; the neural adaptation holds. This produces more total adaptation than a third consecutive progressive week.</div></div>':'')
-  +'<div style="padding:0 18px;margin-top:10px;display:flex;gap:8px"><button class="btn" style="background:rgba(155,141,232,.1);border:1px solid rgba(155,141,232,.2);color:var(--purple);font-size:13px" onclick="openAssessment()">&#128202; Run Assessment</button></div>'
-  +buildReassessmentBanner()
-  +buildMacroCard()
-  +(S.profile&&S.profile.assessmentDate?'<div style="margin:10px 18px 0;padding:10px 14px;background:var(--bg3);border-left:3px solid var(--purple);border-radius:0 10px 10px 0;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--purple)">PROGRAMME CALIBRATED</div><div style="font-size:12px;color:var(--txt2);margin-top:1px">'+S.profile.assessmentDate+' &middot; '+((S.assessmentHistory&&S.assessmentHistory.length)||1)+' assessment'+(((S.assessmentHistory&&S.assessmentHistory.length)||1)!==1?'s':'')+'</div></div><div style="font-size:12px;font-weight:700;color:var(--purple);cursor:pointer" onclick="showTab(\"settings\")">View &rsaquo;</div></div>':'')
-  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px;margin-top:10px"><div class="stat"><div class="stat-v">'+totalSess()+'</div><div class="stat-l">Sessions Done</div></div><div class="stat"><div class="stat-v">'+phWk+'</div><div class="stat-l">Week of Program</div></div></div>'
-  +'<div class="sh">CURRENT GOALS</div>'
-  +(function(){
-    var active=getActiveLandmarks().filter(function(l){return !l.done;});
-    if(active.length===0)return '<div style="padding:0 18px 10px"><div style="background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.25);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--green);font-weight:700">&#10003; All phase goals achieved! Check Metrics tab for achievements.</div></div>';
-    return '<div style="padding:0 18px">'+active.map(function(lm){return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')">'+'<i>'+lm.i+'</i><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--white)">'+lm.g+'</div><div style="font-size:11px;color:var(--txt2)">'+lm.p+'</div></div>'+'<div class="lm-c">&#9675;</div></div>';}).join('')+'<div style="text-align:center;padding:6px 0"><span style="font-size:12px;color:var(--txt3)">Phase '+(getPhase()+1)+' goals \u00b7 '+active.length+' remaining</span></div></div>';
-  })();
+// --- MACROS: derived from live measurements when available -------------------
+// Mifflin-St Jeor BMR x activity factor for the session type. Falls back to the
+// static programme table until a bodyweight measurement exists.
+function getMacroTargets(type){
+  type=type||S.next||'A';
+  var base=MACRO_TARGETS[type]||MACRO_TARGETS.REST;
+  var ms=S.measurements||[];
+  var m=null;
+  for(var i=ms.length-1;i>=0;i--){if(ms[i]&&ms[i].weight){m=ms[i];break;}}
+  if(!m){var o=Object.assign({},base);o.derived=false;return o;}
+  var w=m.weight, h=S.profile.height||164, age=S.profile.age||40;
+  var bmr=10*w+6.25*h-5*age+5;
+  var AF={A:1.60,B:1.65,C:1.60,REST:1.35};
+  var kcal=Math.round(bmr*(AF[type]||1.4)/10)*10;
+  var protein=Math.round(w*2.2);
+  var fat=Math.round(w*0.95);
+  var carbs=Math.max(0,Math.round((kcal-protein*4-fat*9)/4));
+  return {kcal:kcal,protein:protein,carbs:carbs,fat:fat,
+          derived:true,bmr:Math.round(bmr),basis:m.date};
 }
+
+function buildMacroCard(type){
+  var td=today();
+  var logged=(S.macros&&S.macros[td])||{protein:0,carbs:0,fat:0};
+  var t=getMacroTargets(type);
+  var kc=Math.round(logged.protein*4+logged.carbs*4+logged.fat*9);
+  var kp=Math.min(100,Math.round(kc/t.kcal*100));
+  var kcol=kp>=90?'var(--green)':kp>=60?'var(--amber)':'var(--txt3)';
+  function bar(l,v,tg){
+    var p=Math.min(100,Math.round(v/tg*100));
+    var c=p>=90?'var(--green)':p>=60?'var(--amber)':'var(--txt3)';
+    return '<div style="margin-bottom:8px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px">'
+      +'<span style="font-size:11px;font-weight:700;color:var(--txt2);letter-spacing:.02em">'+l+'</span>'
+      +'<span style="font-size:11px;font-weight:800;color:'+c+';font-variant-numeric:tabular-nums">'+v+'<span style="color:var(--txt3);font-weight:600">/'+tg+'g</span></span>'
+      +'</div>'
+      +'<div style="height:4px;background:var(--border);border-radius:3px;overflow:hidden">'
+      +'<div style="height:100%;width:'+p+'%;background:'+c+';border-radius:3px;transition:width .4s"></div>'
+      +'</div></div>';
+  }
+  return '<div style="margin:10px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 15px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px">'
+    +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">TODAY\'S MACROS</div>'
+    +'<div style="font-size:19px;font-weight:900;color:'+kcol+';margin-top:1px;font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+kc+'<span style="font-size:12px;color:var(--txt3);font-weight:600"> / '+t.kcal+' kcal</span></div>'
+    +'<div style="font-size:10px;color:var(--txt3);margin-top:1px">'+(t.derived?'From your measurements \u00b7 BMR '+t.bmr:'Programme default \u00b7 log weight in Metrics')+'</div></div>'
+    +'<button onclick="showMacroSheet()" style="padding:7px 13px;border-radius:9px;border:1px solid var(--bord2);background:var(--bg3);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Log</button>'
+    +'</div>'
+    +bar('Protein',logged.protein,t.protein)+bar('Carbs',logged.carbs,t.carbs)+bar('Fat',logged.fat,t.fat)
+    +'</div>';
+}
+
+function pickSession(t){S.next=t;saveS();renderToday();}
+
+function renderToday(){
+  var ph=getPhase(),phD=PHASES[ph],phWk=getPhaseWk();
+  var phPct=Math.min(100,Math.round(phWk/phD.weeks*100));
+  var td=today();
+  var type=S.next||'A';
+  var comp=compFor(td,type);
+  var sd=SESSIONS[type];
+  var hr=new Date().getHours();
+  var g=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+  var doneToday=Object.keys(S.sessions).filter(function(k){
+    return k.indexOf(td+'|')===0&&sessComp(k).pct>=100;
+  }).map(function(k){return S.sessions[k].type;});
+  var showAssess=!S.profile.assessmentDate||isPhaseEnd();
+  var gp=goalPct(), gDone=completedSessions(), gTot=totalPlannedSessions();
+
+  var h='<div style="padding-bottom:10px">';
+
+  // --- top bar --------------------------------------------------------------
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0">'
+   +'<div style="font-size:21px;font-weight:800;color:var(--white);letter-spacing:-.02em">'+g+', '+CUR_USER.name+'</div>'
+   +'<div onclick="doLogout()" style="font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer;padding:5px 9px;border:1px solid var(--border);border-radius:8px">Exit</div>'
+   +'</div>';
+
+  // --- phase pill -----------------------------------------------------------
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 16px 0">'
+   +'<span style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);background:rgba(232,160,42,.1);border:1px solid rgba(232,160,42,.22);border-radius:20px;padding:4px 10px">PHASE '+(ph+1)+' \u00b7 '+phD.name+'</span>'
+   +'<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden">'
+   +'<div style="height:100%;width:'+phPct+'%;background:var(--amber);border-radius:2px"></div></div>'
+   +'<span style="font-size:10px;font-weight:700;color:var(--txt3);font-variant-numeric:tabular-nums">'+phPct+'%</span>'
+   +'</div>';
+
+  // --- completed-today chips ------------------------------------------------
+  if(doneToday.length){
+    h+='<div style="display:flex;gap:6px;padding:10px 16px 0;flex-wrap:wrap">'
+     +doneToday.map(function(t){
+        return '<span style="font-size:10px;font-weight:700;color:var(--green);background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.22);border-radius:20px;padding:4px 10px">\u2713 '+t+' done today</span>';
+      }).join('')+'</div>';
+  }
+
+  // --- session card (compact) -----------------------------------------------
+  var label=comp.pct>=100?'\u2713 COMPLETE \u2014 REPLAY':(comp.pct>0?'\u25b6 CONTINUE':'\u25b6 START SESSION');
+  h+='<div style="margin:11px 16px 0;border-radius:16px;overflow:hidden;border:1px solid '+sd.col+'33;background:linear-gradient(160deg,'+sd.col+'1f,var(--card) 62%)">'
+   +'<div style="padding:14px 15px 13px">'
+   +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">'
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+sd.col+'">'+sd.icon+' '+sd.name+'</div>'
+   +'<div style="font-size:11px;font-weight:700;color:var(--txt3)">'+sd.dur+'</div></div>'
+   +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px">'
+   +'<div style="flex:1;height:5px;background:rgba(255,255,255,.09);border-radius:3px;overflow:hidden">'
+   +'<div style="height:100%;width:'+comp.pct+'%;background:'+sd.col+';border-radius:3px;transition:width .4s"></div></div>'
+   +'<div style="font-size:12px;font-weight:800;color:var(--white);width:32px;text-align:right;font-variant-numeric:tabular-nums">'+comp.pct+'%</div></div>'
+   +'<button onclick="beginSession()" style="width:100%;padding:11px;border:none;border-radius:11px;background:rgba(255,255,255,.13);color:var(--white);font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer">'+label+'</button>'
+   +'</div>'
+   // session type selector
+   +'<div style="display:flex;gap:1px;background:var(--border)">'
+   +['A','B','C'].map(function(t){
+      var on=t===type, s2=SESSIONS[t], dn=doneToday.indexOf(t)>-1;
+      return '<div onclick="pickSession(\''+t+'\')" style="flex:1;padding:9px 4px;text-align:center;cursor:pointer;background:'+(on?'var(--bg3)':'var(--card)')+';border-top:2px solid '+(on?s2.col:'transparent')+'">'
+        +'<div style="font-size:12px;font-weight:800;color:'+(on?s2.col:'var(--txt3)')+'">'+t+(dn?' \u2713':'')+'</div>'
+        +'<div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);margin-top:1px">'+s2.name.split(' ')[0]+'</div></div>';
+    }).join('')
+   +'</div></div>';
+
+  // --- deload notice --------------------------------------------------------
+  if(isDeloadWeek()){
+    h+='<div style="margin:10px 16px 0;padding:10px 13px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.2);border-radius:12px">'
+     +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:2px;line-height:1.5">One fewer set on main work. Same weight. Recovery is the stimulus.</div></div>';
+  }
+
+  // --- assessment: first run, or end of phase only --------------------------
+  if(showAssess){
+    h+='<div style="padding:10px 16px 0"><button onclick="openAssessment()" style="width:100%;padding:11px;border-radius:12px;border:1px solid rgba(155,141,232,.28);background:rgba(155,141,232,.09);color:var(--purple);font-size:12px;font-weight:800;letter-spacing:.03em;cursor:pointer">'
+     +(S.profile.assessmentDate?'\u{1F4CA} PHASE COMPLETE \u2014 RE-ASSESS':'\u{1F4CA} RUN BASELINE ASSESSMENT')+'</button>'
+     +'<div style="font-size:10px;color:var(--txt3);text-align:center;padding-top:5px">'
+     +(S.profile.assessmentDate?'Recalibrates loads for the next phase':'Sets your starting loads across every session')+'</div></div>';
+  }
+
+  h+=buildReassessmentBanner();
+
+  // --- goal progress --------------------------------------------------------
+  h+='<div style="margin:10px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 15px">'
+   +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:9px">'
+   +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">PROGRESS TO GOAL</div>'
+   +'<div style="font-size:27px;font-weight:900;color:var(--white);letter-spacing:-.03em;line-height:1.15;font-variant-numeric:tabular-nums">'+gp+'<span style="font-size:15px;color:var(--txt3)">%</span></div></div>'
+   +'<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">'+gDone+'</div>'
+   +'<div style="font-size:10px;color:var(--txt3)">of '+gTot+' sessions</div></div></div>'
+   +'<div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">'
+   +'<div style="height:100%;width:'+Math.max(gp,0.8)+'%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:3px;transition:width .5s"></div></div>'
+   +'</div>';
+
+  h+=buildMacroCard(type);
+
+  // --- calibration strip ----------------------------------------------------
+  if(S.profile&&S.profile.assessmentDate){
+    var n=(S.assessmentHistory&&S.assessmentHistory.length)||1;
+    h+='<div onclick="showTab(\'settings\')" style="margin:10px 16px 0;padding:10px 13px;background:var(--bg3);border-left:2px solid var(--purple);border-radius:0 12px 12px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer">'
+     +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple)">CALIBRATED</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:1px">'+S.profile.assessmentDate+' \u00b7 '+n+' assessment'+(n!==1?'s':'')+'</div></div>'
+     +'<div style="font-size:16px;color:var(--purple)">\u203a</div></div>';
+  }
+
+  // --- goals: max 3 ---------------------------------------------------------
+  var active=getActiveLandmarks().filter(function(l){return !l.done;});
+  var shown=active.slice(0,3);
+  h+='<div class="sh">CURRENT GOALS</div>';
+  if(!active.length){
+    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:12px;padding:12px 14px;font-size:12px;color:var(--green);font-weight:700">\u2713 All phase goals achieved \u2014 see Metrics</div></div>';
+  }else{
+    h+='<div style="padding:0 16px">'+shown.map(function(lm){
+      return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')"><i>'+lm.i+'</i>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--white)">'+lm.g+'</div>'
+        +'<div style="font-size:10px;color:var(--txt2)">'+lm.p+'</div></div>'
+        +'<div class="lm-c">\u25cb</div></div>';
+    }).join('')
+    +'<div style="text-align:center;padding:7px 0"><span style="font-size:10px;color:var(--txt3)">'
+    +active.length+' open in Phase '+(ph+1)+(active.length>3?' \u00b7 showing 3':'')+'</span></div></div>';
+  }
+
+  h+='</div>';
+  document.getElementById('v-today').innerHTML=h;
+}
+
 function toggleLm(id){
   var lm=S.landmarks.find(function(l){return l.id===id;});
   if(!lm)return;
