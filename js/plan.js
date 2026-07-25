@@ -48,22 +48,22 @@ function planToday(){
   var type=prescribedType();
   if(gap===0){
     return {mode:'done',type:'REST',next:type,
-            title:'Session complete',
-            reason:'You have trained today. Active Recovery is optional and light.'};
+            title:'Mission accomplished',
+            reason:'Today\'s mission is executed. Recovery ops are optional and light.'};
   }
   if(gap<=MIN_REST_DAYS){
     return {mode:'recover',type:'REST',next:type,unlocks:1-gap+1,
-            title:'Recovery day',
-            reason:'Adaptation happens between sessions, not during them. '+
-                   SESSIONS[type].name+' unlocks tomorrow.'};
+            title:'Stand down',
+            reason:'Adaptation happens between missions, not during them. '+
+                   SESSIONS[type].name+' is authorised tomorrow.'};
   }
   if(trainingLast7()>=MAX_PER_WEEK){
     return {mode:'recover',type:'REST',next:type,
-            title:'Weekly volume reached',
-            reason:MAX_PER_WEEK+' sessions in the last 7 days. Recovery is the work today.'};
+            title:'Operational tempo reached',
+            reason:MAX_PER_WEEK+' missions in the last 7 days. Recovery ops are the task today.'};
   }
   return {mode:'train',type:type,next:null,
-          title:'Today\'s session',
+          title:'Mission authorised',
           reason:''};
 }
 
