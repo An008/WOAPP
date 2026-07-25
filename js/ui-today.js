@@ -86,23 +86,7 @@ function getActiveLandmarks(){
 // --- MACROS: derived from live measurements when available -------------------
 // Mifflin-St Jeor BMR x activity factor for the session type. Falls back to the
 // static programme table until a bodyweight measurement exists.
-function getMacroTargets(type){
-  type=type||S.next||'A';
-  var base=MACRO_TARGETS[type]||MACRO_TARGETS.REST;
-  var ms=S.measurements||[];
-  var m=null;
-  for(var i=ms.length-1;i>=0;i--){if(ms[i]&&ms[i].weight){m=ms[i];break;}}
-  if(!m){var o=Object.assign({},base);o.derived=false;return o;}
-  var w=m.weight, h=S.profile.height||164, age=S.profile.age||40;
-  var bmr=10*w+6.25*h-5*age+5;
-  var AF={A:1.60,B:1.65,C:1.60,REST:1.35};
-  var kcal=Math.round(bmr*(AF[type]||1.4)/10)*10;
-  var protein=Math.round(w*2.2);
-  var fat=Math.round(w*0.95);
-  var carbs=Math.max(0,Math.round((kcal-protein*4-fat*9)/4));
-  return {kcal:kcal,protein:protein,carbs:carbs,fat:fat,
-          derived:true,bmr:Math.round(bmr),basis:m.date};
-}
+function getMacroTargets(type){return macroTargets(type);}
 
 function buildMacroCard(type){
   var td=today();
@@ -127,7 +111,7 @@ function buildMacroCard(type){
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:11px">'
     +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">TODAY\'S MACROS</div>'
     +'<div style="font-size:19px;font-weight:900;color:'+kcol+';margin-top:1px;font-variant-numeric:tabular-nums;letter-spacing:-.02em">'+kc+'<span style="font-size:12px;color:var(--txt3);font-weight:600"> / '+t.kcal+' kcal</span></div>'
-    +'<div style="font-size:10px;color:var(--txt3);margin-top:1px">'+(t.derived?'From your measurements \u00b7 BMR '+t.bmr:'Programme default \u00b7 log weight in Metrics')+'</div></div>'
+    +'<div style="font-size:10px;color:var(--txt3);margin-top:1px">'+(t.derived?(t.cutting?'CUT':'MAINTAIN')+' \u00b7 BF '+t.comp.bf+'% \u00b7 BMR '+t.bmr+' \u00b7 TDEE '+t.tdee+(t.adapt&&t.adapt.kcal?' \u00b7 adj '+(t.adapt.kcal>0?'+':'')+t.adapt.kcal:''):(t.reason||'Programme default'))+'</div></div>'
     +'<button onclick="showMacroSheet()" style="padding:7px 13px;border-radius:9px;border:1px solid var(--bord2);background:var(--bg3);color:var(--txt2);font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">Log</button>'
     +'</div>'
     +bar('Protein',logged.protein,t.protein)+bar('Carbs',logged.carbs,t.carbs)+bar('Fat',logged.fat,t.fat)
