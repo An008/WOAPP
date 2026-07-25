@@ -35,7 +35,8 @@
       "i": "&#127947;",
       "g": "Carry 15kg Ã 1km non-stop",
       "p": "Carry",
-      "done": false
+      "done": true,
+      "achievedDate": "2026-07-25"
     },
     {
       "id": "l5",
