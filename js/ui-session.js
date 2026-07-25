@@ -3,17 +3,19 @@
 // ASCII-ONLY: no byte above 0x7F may appear in this file.
 
 // ===========================================================
-function beginSession(){
-  var td=today();
+function beginSession(forceType,forceDate){
+  var td=forceDate||today();
   curSessDate=td;
-  curSessType=S.sessions[td]?S.sessions[td].type:S.next;
+  // Always honour the queued/selected type. Reuses the record for that
+  // date+type if one exists, otherwise creates it.
+  curSessType=forceType||S.next||'A';
   getOrCreate(td,curSessType);saveS();
   var sd=SESSIONS[curSessType];
   document.getElementById('ov-ttl').textContent=sd.name;
   document.getElementById('ov-sub').textContent=sd.dur;
-  var comp=sessComp(td);
+  var comp=compFor(td,curSessType);
   var html=comp.pct>0?'<div style="padding:10px 18px;display:flex;align-items:center;gap:10px;background:var(--bg3);border-bottom:1px solid var(--border)"><div class="h-bar"><div class="h-fill" style="width:'+comp.pct+'%;background:'+sd.col+'"></div></div><div style="font-size:13px;font-weight:800;color:'+sd.col+'">'+comp.pct+'%</div></div>':'';
-  var sess=S.sessions[td];
+  var sess=getOrCreate(td,curSessType);
   sd.blocks.forEach(function(blk){
     html+='<div class="blk-hdr"><div class="blk-n" style="color:'+blk.col+'">'+blk.n+'</div></div>';
     blk.exs.forEach(function(ex){
@@ -165,7 +167,10 @@ function fcDone(){
       if(rest>0){showRest(rest,ex.n,(FC_CARDS[FC_IDX+1].ex.n),function(){FC_IDX++;renderFC();});}
       else{FC_IDX++;renderFC();}
     } else {
-      var o=['A','B','C'];S.next=o[(o.indexOf(curSessType)+1)%3];saveS();
+      var o=['A','B','C'];
+      var i=o.indexOf(curSessType);
+      S.next=o[(i<0?0:i+1)%3];
+      saveS();
       autoSyncToGH();
       showComplete();
     }
