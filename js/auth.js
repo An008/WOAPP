@@ -22,7 +22,20 @@ function doLogin(){
       if(d&&d.content){
         try{
           var cloud=JSON.parse(atob(d.content.replace(/\n/g,'')));
-          localStorage.setItem(SK+'-'+user.name,JSON.stringify(cloud));
+          // Never let a thinner cloud copy erase local work.
+          var localRaw=localStorage.getItem(SK+'-'+user.name);
+          var keep=cloud;
+          if(localRaw){
+            try{
+              var loc=JSON.parse(localRaw);
+              var nLoc=Object.keys(loc.sessions||{}).length;
+              var nCld=Object.keys(cloud.sessions||{}).length;
+              var mLoc=(loc.measurements||[]).length;
+              var mCld=(cloud.measurements||[]).length;
+              if(nLoc>nCld||mLoc>mCld)keep=loc;
+            }catch(e){}
+          }
+          localStorage.setItem(SK+'-'+user.name,JSON.stringify(keep));
         }catch(e){}
       }
       _enterApp();
@@ -37,7 +50,7 @@ function _enterApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='flex';
   curSessDate=today();
-  curSessType=S.sessions[today()]?S.sessions[today()].type:S.next;
+  curSessType=S.next||'A';
   showTab('today');
   startNotifCheck();
 }
