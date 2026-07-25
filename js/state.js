@@ -22,16 +22,58 @@ function fmtDate(s){var d=new Date(s+'T12:00:00');return d.toLocaleDateString('e
 function getPhase(){var w=Math.floor((new Date()-new Date(S.profile.start))/604800000);return w<8?0:w<20?1:w<36?2:3;}
 function getPhaseWk(){var w=Math.floor((new Date()-new Date(S.profile.start))/604800000),ph=getPhase(),off=0;for(var i=0;i<ph;i++)off+=PHASES[i].weeks;return Math.max(1,w-off+1);}
 function isDeloadWeek(){return S&&S.profile&&S.profile.start&&(getPhaseWk()%4===0);}
-function totalSess(){return Object.keys(S.sessions).filter(function(d){return sessComp(d).pct>0;}).length;}
-function sessComp(date){
-  var sess=S.sessions[date];if(!sess)return{pct:0,done:0,total:0};
+// --- SESSION KEYS -------------------------------------------------------------
+// Sessions are keyed "YYYY-MM-DD|TYPE" so every session type stays reachable on
+// any day. Keying by date alone locked the type once a record existed, which is
+// why only Session A was ever offered and the Setup override did nothing.
+function sessKey(date,type){return date+'|'+type;}
+
+function migrateSessions(){
+  var out={};
+  Object.keys(S.sessions||{}).forEach(function(k){
+    var s=S.sessions[k];
+    if(!s||typeof s!=='object')return;
+    if(k.indexOf('|')>-1){out[k]=s;return;}
+    var t=s.type||'A';
+    s.date=s.date||k;
+    out[sessKey(k,t)]=s;
+  });
+  S.sessions=out;
+}
+
+function sessComp(key){
+  var sess=S.sessions[key];if(!sess)return{pct:0,done:0,total:0};
   var sd=SESSIONS[sess.type];if(!sd)return{pct:0,done:0,total:0};
   var tot=0,dn=0;
   sd.blocks.forEach(function(b){b.exs.forEach(function(e){tot++;var ed=sess.exercises[e.id];if(ed&&ed.comp)dn++;});});
   return{pct:tot?Math.round(dn/tot*100):0,done:dn,total:tot};
 }
-function getOrCreate(date,type){if(!S.sessions[date])S.sessions[date]={type:type,exercises:{},started:new Date().toISOString()};return S.sessions[date];}
-function defaultState(){return{profile:{name:'',start:today(),apiKey:'',height:164},next:'A',sessions:{},journal:{},landmarks:LM.map(function(l){return Object.assign({},l,{done:false});}),measurements:[]};}
+function compFor(date,type){return sessComp(sessKey(date,type));}
+
+function completedSessions(){
+  return Object.keys(S.sessions).filter(function(k){return sessComp(k).pct>=100;}).length;
+}
+function startedSessions(){
+  return Object.keys(S.sessions).filter(function(k){return sessComp(k).pct>0;}).length;
+}
+function totalSess(){return startedSessions();}
+
+// Total training sessions between day one and the goal (3 per week, all phases)
+function totalPlannedSessions(){
+  var w=0;PHASES.forEach(function(p){w+=p.weeks;});return w*3;
+}
+function goalPct(){
+  var t=totalPlannedSessions();
+  return t?Math.min(100,Math.round(completedSessions()/t*1000)/10):0;
+}
+function isPhaseEnd(){return getPhaseWk()>=PHASES[getPhase()].weeks;}
+
+function getOrCreate(date,type){
+  var k=sessKey(date,type);
+  if(!S.sessions[k])S.sessions[k]={type:type,date:date,exercises:{},started:new Date().toISOString()};
+  return S.sessions[k];
+}
+function defaultState(){return{profile:{name:'',start:today(),apiKey:'',height:164,age:40},next:'A',sessions:{},journal:{},landmarks:LM.map(function(l){return Object.assign({},l,{done:false});}),measurements:[]};}
 
 // --- LANDMARK SYNC ------------------------------------------------------------
 // PERMANENT ENCODING FIX: display text (i/g/p) is NEVER trusted from storage.
@@ -51,8 +93,9 @@ function syncLandmarks(){
   });
 }
 
-function loadS(){var d=localStorage.getItem(SK+'-'+(CUR_USER?CUR_USER.name:''));S=d?JSON.parse(d):defaultState();syncLandmarks();if(!S.profile)S.profile={};if(!S.profile.apiKey)S.profile.apiKey=localStorage.getItem(AI_KEY_STORE)||'';if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;if(!S.profile.start)S.profile.start=today();
+function loadS(){var d=localStorage.getItem(SK+'-'+(CUR_USER?CUR_USER.name:''));S=d?JSON.parse(d):defaultState();if(!S.sessions)S.sessions={};migrateSessions();syncLandmarks();if(!S.profile)S.profile={};if(!S.profile.apiKey)S.profile.apiKey=localStorage.getItem(AI_KEY_STORE)||'';if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;if(!S.profile.start)S.profile.start=today();
   if(!S.profile.height)S.profile.height=164;
+  if(!S.profile.age)S.profile.age=40;
   if(!S.measurements)S.measurements=[];}
 function saveS(){try{localStorage.setItem(SK+'-'+(CUR_USER?CUR_USER.name:''),JSON.stringify(S));}catch(e){}}
 
