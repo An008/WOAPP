@@ -134,7 +134,14 @@ function buildMacroCard(type){
     +'</div>';
 }
 
-function pickSession(t){S.next=t;saveS();renderToday();}
+function pickSession(t){
+  var p=planToday();
+  if(p.mode==='train'&&t===p.type){beginSession();return;}
+  var msg=t===p.next
+    ? SESSIONS[t].name+' is next in the plan, but today is '+(p.mode==='done'?'already done':'a recovery day')+'.\n\n'+p.reason
+    : SESSIONS[t].name+' is not due yet. The plan runs A then B then C in order, and advances when a session is completed.';
+  alert(msg);
+}
 
 function progressRing(pct,size,stroke,color,track,label,sub){
   var r=(size-stroke)/2, c=2*Math.PI*r, p=Math.max(0,Math.min(100,pct));
@@ -181,7 +188,10 @@ function tile(val,unit,label,color){
 function renderToday(){
   var ph=getPhase(),phD=PHASES[ph],phWk=getPhaseWk();
   var phPct=Math.min(100,Math.round(phWk/phD.weeks*100));
-  var td=today(), type=S.next||'A', comp=compFor(td,type), sd=SESSIONS[type];
+  var td=today();
+  var PLAN=syncPlan();
+  var type=PLAN.mode==='train'?PLAN.type:'REST';
+  var comp=compFor(td,type), sd=SESSIONS[type];
   var hr=new Date().getHours();
   var g=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   var doneToday=Object.keys(S.sessions).filter(function(k){
@@ -210,24 +220,37 @@ function renderToday(){
   }
 
   // --- HERO: filled accent card with progress ring --------------------------
-  var label=comp.pct>=100?'REPLAY SESSION':(comp.pct>0?'CONTINUE':'START SESSION');
+  var label=comp.pct>=100?'REPLAY SESSION':(comp.pct>0?'CONTINUE':(PLAN.mode==='train'?'START SESSION':'START RECOVERY'));
+  var eyebrow=comp.pct>=100?'COMPLETE':(PLAN.mode==='train'?'TODAY \u00b7 PRESCRIBED':PLAN.title.toUpperCase());
   h+='<div style="margin:13px 16px 0;border-radius:24px;overflow:hidden;background:'+sd.col+'">'
    +'<div style="padding:18px 18px 16px;display:flex;align-items:center;gap:16px">'
    +progressRing(comp.pct,86,9,'rgba(10,14,22,.92)','rgba(10,14,22,.16)',comp.pct+'%')
    +'<div style="flex:1;min-width:0">'
-   +'<div style="font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:rgba(10,14,22,.55)">'+(comp.pct>=100?'COMPLETE':'TODAY')+'</div>'
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:rgba(10,14,22,.55)">'+eyebrow+'</div>'
    +'<div style="font-size:19px;font-weight:900;color:#0A0E16;letter-spacing:-.03em;line-height:1.15;margin-top:3px">'+sd.name+'</div>'
    +'<div style="font-size:11px;font-weight:700;color:rgba(10,14,22,.6);margin-top:3px">'+sd.dur+'</div>'
    +'</div></div>'
    +'<div style="padding:0 18px 16px">'
    +'<button onclick="beginSession()" style="width:100%;padding:13px;border:none;border-radius:14px;background:#0A0E16;color:'+sd.col+';font-size:13px;font-weight:900;letter-spacing:.06em;cursor:pointer">'+label+'</button></div>'
    +'<div style="display:flex;gap:1px;background:rgba(10,14,22,.14)">'
-   +['A','B','C'].map(function(t){
-      var on=t===type,s2=SESSIONS[t],dn=doneToday.indexOf(t)>-1;
-      return '<div onclick="pickSession(\''+t+'\')" style="flex:1;padding:10px 4px;text-align:center;cursor:pointer;background:'+(on?'rgba(10,14,22,.16)':'transparent')+'">'
-        +'<div style="font-size:12px;font-weight:900;color:'+(on?'#0A0E16':'rgba(10,14,22,.45)')+'">'+t+(dn?' \u2713':'')+'</div>'
-        +'<div style="font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,14,22,'+(on?'.6':'.35')+');margin-top:2px">'+s2.name.split(' ')[0]+'</div></div>';
+   +planStrip().map(function(x){
+      var st=x.state;
+      var op=st==='now'?'1':st==='done'?'.55':'.32';
+      var mark=st==='done'?' \u2713':st==='locked'?' \u1F512':'';
+      return '<div onclick="pickSession(\''+x.type+'\')" style="flex:1;padding:10px 4px;text-align:center;cursor:pointer;background:'
+        +(st==='now'?'rgba(10,14,22,.18)':'transparent')+'">'
+        +'<div style="font-size:12px;font-weight:900;color:#0A0E16;opacity:'+op+'">'+x.type+mark+'</div>'
+        +'<div style="font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#0A0E16;opacity:'+(st==='now'?'.6':'.3')+';margin-top:2px">'
+        +(st==='now'?'NOW':st==='done'?'DONE':'LOCKED')+'</div></div>';
     }).join('')+'</div></div>';
+
+  if(PLAN.mode!=='train'){
+    h+='<div style="margin:11px 16px 0;padding:13px 15px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.22);border-radius:16px">'
+     +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">'+PLAN.title.toUpperCase()+'</div>'
+     +'<div style="font-size:12px;color:var(--txt2);margin-top:4px;line-height:1.55">'+PLAN.reason+'</div>'
+     +(PLAN.next?'<div style="font-size:11px;color:var(--txt3);margin-top:6px">Next up: <span style="color:'+SESSIONS[PLAN.next].col+';font-weight:800">'+SESSIONS[PLAN.next].name+'</span></div>':'')
+     +'</div>';
+  }
 
   // --- BENTO STATS ----------------------------------------------------------
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:11px 16px 0">'
