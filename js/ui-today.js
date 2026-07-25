@@ -136,13 +136,52 @@ function buildMacroCard(type){
 
 function pickSession(t){S.next=t;saveS();renderToday();}
 
+function progressRing(pct,size,stroke,color,track,label,sub){
+  var r=(size-stroke)/2, c=2*Math.PI*r, p=Math.max(0,Math.min(100,pct));
+  var off=c*(1-p/100);
+  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" style="display:block;flex-shrink:0">'
+    +'<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="'+track+'" stroke-width="'+stroke+'"/>'
+    +'<circle cx="'+(size/2)+'" cy="'+(size/2)+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+stroke
+    +'" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off
+    +'" transform="rotate(-90 '+(size/2)+' '+(size/2)+')" style="transition:stroke-dashoffset .6s ease"/>'
+    +'<text x="50%" y="50%" text-anchor="middle" dy="'+(sub?'0.05em':'0.36em')+'" font-size="'+Math.round(size*0.25)
+    +'" font-weight="900" fill="'+color+'" letter-spacing="-0.5">'+label+'</text>'
+    +(sub?'<text x="50%" y="50%" text-anchor="middle" dy="1.5em" font-size="'+Math.round(size*0.1)
+      +'" font-weight="700" fill="'+color+'" opacity=".65" letter-spacing="1">'+sub+'</text>':'')
+    +'</svg>';
+}
+
+function dayStreak(){
+  var days={};
+  Object.keys(S.sessions).forEach(function(k){
+    if(sessComp(k).pct>=100){days[(S.sessions[k].date||k.split('|')[0])]=1;}
+  });
+  var list=Object.keys(days).sort().reverse();
+  if(!list.length)return 0;
+  var ms=86400000, t=new Date(today()+'T12:00:00');
+  var gap=Math.round((t-new Date(list[0]+'T12:00:00'))/ms);
+  if(gap>1)return 0;
+  var n=1, prev=new Date(list[0]+'T12:00:00');
+  for(var i=1;i<list.length;i++){
+    var d=new Date(list[i]+'T12:00:00');
+    if(Math.round((prev-d)/ms)===1){n++;prev=d;}else break;
+  }
+  return n;
+}
+
+function tile(val,unit,label,color){
+  var c=color||'var(--white)';
+  return '<div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 14px 12px">'
+    +'<div style="font-size:28px;font-weight:900;color:'+c+';letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums">'
+    +val+(unit?'<span style="font-size:13px;font-weight:700;color:var(--txt3)">'+unit+'</span>':'')+'</div>'
+    +'<div style="font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--txt3);margin-top:7px">'+label+'</div>'
+    +'</div>';
+}
+
 function renderToday(){
   var ph=getPhase(),phD=PHASES[ph],phWk=getPhaseWk();
   var phPct=Math.min(100,Math.round(phWk/phD.weeks*100));
-  var td=today();
-  var type=S.next||'A';
-  var comp=compFor(td,type);
-  var sd=SESSIONS[type];
+  var td=today(), type=S.next||'A', comp=compFor(td,type), sd=SESSIONS[type];
   var hr=new Date().getHours();
   var g=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   var doneToday=Object.keys(S.sessions).filter(function(k){
@@ -151,107 +190,90 @@ function renderToday(){
   var showAssess=!S.profile.assessmentDate||isPhaseEnd();
   var gp=goalPct(), gDone=completedSessions(), gTot=totalPlannedSessions();
 
-  var h='<div style="padding-bottom:10px">';
+  var h='<div style="padding-bottom:12px">';
 
-  // --- top bar --------------------------------------------------------------
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0">'
-   +'<div style="font-size:21px;font-weight:800;color:var(--white);letter-spacing:-.02em">'+g+', '+CUR_USER.name+'</div>'
-   +'<div onclick="doLogout()" style="font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer;padding:5px 9px;border:1px solid var(--border);border-radius:8px">Exit</div>'
-   +'</div>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:18px 16px 0">'
+   +'<div style="font-size:22px;font-weight:800;color:var(--white);letter-spacing:-.025em">'+g+', '+CUR_USER.name+'</div>'
+   +'<div onclick="doLogout()" style="font-size:11px;font-weight:700;color:var(--txt3);cursor:pointer;padding:6px 10px;border:1px solid var(--border);border-radius:10px">Exit</div></div>';
 
-  // --- phase pill -----------------------------------------------------------
-  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 16px 0">'
-   +'<span style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);background:rgba(232,160,42,.1);border:1px solid rgba(232,160,42,.22);border-radius:20px;padding:4px 10px">PHASE '+(ph+1)+' \u00b7 '+phD.name+'</span>'
+  h+='<div style="display:flex;align-items:center;gap:9px;padding:11px 16px 0">'
+   +'<span style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);background:rgba(232,160,42,.1);border:1px solid rgba(232,160,42,.22);border-radius:20px;padding:5px 11px;white-space:nowrap">PHASE '+(ph+1)+' \u00b7 '+phD.name+'</span>'
    +'<div style="flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden">'
    +'<div style="height:100%;width:'+phPct+'%;background:var(--amber);border-radius:2px"></div></div>'
-   +'<span style="font-size:10px;font-weight:700;color:var(--txt3);font-variant-numeric:tabular-nums">'+phPct+'%</span>'
+   +'<span style="font-size:10px;font-weight:800;color:var(--txt3);font-variant-numeric:tabular-nums">'+phPct+'%</span></div>';
+
+  if(doneToday.length){
+    h+='<div style="display:flex;gap:6px;padding:11px 16px 0;flex-wrap:wrap">'
+     +doneToday.map(function(t){return '<span style="font-size:10px;font-weight:800;color:var(--green);background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.22);border-radius:20px;padding:5px 11px">\u2713 '+t+' DONE</span>';}).join('')
+     +'</div>';
+  }
+
+  // --- HERO: filled accent card with progress ring --------------------------
+  var label=comp.pct>=100?'REPLAY SESSION':(comp.pct>0?'CONTINUE':'START SESSION');
+  h+='<div style="margin:13px 16px 0;border-radius:24px;overflow:hidden;background:'+sd.col+'">'
+   +'<div style="padding:18px 18px 16px;display:flex;align-items:center;gap:16px">'
+   +progressRing(comp.pct,86,9,'rgba(10,14,22,.92)','rgba(10,14,22,.16)',comp.pct+'%')
+   +'<div style="flex:1;min-width:0">'
+   +'<div style="font-size:9px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:rgba(10,14,22,.55)">'+(comp.pct>=100?'COMPLETE':'TODAY')+'</div>'
+   +'<div style="font-size:19px;font-weight:900;color:#0A0E16;letter-spacing:-.03em;line-height:1.15;margin-top:3px">'+sd.name+'</div>'
+   +'<div style="font-size:11px;font-weight:700;color:rgba(10,14,22,.6);margin-top:3px">'+sd.dur+'</div>'
+   +'</div></div>'
+   +'<div style="padding:0 18px 16px">'
+   +'<button onclick="beginSession()" style="width:100%;padding:13px;border:none;border-radius:14px;background:#0A0E16;color:'+sd.col+';font-size:13px;font-weight:900;letter-spacing:.06em;cursor:pointer">'+label+'</button></div>'
+   +'<div style="display:flex;gap:1px;background:rgba(10,14,22,.14)">'
+   +['A','B','C'].map(function(t){
+      var on=t===type,s2=SESSIONS[t],dn=doneToday.indexOf(t)>-1;
+      return '<div onclick="pickSession(\''+t+'\')" style="flex:1;padding:10px 4px;text-align:center;cursor:pointer;background:'+(on?'rgba(10,14,22,.16)':'transparent')+'">'
+        +'<div style="font-size:12px;font-weight:900;color:'+(on?'#0A0E16':'rgba(10,14,22,.45)')+'">'+t+(dn?' \u2713':'')+'</div>'
+        +'<div style="font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(10,14,22,'+(on?'.6':'.35')+');margin-top:2px">'+s2.name.split(' ')[0]+'</div></div>';
+    }).join('')+'</div></div>';
+
+  // --- BENTO STATS ----------------------------------------------------------
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:11px 16px 0">'
+   +tile(gp,'%','To Goal','var(--amber)')
+   +tile(gDone,' /'+gTot,'Sessions')
+   +tile(dayStreak(),'','Day Streak','var(--green)')
+   +tile('P'+(ph+1),'','Phase \u00b7 Wk '+phWk)
    +'</div>';
 
-  // --- completed-today chips ------------------------------------------------
-  if(doneToday.length){
-    h+='<div style="display:flex;gap:6px;padding:10px 16px 0;flex-wrap:wrap">'
-     +doneToday.map(function(t){
-        return '<span style="font-size:10px;font-weight:700;color:var(--green);background:rgba(61,184,122,.1);border:1px solid rgba(61,184,122,.22);border-radius:20px;padding:4px 10px">\u2713 '+t+' done today</span>';
-      }).join('')+'</div>';
-  }
-
-  // --- session card (compact) -----------------------------------------------
-  var label=comp.pct>=100?'\u2713 COMPLETE \u2014 REPLAY':(comp.pct>0?'\u25b6 CONTINUE':'\u25b6 START SESSION');
-  h+='<div style="margin:11px 16px 0;border-radius:16px;overflow:hidden;border:1px solid '+sd.col+'33;background:linear-gradient(160deg,'+sd.col+'1f,var(--card) 62%)">'
-   +'<div style="padding:14px 15px 13px">'
-   +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px">'
-   +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+sd.col+'">'+sd.icon+' '+sd.name+'</div>'
-   +'<div style="font-size:11px;font-weight:700;color:var(--txt3)">'+sd.dur+'</div></div>'
-   +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px">'
-   +'<div style="flex:1;height:5px;background:rgba(255,255,255,.09);border-radius:3px;overflow:hidden">'
-   +'<div style="height:100%;width:'+comp.pct+'%;background:'+sd.col+';border-radius:3px;transition:width .4s"></div></div>'
-   +'<div style="font-size:12px;font-weight:800;color:var(--white);width:32px;text-align:right;font-variant-numeric:tabular-nums">'+comp.pct+'%</div></div>'
-   +'<button onclick="beginSession()" style="width:100%;padding:11px;border:none;border-radius:11px;background:rgba(255,255,255,.13);color:var(--white);font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer">'+label+'</button>'
-   +'</div>'
-   // session type selector
-   +'<div style="display:flex;gap:1px;background:var(--border)">'
-   +['A','B','C'].map(function(t){
-      var on=t===type, s2=SESSIONS[t], dn=doneToday.indexOf(t)>-1;
-      return '<div onclick="pickSession(\''+t+'\')" style="flex:1;padding:9px 4px;text-align:center;cursor:pointer;background:'+(on?'var(--bg3)':'var(--card)')+';border-top:2px solid '+(on?s2.col:'transparent')+'">'
-        +'<div style="font-size:12px;font-weight:800;color:'+(on?s2.col:'var(--txt3)')+'">'+t+(dn?' \u2713':'')+'</div>'
-        +'<div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);margin-top:1px">'+s2.name.split(' ')[0]+'</div></div>';
-    }).join('')
-   +'</div></div>';
-
-  // --- deload notice --------------------------------------------------------
   if(isDeloadWeek()){
-    h+='<div style="margin:10px 16px 0;padding:10px 13px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.2);border-radius:12px">'
-     +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK</div>'
-     +'<div style="font-size:11px;color:var(--txt2);margin-top:2px;line-height:1.5">One fewer set on main work. Same weight. Recovery is the stimulus.</div></div>';
+    h+='<div style="margin:11px 16px 0;padding:11px 14px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.2);border-radius:16px">'
+     +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:3px;line-height:1.5">One fewer set on main work. Same weight. Recovery is the stimulus.</div></div>';
   }
 
-  // --- assessment: first run, or end of phase only --------------------------
+  h+=buildRpeBanner();
+
   if(showAssess){
-    h+='<div style="padding:10px 16px 0"><button onclick="openAssessment()" style="width:100%;padding:11px;border-radius:12px;border:1px solid rgba(155,141,232,.28);background:rgba(155,141,232,.09);color:var(--purple);font-size:12px;font-weight:800;letter-spacing:.03em;cursor:pointer">'
-     +(S.profile.assessmentDate?'\u{1F4CA} PHASE COMPLETE \u2014 RE-ASSESS':'\u{1F4CA} RUN BASELINE ASSESSMENT')+'</button>'
-     +'<div style="font-size:10px;color:var(--txt3);text-align:center;padding-top:5px">'
+    h+='<div style="padding:11px 16px 0"><button onclick="openAssessment()" style="width:100%;padding:13px;border-radius:16px;border:1px solid rgba(155,141,232,.28);background:rgba(155,141,232,.09);color:var(--purple);font-size:12px;font-weight:800;letter-spacing:.05em;cursor:pointer">'
+     +(S.profile.assessmentDate?'PHASE COMPLETE \u2014 RE-ASSESS':'RUN BASELINE ASSESSMENT')+'</button>'
+     +'<div style="font-size:10px;color:var(--txt3);text-align:center;padding-top:6px">'
      +(S.profile.assessmentDate?'Recalibrates loads for the next phase':'Sets your starting loads across every session')+'</div></div>';
   }
 
   h+=buildReassessmentBanner();
-
-  // --- goal progress --------------------------------------------------------
-  h+='<div style="margin:10px 16px 0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 15px">'
-   +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:9px">'
-   +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">PROGRESS TO GOAL</div>'
-   +'<div style="font-size:27px;font-weight:900;color:var(--white);letter-spacing:-.03em;line-height:1.15;font-variant-numeric:tabular-nums">'+gp+'<span style="font-size:15px;color:var(--txt3)">%</span></div></div>'
-   +'<div style="text-align:right"><div style="font-size:15px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">'+gDone+'</div>'
-   +'<div style="font-size:10px;color:var(--txt3)">of '+gTot+' sessions</div></div></div>'
-   +'<div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">'
-   +'<div style="height:100%;width:'+Math.max(gp,0.8)+'%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:3px;transition:width .5s"></div></div>'
-   +'</div>';
-
   h+=buildMacroCard(type);
 
-  // --- calibration strip ----------------------------------------------------
   if(S.profile&&S.profile.assessmentDate){
     var n=(S.assessmentHistory&&S.assessmentHistory.length)||1;
-    h+='<div onclick="showTab(\'settings\')" style="margin:10px 16px 0;padding:10px 13px;background:var(--bg3);border-left:2px solid var(--purple);border-radius:0 12px 12px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer">'
-     +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--purple)">CALIBRATED</div>'
-     +'<div style="font-size:11px;color:var(--txt2);margin-top:1px">'+S.profile.assessmentDate+' \u00b7 '+n+' assessment'+(n!==1?'s':'')+'</div></div>'
-     +'<div style="font-size:16px;color:var(--purple)">\u203a</div></div>';
+    h+='<div onclick="showTab(\'settings\')" style="margin:11px 16px 0;padding:11px 14px;background:var(--bg3);border-left:2px solid var(--purple);border-radius:0 16px 16px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer">'
+     +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--purple)">CALIBRATED</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:2px">'+S.profile.assessmentDate+' \u00b7 '+n+' assessment'+(n!==1?'s':'')+'</div></div>'
+     +'<div style="font-size:17px;color:var(--purple)">\u203a</div></div>';
   }
 
-  // --- goals: max 3 ---------------------------------------------------------
   var active=getActiveLandmarks().filter(function(l){return !l.done;});
-  var shown=active.slice(0,3);
   h+='<div class="sh">CURRENT GOALS</div>';
   if(!active.length){
-    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:12px;padding:12px 14px;font-size:12px;color:var(--green);font-weight:700">\u2713 All phase goals achieved \u2014 see Metrics</div></div>';
+    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:16px;padding:13px 15px;font-size:12px;color:var(--green);font-weight:700">\u2713 All phase goals achieved \u2014 see Metrics</div></div>';
   }else{
-    h+='<div style="padding:0 16px">'+shown.map(function(lm){
+    h+='<div style="padding:0 16px">'+active.slice(0,3).map(function(lm){
       return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')"><i>'+lm.i+'</i>'
         +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--white)">'+lm.g+'</div>'
-        +'<div style="font-size:10px;color:var(--txt2)">'+lm.p+'</div></div>'
-        +'<div class="lm-c">\u25cb</div></div>';
+        +'<div style="font-size:10px;color:var(--txt2)">'+lm.p+'</div></div><div class="lm-c">\u25cb</div></div>';
     }).join('')
-    +'<div style="text-align:center;padding:7px 0"><span style="font-size:10px;color:var(--txt3)">'
-    +active.length+' open in Phase '+(ph+1)+(active.length>3?' \u00b7 showing 3':'')+'</span></div></div>';
+    +'<div style="text-align:center;padding:8px 0"><span style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--txt3)">'
+    +active.length+' OPEN IN PHASE '+(ph+1)+(active.length>3?' \u00b7 SHOWING 3':'')+'</span></div></div>';
   }
 
   h+='</div>';
