@@ -8,7 +8,8 @@ function beginSession(forceType,forceDate){
   curSessDate=td;
   // Always honour the queued/selected type. Reuses the record for that
   // date+type if one exists, otherwise creates it.
-  curSessType=forceType||S.next||'A';
+  if(forceType){curSessType=forceType;}
+  else{var _p=planToday();curSessType=_p.mode==='train'?_p.type:'REST';}
   getOrCreate(td,curSessType);saveS();
   var sd=SESSIONS[curSessType];
   document.getElementById('ov-ttl').textContent=sd.name;
@@ -23,7 +24,9 @@ function beginSession(forceType,forceDate){
       var isDone=ed.comp;
       var isPart=!isDone&&ed.sets&&ed.sets.some(function(s){return s.done;});
       var rowStyle=isDone?' style="border-left:3px solid var(--green);background:rgba(61,184,122,.03)"':isPart?' style="border-left:3px solid var(--amber);background:rgba(232,160,42,.03)"':'';
-      html+='<div class="ex-row"'+rowStyle+' onclick="fcJumpTo(\''+blk.id+'\',\''+ex.id+'\')">'
+      var _ci=FC_CARDS.findIndex(function(c){return c.blkId===blk.id&&c.exId===ex.id;});
+      var _lk=_ci>fcFrontier();
+      html+='<div class="ex-row"'+rowStyle+(_lk?' data-locked="1"':'')+' onclick="fcJumpTo(\''+blk.id+'\',\''+ex.id+'\')" style="opacity:'+(_lk?'.4':'1')+'">'
         +'<div class="ex-st '+(isDone?'done':isPart?'part':'')+'">'+( isDone?'&#10003;':isPart?'&#9705;':'')+'</div>'
         +'<div><div class="ex-n">'+ex.n+'</div><div class="ex-v">'+(ex.t==='time'?ex.v:ex.s+' \xd7 '+(ex.rpp?ex.rpp+' reps':'Max'))+'</div></div>'
         +'<div style="font-size:18px;color:var(--txt3)">&#8250;</div></div>';
@@ -71,6 +74,14 @@ function fcJumpTo(blkId,exId){
   closeOv('v-overview');
   FC_CARDS=buildCards();
   var idx=FC_CARDS.findIndex(function(c){return c.blkId===blkId&&c.exId===exId;});
+  var fr=fcFrontier();
+  if(idx>fr){
+    var nx=FC_CARDS[fr];
+    alert('Exercises run in order.\n\nNext up: '+nx.ex.n+
+          (nx.totalSets>1?'  (set '+(nx.si+1)+' of '+nx.totalSets+')':'')+
+          '\n\nThe sequence is deliberate - warm-up prepares the joints, the main work follows, prehab and breathing close it out.');
+    idx=fr;
+  }
   FC_IDX=idx>=0?idx:0;
   document.getElementById('fc-ttl').textContent=SESSIONS[curSessType].name;
   openOv('v-flashcard');
