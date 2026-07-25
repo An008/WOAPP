@@ -46,8 +46,10 @@ function renderMetrics(){
     var bmi=calcBMI(cur.weight,h);
     var whr=cur.waist&&cur.hip?(Math.round(cur.waist/cur.hip*100)/100):null;
     var lean=cur.bodyFat&&cur.weight?Math.round(cur.weight*(1-cur.bodyFat/100)*10)/10:null;
-    var navy=navyBF(cur.waist,cur.neck,h);
+    var navy=bodyFatNavy(cur.waist,cur.neck,h);
     var cedars=bodyFatCedars(cur.weight,h,S.profile.age||40,true);
+    var rfm=bodyFatRFM(cur.waist,h);
+    var comp=bodyComp();
     banner+='<div style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin-bottom:12px">CURRENT SNAPSHOT \u00b7 '+cur.date+'</div>';
     banner+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">';
     var metrics=[
@@ -68,9 +70,15 @@ function renderMetrics(){
     });
     banner+='</div>';
     if(whr)banner+='<div style="font-size:12px;color:var(--txt2)">WHR: <strong style="color:var(--white)">'+whr+'</strong>'+(whr<0.90?' \u2014 <span style="color:var(--green)">good</span>':' \u2014 <span style="color:var(--amber)">monitor</span>')+'</div>';
-    if(!cur.bodyFat){
-      banner+='<div style="font-size:12px;color:var(--txt2);margin-top:4px">Cedars-Sinai: <strong style="color:var(--amber)">'+cedars+'%</strong>'
-        +(navy?' <span style="color:var(--txt3)">\u00b7 Navy '+navy+'%</span>':'')+'</div>';
+    if(!cur.bodyFat&&comp){
+      banner+='<div style="font-size:12px;color:var(--txt2);margin-top:5px">'
+        +'<strong style="color:var(--amber)">'+comp.bf+'%</strong> '
+        +(comp.calibrated?'<span style="font-size:10px;color:var(--green)">DEXA-calibrated</span>':'<span style="font-size:10px;color:var(--txt3)">uncalibrated</span>')
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--txt3);margin-top:2px">'
+        +'raw RFM '+(rfm!=null?rfm+'%':'-')
+        +(navy!=null?' \u00b7 Navy '+navy+'%':'')
+        +(cedars!=null?' \u00b7 Cedars '+cedars+'%':'')+'</div>';
     }
     if(prev)banner+='<div style="font-size:11px;color:var(--txt3);margin-top:6px">vs '+prev.date+(cur.weight&&prev.weight?delta(cur,prev,'weight','kg',true):'')+(cur.bodyFat&&prev.bodyFat?delta(cur,prev,'bodyFat','%',true):'')+(cur.waist&&prev.waist?delta(cur,prev,'waist','cm',false):'')+'</div>';
   } else {
@@ -159,9 +167,59 @@ function renderMetrics(){
     }).join('');
   }
 
+
+function renderCalibration(){
+  var refs=(S.profile&&S.profile.bfReferences)||[];
+  var c=bfCalibration();
+  var h='<div class="sh">DEXA CALIBRATION</div><div style="padding:0 16px 6px">';
+  h+='<div style="font-size:11px;color:var(--txt2);line-height:1.55;margin-bottom:10px">'
+    +'Every field formula under-reads against a scan. Enter a DEXA or BodPod result and the estimate is corrected to match it. '
+    +'A second scan later fits a line instead of a flat offset.</div>';
+  if(c.mode==='none'){
+    h+='<div style="font-size:11px;color:var(--amber);margin-bottom:10px">No reference on file \u2014 estimates are uncalibrated.</div>';
+  }else{
+    h+='<div style="padding:10px 12px;background:rgba(61,184,122,.08);border:1px solid rgba(61,184,122,.22);border-radius:12px;margin-bottom:10px">'
+      +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--green)">CALIBRATED \u00b7 '+c.n+' REFERENCE'+(c.n!==1?'S':'')+'</div>'
+      +'<div style="font-size:11px;color:var(--txt2);margin-top:3px">'
+      +(c.mode==='offset'?'Offset '+(c.offset>0?'+':'')+c.offset+' points applied to every estimate'
+        :'Linear fit: '+c.slope.toFixed(3)+' \u00d7 est '+(c.intercept>=0?'+':'')+c.intercept.toFixed(2))
+      +'</div></div>';
+  }
+  refs.forEach(function(r,i){
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
+      +'<div><div style="font-size:12px;font-weight:700;color:var(--white)">'+(r.method||'DEXA')+' \u00b7 '+r.value+'%</div>'
+      +'<div style="font-size:10px;color:var(--txt3)">'+r.date+(r.waist?' \u00b7 waist '+r.waist+'cm':'')+'</div></div>'
+      +'<div onclick="removeBfRef('+i+')" style="font-size:11px;color:var(--red);cursor:pointer;padding:4px 8px">Remove</div></div>';
+  });
+  h+='<div style="margin-top:12px">'
+    +'<div class="sr"><div class="sr-l">Scan result (%)</div><input class="sr-i" type="number" inputmode="decimal" id="bf-ref-val" placeholder="30.3" style="width:90px"></div>'
+    +'<div class="sr"><div class="sr-l">Waist at scan (cm)</div><input class="sr-i" type="number" inputmode="decimal" id="bf-ref-waist" placeholder="93.5" style="width:90px"></div>'
+    +'<div class="sr"><div class="sr-l">Method</div><input class="sr-i" type="text" id="bf-ref-method" placeholder="DEXA" style="width:110px"></div>'
+    +'<div style="padding:10px 0"><button class="btn btn-g" onclick="addBfRef()">Add Reference Scan</button></div>'
+    +'<div id="bf-ref-msg" style="font-size:11px;color:var(--green);min-height:16px"></div>'
+    +'</div></div>';
+  return h;
+}
+
+function addBfRef(){
+  var v=parseFloat((document.getElementById('bf-ref-val')||{}).value);
+  var wst=parseFloat((document.getElementById('bf-ref-waist')||{}).value);
+  var mth=((document.getElementById('bf-ref-method')||{}).value||'DEXA').trim();
+  var msg=document.getElementById('bf-ref-msg');
+  if(!v||v<=0||v>70){if(msg){msg.style.color='var(--red)';msg.textContent='Enter a valid percentage.';}return;}
+  if(!wst){if(msg){msg.style.color='var(--red)';msg.textContent='Waist at the time of the scan is required to calibrate.';}return;}
+  if(!S.profile.bfReferences)S.profile.bfReferences=[];
+  S.profile.bfReferences.push({date:today(),value:v,waist:wst,method:mth||'DEXA'});
+  saveS();renderMetrics();
+}
+function removeBfRef(i){
+  if(!S.profile.bfReferences)return;
+  S.profile.bfReferences.splice(i,1);saveS();renderMetrics();
+}
+
   var body=METRICS_MODE==='recovery' ? renderRecovery()
     : METRICS_MODE==='development' ? renderDevelopment()
-    : (banner+'<div style="height:4px"></div>'+achHtml+form+histHtml);
+    : (banner+'<div style="height:4px"></div>'+renderCalibration()+achHtml+form+histHtml);
   el.innerHTML='<div class="hdr"><div class="hdr-ttl">Operator File</div></div>'
     +'<div style="padding-bottom:calc(var(--nav-h)+20px)">'
     +metricsToggle()+body+'</div>';
@@ -170,10 +228,11 @@ function renderMetrics(){
   function updateNavy(){
     var w=parseFloat(document.getElementById('mf-waist')&&document.getElementById('mf-waist').value||cur&&cur.waist||0);
     var n=parseFloat(document.getElementById('mf-neck')&&document.getElementById('mf-neck').value||cur&&cur.neck||0);
-    var est=navyBF(w,n,h);
-    var ced=bodyFatCedars(parseFloat(document.getElementById('mf-weight')&&document.getElementById('mf-weight').value||cur&&cur.weight||0),h,S.profile.age||40,true);
+    var est=bodyFatNavy(w,n,h);
+    var rf=bodyFatRFM(w,h);
+    
     var el2=document.getElementById('navy-est');
-    if(el2)el2.textContent=(ced?'Cedars-Sinai: '+ced+'%':'')+(est?'   Navy: '+est+'%':'');
+    if(el2)el2.textContent=(rf!=null?'RFM '+rf+'% -> calibrated '+(applyCalibration(rf))+'%':'')+(est!=null?'   Navy '+est+'%':'');
   }
   if(METRICS_MODE!=='composition')return;
   setTimeout(function(){
