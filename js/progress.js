@@ -150,7 +150,7 @@ function attributeBand(){
     +'<div style="font-size:8px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3);margin-bottom:7px">ATTRIBUTES</div>'
     +'<div style="display:flex;gap:7px;margin-bottom:7px">'
     +cell('Mass',comp.weight,'kg',null,'BMI '+comp.bmi)
-    +cell('Body Fat',comp.bf,'%',bfCol,comp.manual?'measured':'Cedars-Sinai')
+    +cell('Body Fat',comp.bf,'%',bfCol,comp.manual?'measured':(comp.calibrated?'DEXA-calibrated':'RFM uncal.'))
     +'</div>'
     +'<div style="display:flex;gap:7px">'
     +cell('Lean Mass',comp.lbm,'kg','#3DB87A',null)
