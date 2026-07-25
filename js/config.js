@@ -28,7 +28,7 @@ var USERS=[
 //           assessment, AI coach, muscle maps, auto-sync to GitHub
 // v1.1.0 \u2014 2025-07: Training reminders (browser notifications) + daily macro
 //           check-in with progress bars per session type
-var APP_VERSION = '1.7.0';
+var APP_VERSION = '1.8.0';
 
 // ---------------------------------------------------------------------------
 
