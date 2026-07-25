@@ -138,8 +138,8 @@ function pickSession(t){
   var p=planToday();
   if(p.mode==='train'&&t===p.type){beginSession();return;}
   var msg=t===p.next
-    ? SESSIONS[t].name+' is next in the plan, but today is '+(p.mode==='done'?'already done':'a recovery day')+'.\n\n'+p.reason
-    : SESSIONS[t].name+' is not due yet. The plan runs A then B then C in order, and advances when a session is completed.';
+    ? SESSIONS[t].name+' is the next authorised mission, but today is '+(p.mode==='done'?'already executed':'a stand-down day')+'.\n\n'+p.reason
+    : SESSIONS[t].name+' is not authorised yet.\n\nMissions run A then B then C in order. The next one is released when the current mission is executed.';
   alert(msg);
 }
 
@@ -220,8 +220,8 @@ function renderToday(){
   }
 
   // --- HERO: filled accent card with progress ring --------------------------
-  var label=comp.pct>=100?'REPLAY SESSION':(comp.pct>0?'CONTINUE':(PLAN.mode==='train'?'START SESSION':'START RECOVERY'));
-  var eyebrow=comp.pct>=100?'COMPLETE':(PLAN.mode==='train'?'TODAY \u00b7 PRESCRIBED':PLAN.title.toUpperCase());
+  var label=comp.pct>=100?'RE-RUN MISSION':(comp.pct>0?'CONTINUE':(PLAN.mode==='train'?'BEGIN MISSION':'BEGIN RECOVERY OPS'));
+  var eyebrow=comp.pct>=100?'MISSION ACCOMPLISHED':(PLAN.mode==='train'?'MISSION \u00b7 AUTHORISED':PLAN.title.toUpperCase());
   h+='<div style="margin:13px 16px 0;border-radius:24px;overflow:hidden;background:'+sd.col+'">'
    +'<div style="padding:18px 18px 16px;display:flex;align-items:center;gap:16px">'
    +progressRing(comp.pct,86,9,'rgba(10,14,22,.92)','rgba(10,14,22,.16)',comp.pct+'%')
@@ -253,10 +253,12 @@ function renderToday(){
   }
 
   // --- BENTO STATS ----------------------------------------------------------
+  var _R=readiness(), _sus=isSustainment();
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:11px 16px 0">'
-   +tile(gp,'%','To Goal','var(--amber)')
-   +tile(gDone,' /'+gTot,'Sessions')
-   +tile(dayStreak(),'','Day Streak','var(--green)')
+   +(_sus?tile(_R.score,'%','Readiness',_R.state.col)
+         :tile(gp,'%','Mission Progress','var(--amber)'))
+   +tile(gDone,' /'+gTot,'Missions Run')
+   +tile(dayStreak(),'','Op Streak','var(--green)')
    +tile('P'+(ph+1),'','Phase \u00b7 Wk '+phWk)
    +'</div>';
 
@@ -281,15 +283,15 @@ function renderToday(){
   if(S.profile&&S.profile.assessmentDate){
     var n=(S.assessmentHistory&&S.assessmentHistory.length)||1;
     h+='<div onclick="showTab(\'settings\')" style="margin:11px 16px 0;padding:11px 14px;background:var(--bg3);border-left:2px solid var(--purple);border-radius:0 16px 16px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer">'
-     +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--purple)">CALIBRATED</div>'
+     +'<div><div style="font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--purple)">LOADOUT CALIBRATED</div>'
      +'<div style="font-size:11px;color:var(--txt2);margin-top:2px">'+S.profile.assessmentDate+' \u00b7 '+n+' assessment'+(n!==1?'s':'')+'</div></div>'
      +'<div style="font-size:17px;color:var(--purple)">\u203a</div></div>';
   }
 
   var active=getActiveLandmarks().filter(function(l){return !l.done;});
-  h+='<div class="sh">CURRENT GOALS</div>';
+  h+='<div class="sh">STANDARDS TO MEET</div>';
   if(!active.length){
-    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:16px;padding:13px 15px;font-size:12px;color:var(--green);font-weight:700">\u2713 All phase goals achieved \u2014 see Metrics</div></div>';
+    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:16px;padding:13px 15px;font-size:12px;color:var(--green);font-weight:700">\u2713 All phase standards met \u2014 see Operator file</div></div>';
   }else{
     h+='<div style="padding:0 16px">'+active.slice(0,3).map(function(lm){
       return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')"><i>'+lm.i+'</i>'
@@ -297,7 +299,7 @@ function renderToday(){
         +'<div style="font-size:10px;color:var(--txt2)">'+lm.p+'</div></div><div class="lm-c">\u25cb</div></div>';
     }).join('')
     +'<div style="text-align:center;padding:8px 0"><span style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--txt3)">'
-    +active.length+' OPEN IN PHASE '+(ph+1)+(active.length>3?' \u00b7 SHOWING 3':'')+'</span></div></div>';
+    +active.length+' OUTSTANDING IN PHASE '+(ph+1)+(active.length>3?' \u00b7 SHOWING 3':'')+'</span></div></div>';
   }
 
   h+='</div>';
