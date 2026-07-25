@@ -50,7 +50,16 @@ function renderSettings(){
   +'<div class="sr"><div class="sr-l">API Key</div><input class="sr-i" type="password" value="'+getApiKey()+'" placeholder="gsk_ or AIza..." onchange="setApiKey(this.value);renderSettings()" style="width:180px;font-size:12px"></div>'
   +(getApiKey()?'<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">&#10003; '+(getApiKey().startsWith('gsk_')?'Groq connected':'Gemini connected')+'</div>':'')
   +'<div class="sh">OVERRIDE NEXT SESSION</div>'
-  +'<div class="sr"><div class="sr-l">Next session</div><div style="display:flex;gap:6px">'+['A','B','C'].map(function(t){return '<button onclick="S.next=\''+t+'\';saveS();renderSettings();" style="padding:8px 14px;border-radius:8px;border:1px solid '+(S.next===t?'var(--amber)':'var(--border)')+';background:'+(S.next===t?'rgba(232,160,42,.15)':'var(--bg3)')+';color:'+(S.next===t?'var(--amber)':'var(--txt2)')+';font-weight:700;font-size:13px;cursor:pointer">'+t+'</button>';}).join('')+'</div></div>'
+  +(function(){
+    var p=planToday();
+    return '<div class="sr"><div class="sr-l">Today</div><div style="font-size:13px;font-weight:800;color:'
+      +(p.mode==='train'?SESSIONS[p.type].col:'var(--blue)')+'">'+SESSIONS[p.type].name+'</div></div>'
+      +'<div style="padding:2px 18px 10px;font-size:11px;color:var(--txt3);line-height:1.55">'
+      +(p.mode==='train'
+        ? 'The plan runs A, B then C in order and advances when a session is completed. Rest between sessions is enforced.'
+        : p.reason)
+      +'</div>';
+  })()
   +'<div class="sh">TIMELINE</div>'
   +'<div style="padding:14px 18px;background:var(--card);margin:0 18px;border-radius:12px;border:1px solid var(--border);font-size:14px;color:var(--txt2);line-height:1.85">Phase 1 Foundation: <span style="color:var(--white);font-weight:700">Weeks 1\u20138</span><br>Phase 2 Development: <span style="color:var(--white);font-weight:700">Weeks 9\u201320</span><br>Phase 3 Integration: <span style="color:var(--white);font-weight:700">Weeks 21\u201336</span><br>Phase 4 Readiness: <span style="color:var(--white);font-weight:700">Weeks 37\u201348</span><br><div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Finland X: <span style="color:var(--amber);font-weight:700">~12 months</span></div></div>'
   +'<div class="sh">REMINDERS</div>'
