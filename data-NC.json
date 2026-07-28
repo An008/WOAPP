@@ -60,6 +60,23 @@
           "comp": true
         },
         "wu2": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 10,
+              "rpe": 8
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 10,
+              "rpe": 8
+            }
+          ],
+          "comp": true
+        },
+        "wu3": {
           "sets": [],
           "comp": false
         }
