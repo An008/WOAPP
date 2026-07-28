@@ -106,9 +106,19 @@
               "wt": null,
               "rp": 8,
               "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 7
             }
           ],
           "comp": true
+        },
+        "band-pa": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
