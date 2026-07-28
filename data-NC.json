@@ -238,9 +238,19 @@
               "wt": 12,
               "rp": null,
               "rpe": 5
+            },
+            {
+              "done": true,
+              "wt": 12,
+              "rp": null,
+              "rpe": 6
             }
           ],
           "comp": true
+        },
+        "sl-hip": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
