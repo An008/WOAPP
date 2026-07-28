@@ -329,6 +329,18 @@
       },
       "started": "2026-07-28T14:57:54.477Z",
       "mode": "base"
+    },
+    "2026-07-28|REST": {
+      "type": "REST",
+      "date": "2026-07-28",
+      "exercises": {
+        "easy-walk": {
+          "sets": [],
+          "comp": false
+        }
+      },
+      "started": "2026-07-28T17:37:05.844Z",
+      "mode": "base"
     }
   },
   "journal": {},
