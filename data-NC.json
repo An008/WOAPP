@@ -18,7 +18,7 @@
       }
     ]
   },
-  "next": "A",
+  "next": "B",
   "sessions": {
     "2026-07-25|A": {
       "type": "A",
@@ -255,8 +255,75 @@
               "wt": null,
               "rp": 8,
               "rpe": 9
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 8,
+              "rpe": 9
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 0,
+              "rpe": null
             }
           ],
+          "comp": true
+        },
+        "tib": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 0,
+              "rpe": null
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 0,
+              "rpe": null
+            }
+          ],
+          "comp": true
+        },
+        "heel-d": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 0,
+              "rpe": null
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 0,
+              "rpe": null
+            }
+          ],
+          "comp": true
+        },
+        "rev-curl": {
+          "sets": [
+            {
+              "done": true,
+              "wt": 0,
+              "rp": null,
+              "rpe": null
+            },
+            {
+              "done": true,
+              "wt": 0,
+              "rp": null,
+              "rpe": null
+            }
+          ],
+          "comp": true
+        },
+        "breath-mf": {
+          "sets": [],
           "comp": true
         }
       },
