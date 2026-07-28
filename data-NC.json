@@ -20,6 +20,24 @@
   },
   "next": "B",
   "sessions": {
+    "2026-07-25|A": {
+      "type": "A",
+      "date": "2026-07-25",
+      "exercises": {
+        "wu1": {
+          "sets": [],
+          "comp": false
+        }
+      },
+      "started": "2026-07-25T15:53:16.649Z",
+      "mode": "field"
+    },
+    "2026-07-27|A": {
+      "type": "A",
+      "date": "2026-07-27",
+      "exercises": {},
+      "started": "2026-07-27T13:50:39.069Z"
+    },
     "2026-07-28|A": {
       "type": "A",
       "date": "2026-07-28",
@@ -305,14 +323,7 @@
           "comp": true
         },
         "breath-mf": {
-          "sets": [
-            {
-              "done": true,
-              "wt": null,
-              "rp": null,
-              "rpe": null
-            }
-          ],
+          "sets": [],
           "comp": true
         }
       },
@@ -349,7 +360,7 @@
     {
       "id": "l4",
       "i": "&#127947;",
-      "g": "Carry 15kg \u00d7 1km non-stop",
+      "g": "Carry 15kg × 1km non-stop",
       "p": "Carry",
       "done": false,
       "achievedDate": null
@@ -357,7 +368,7 @@
     {
       "id": "l5",
       "i": "&#9889;",
-      "g": "6 \u00d7 40m sprint, full 4 min rest",
+      "g": "6 × 40m sprint, full 4 min rest",
       "p": "Power",
       "done": false,
       "achievedDate": null
@@ -381,7 +392,7 @@
     {
       "id": "l8",
       "i": "&#127947;",
-      "g": "Carry 20kg \u00d7 5km",
+      "g": "Carry 20kg × 5km",
       "p": "Carry",
       "done": false,
       "achievedDate": null
