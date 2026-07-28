@@ -50,7 +50,26 @@ function sessComp(key){
 }
 function compFor(date,type){return sessComp(sessKey(date,type));}
 
+// Resolved = completed OR deliberately skipped. Drives whether a mission can
+// finish and whether the plan advances. Merit and volume still use sessComp,
+// so skipping costs you credit rather than silently counting as work.
+function sessResolved(key){
+  var sess=S.sessions[key];if(!sess)return{pct:0,done:0,skipped:0,total:0};
+  var sd=SESSIONS[sess.type];if(!sd)return{pct:0,done:0,skipped:0,total:0};
+  var tot=0,dn=0,sk=0;
+  sd.blocks.forEach(function(b){b.exs.forEach(function(e){
+    tot++;var ed=sess.exercises[e.id];
+    if(ed&&ed.comp)dn++;else if(ed&&ed.skipped)sk++;
+  });});
+  return{pct:tot?Math.round((dn+sk)/tot*100):0,done:dn,skipped:sk,total:tot};
+}
+function resolvedFor(date,type){return sessResolved(sessKey(date,type));}
+
 function completedSessions(){
+  return Object.keys(S.sessions).filter(function(k){return sessResolved(k).pct>=100;}).length;
+}
+// Missions finished with no skipped objectives - used for merit
+function cleanSessions(){
   return Object.keys(S.sessions).filter(function(k){return sessComp(k).pct>=100;}).length;
 }
 function startedSessions(){
