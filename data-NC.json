@@ -140,8 +140,15 @@
           "comp": true
         },
         "db-row": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": 18,
+              "rp": null,
+              "rpe": 7
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
