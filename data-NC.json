@@ -169,6 +169,12 @@
               "wt": null,
               "rp": 26,
               "rpe": 8
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 24,
+              "rpe": 8
             }
           ],
           "comp": true
