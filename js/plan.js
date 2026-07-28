@@ -16,7 +16,7 @@ function trainingDates(){
   Object.keys(S.sessions||{}).forEach(function(k){
     var s=S.sessions[k];
     if(!s||!isTraining(s.type))return;
-    if(sessComp(k).pct<100)return;
+    if(sessResolved(k).pct<100)return;
     out.push(s.date||k.split('|')[0]);
   });
   return out.sort();
@@ -94,9 +94,11 @@ function fcFrontier(){
   for(var i=0;i<FC_CARDS.length;i++){
     var c=FC_CARDS[i];
     var ed=sess.exercises[c.exId];
-    var st=ed&&ed.sets?ed.sets[c.si]:null;
-    if(!st||!st.done)return i;
-  }
+    if(ed&&ed.skipped)continue;                       // skipped: pass through
+    if(c.ex.t==='time'){ if(!ed||!ed.comp)return i; continue; }
+    var st=ed&&ed.sets?ed.sets[c.si]:null;            // timed objectives never
+    if(!st||!st.done)return i;                        // create sets - that used
+  }                                                   // to lock the whole run
   return FC_CARDS.length-1;
 }
 function cardLocked(i){return i>fcFrontier();}
