@@ -129,9 +129,19 @@
               "wt": 9,
               "rp": null,
               "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": 9,
+              "rp": null,
+              "rpe": 8
             }
           ],
           "comp": true
+        },
+        "db-row": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
