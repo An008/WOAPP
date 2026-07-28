@@ -43,8 +43,15 @@
       "date": "2026-07-28",
       "exercises": {
         "wu1": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 3
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
