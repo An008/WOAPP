@@ -175,9 +175,19 @@
               "wt": null,
               "rp": 24,
               "rpe": 8
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 26,
+              "rpe": 8
             }
           ],
           "comp": true
+        },
+        "pushup": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
