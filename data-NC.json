@@ -226,8 +226,15 @@
           "comp": true
         },
         "goblet": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": 12,
+              "rp": null,
+              "rpe": 6
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
