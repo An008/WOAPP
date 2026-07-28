@@ -117,8 +117,15 @@
           "comp": true
         },
         "band-pa": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": 14,
+              "rp": null,
+              "rpe": 7
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
