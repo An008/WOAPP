@@ -62,7 +62,7 @@ function xpBreakdown(){
   var b={sessions:0,partial:0,goals:0,assessments:0,measurements:0,journal:0,phases:0};
   var full=0,part=0;
   Object.keys(S.sessions||{}).forEach(function(k){
-    var p=sessComp(k).pct;
+    var p=sessComp(k).pct;                 // completed objectives only
     if(p>=100){full++;b.sessions+=XP.session;}
     else if(p>=50){part++;b.partial+=XP.partial;}
   });
