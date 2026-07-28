@@ -215,9 +215,19 @@
               "wt": null,
               "rp": 8,
               "rpe": 7
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 12,
+              "rpe": 8
             }
           ],
           "comp": true
+        },
+        "goblet": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-07-28T14:57:54.477Z",
