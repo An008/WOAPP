@@ -63,7 +63,7 @@ function startFC(){
   closeOv('v-overview');
   FC_CARDS=buildCards();
   // find first incomplete
-  var sess=S.sessions[curSessDate]||{exercises:{}};
+  var sess=S.sessions[sessKey(curSessDate,curSessType)]||{exercises:{}};
   FC_IDX=0;
   for(var i=0;i<FC_CARDS.length;i++){
     var c=FC_CARDS[i],ed=sess.exercises[c.exId]||{};
@@ -173,13 +173,19 @@ function ensureSet(exId,si){
 }
 function fcDone(){
   var card=FC_CARDS[FC_IDX],ex=card.ex,isTimed=ex.t==='time';
+  if(compFor(curSessDate,curSessType).pct>=100&&FC_IDX===FC_CARDS.length-1){
+    showComplete();return;
+  }
   var sess=getOrCreate(curSessDate,curSessType);
   if(!sess.exercises[ex.id])sess.exercises[ex.id]={sets:[],comp:false};
   var ed=sess.exercises[ex.id];
-  if(isTimed){ed.comp=!ed.comp;}
+  var isLast=(FC_IDX===FC_CARDS.length-1);
+  // On the final card completion is one-way: a second tap must never undo the
+  // mission (this is how a full day of work was nearly lost).
+  if(isTimed){ed.comp=isLast?true:!ed.comp;}
   else{
     ensureSet(ex.id,card.si);
-    ed.sets[card.si].done=!ed.sets[card.si].done;
+    ed.sets[card.si].done=isLast?true:!ed.sets[card.si].done;
     if(ed.sets.slice(0,ex.s).every(function(s){return s.done;}))ed.comp=true;
   }
   saveS();FC_MSG++;
@@ -190,9 +196,11 @@ function fcDone(){
       if(rest>0){showRest(rest,ex.n,(FC_CARDS[FC_IDX+1].ex.n),function(){FC_IDX++;renderFC();});}
       else{FC_IDX++;renderFC();}
     } else {
+      // Recovery is not part of the A-B-C rotation: completing it must not
+      // reset the training queue back to A.
       var o=['A','B','C'];
       var i=o.indexOf(curSessType);
-      S.next=o[(i<0?0:i+1)%3];
+      if(i>=0)S.next=o[(i+1)%3];
       saveS();
       autoSyncToGH();
       showComplete();
@@ -202,10 +210,16 @@ function fcDone(){
 function confirmExit(){if(confirm('Exit session? Your logged sets are saved.'))closeOv('v-flashcard');}
 function showComplete(){
   var sd=SESSIONS[curSessType];
-  document.getElementById('fc-done-wrap').style.display='none';
-  document.getElementById('fc-pf').style.width='100%';
-  document.getElementById('fc-pct').textContent='100%';
-  document.getElementById('fc-body').innerHTML='<div class="sc-screen">'
+  // Null-guarded: a single missing element must never abort the whole screen.
+  var _btn=document.getElementById('fc-done-btn');
+  if(_btn)_btn.style.display='none';
+  var _pf=document.getElementById('fc-pf');
+  if(_pf)_pf.style.width='100%';
+  var _pct=document.getElementById('fc-pct');
+  if(_pct)_pct.textContent='100%';
+  var _body=document.getElementById('fc-body');
+  if(!_body)return;
+  _body.innerHTML='<div class="sc-screen">'
     +'<div style="font-size:60px;margin-bottom:14px">&#127942;</div>'
     +'<div style="font-size:22px;font-weight:900;color:var(--white);margin-bottom:6px">MISSION ACCOMPLISHED</div>'
     +'<div style="font-size:14px;color:var(--txt2);margin-bottom:28px">'+sd.name+' \u2014 all objectives secured</div>'
