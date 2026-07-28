@@ -67,6 +67,7 @@ function startFC(){
   FC_IDX=0;
   for(var i=0;i<FC_CARDS.length;i++){
     var c=FC_CARDS[i],ed=sess.exercises[c.exId]||{};
+    if(ed.skipped){continue;}
     if(c.ex.t==='time'){if(!ed.comp){FC_IDX=i;break;}}
     else{var sd2=ed.sets&&ed.sets[c.si];if(!sd2||!sd2.done){FC_IDX=i;break;}}
     if(i===FC_CARDS.length-1)FC_IDX=i;
@@ -144,11 +145,17 @@ function renderFC(){
     +'<div class="fc-np">'
     +(prevEx?'<div class="fc-np-item"><div class="fc-np-l">&#8592; Prev</div><div class="fc-np-n">'+prevEx.n+'</div></div>':'<div class="fc-np-item" style="opacity:.3"><div class="fc-np-l">Start</div><div class="fc-np-n">Beginning</div></div>')
     +(nextEx?'<div class="fc-np-item"><div class="fc-np-l">Next &#8594;</div><div class="fc-np-n">'+nextEx.n+'</div></div>':'<div class="fc-np-item" style="opacity:.3"><div class="fc-np-l">Next</div><div class="fc-np-n">Session done</div></div>')
-    +'</div>';
+    +'</div>'
+    +'<div style="text-align:center;padding:12px 0 4px">'
+    +'<span onclick="fcSkip()" style="font-size:12px;font-weight:700;color:var(--txt3);cursor:pointer;border-bottom:1px dashed var(--bord2);padding-bottom:2px">Cannot execute \u2014 skip objective</span></div>'
+  ;
   document.getElementById('fc-body').innerHTML=html;
   document.getElementById('fc-body').scrollTop=0;
   var btn=document.getElementById('fc-done-btn');
-  btn.textContent=isDone?'&#10003; OBJECTIVE SECURED \u2014 NEXT':'&#10003; LOG '+(isTimed?'ACTIVITY':'SERIAL '+(card.si+1));
+  // textContent does NOT decode HTML entities - use real characters
+  btn.style.display='';
+  btn.textContent=isDone?'\u2713 OBJECTIVE SECURED \u2014 NEXT'
+                        :'\u2713 LOG '+(isTimed?'ACTIVITY':'SERIAL '+(card.si+1));
   btn.style.background=isDone?'rgba(61,184,122,.25)':'var(--green)';
   btn.style.border=isDone?'1px solid rgba(61,184,122,.4)':'none';
 }
@@ -171,9 +178,34 @@ function ensureSet(exId,si){
   while(sess.exercises[exId].sets.length<=si)sess.exercises[exId].sets.push({done:false,wt:null,rp:null,rpe:null});
   return sess.exercises[exId].sets[si];
 }
+
+// Skip an objective that cannot be executed today. Recorded as skipped, never
+// as done: the mission can still finish, but merit and volume only credit work
+// actually performed.
+function fcSkip(){
+  var card=FC_CARDS[FC_IDX],ex=card.ex;
+  if(!confirm('Skip '+ex.n+'?\n\nIt will be recorded as skipped, not completed. The mission can still be finished.'))return;
+  var sess=getOrCreate(curSessDate,curSessType);
+  if(!sess.exercises[ex.id])sess.exercises[ex.id]={sets:[],comp:false};
+  sess.exercises[ex.id].skipped=true;
+  sess.exercises[ex.id].comp=false;
+  stampLoadout();saveS();
+  // jump past every remaining serial of this objective
+  var last=FC_IDX;
+  for(var i=FC_IDX;i<FC_CARDS.length;i++){
+    if(FC_CARDS[i].exId===ex.id)last=i; else break;
+  }
+  if(last<FC_CARDS.length-1){FC_IDX=last+1;renderFC();}
+  else{
+    var o=['A','B','C'],ix=o.indexOf(curSessType);
+    if(ix>=0)S.next=o[(ix+1)%3];
+    saveS();autoSyncToGH();showComplete();
+  }
+}
+
 function fcDone(){
   var card=FC_CARDS[FC_IDX],ex=card.ex,isTimed=ex.t==='time';
-  if(compFor(curSessDate,curSessType).pct>=100&&FC_IDX===FC_CARDS.length-1){
+  if(resolvedFor(curSessDate,curSessType).pct>=100&&FC_IDX===FC_CARDS.length-1){
     showComplete();return;
   }
   var sess=getOrCreate(curSessDate,curSessType);
@@ -290,7 +322,7 @@ function buildMuscleThumb(exId){
 function showRest(secs,doneEx,nextEx,cb){
   clearInterval(RS_INT);RS_TOTAL=RS_LEFT=secs;RS_CB=cb;
   document.getElementById('rs-t').textContent=secs+'s';
-  document.getElementById('rs-ex').textContent='&#10003; '+doneEx+' secured \u2014 Next objective: '+nextEx;
+  document.getElementById('rs-ex').textContent='\u2713 '+doneEx+' secured \u2014 Next objective: '+nextEx;
   document.getElementById('rs-bf').style.width='100%';
   document.getElementById('rest-screen').classList.add('show');
   RS_INT=setInterval(function(){
