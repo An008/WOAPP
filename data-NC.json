@@ -77,6 +77,23 @@
           "comp": true
         },
         "wu3": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 2
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 2
+            }
+          ],
+          "comp": true
+        },
+        "scap-pu": {
           "sets": [],
           "comp": false
         }
