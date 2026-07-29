@@ -119,13 +119,19 @@ function setLoadout(m){
 // Merge a field override onto a base exercise. Same id, different prescription.
 function resolveEx(ex,mode){
   mode=mode||MISSION_MODE;
-  if(mode!=='field')return ex;
-  var f=FIELD[ex.id];
-  if(!f)return ex;
   var out={};
   for(var k in ex)if(ex.hasOwnProperty(k))out[k]=ex[k];
-  for(var k2 in f)if(f.hasOwnProperty(k2))out[k2]=f[k2];
-  out.fieldVariant=true;
+  // layer 1: field variant
+  if(mode==='field'){
+    var f=FIELD[ex.id];
+    if(f){for(var k2 in f)if(f.hasOwnProperty(k2))out[k2]=f[k2];out.fieldVariant=true;}
+  }
+  // layer 2: AI replacement from a mission debrief - always wins
+  var ov=S&&S.profile&&S.profile.overrides&&S.profile.overrides[ex.id];
+  if(ov){
+    for(var k3 in ov)if(ov.hasOwnProperty(k3)&&ov[k3]!==undefined&&k3!=='replacedOn')out[k3]=ov[k3];
+    out.aiReplaced=true;
+  }
   return out;
 }
 
