@@ -356,7 +356,34 @@
         },
         "box-br": {
           "sets": [],
-          "comp": false
+          "comp": true
+        },
+        "grip-work": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 30,
+              "rpe": 3
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 30,
+              "rpe": 3
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 30,
+              "rpe": 3
+            }
+          ],
+          "comp": true
+        },
+        "vis": {
+          "sets": [],
+          "comp": true
         }
       },
       "started": "2026-07-29T06:21:56.659Z",
