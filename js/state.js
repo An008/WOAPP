@@ -79,7 +79,7 @@ function totalSess(){return startedSessions();}
 
 // Total training sessions between day one and the goal (3 per week, all phases)
 function totalPlannedSessions(){
-  var w=0;PHASES.forEach(function(p){w+=p.weeks;});return w*3;
+  var w=0;PHASES.forEach(function(p){w+=p.weeks;});return w*4;
 }
 function goalPct(){
   var t=totalPlannedSessions();
