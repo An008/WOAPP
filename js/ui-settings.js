@@ -12,6 +12,18 @@ function renderSettings(){
   +'<div style="flex:1"><div style="font-size:16px;font-weight:700;color:var(--white)">'+CUR_USER.name+'</div><div style="font-size:11px;color:var(--txt2);margin-top:2px">'+CUR_USER.type.toUpperCase()+' profile</div></div>'
   +'<button onclick="doLogout()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--txt2);font-size:13px;font-weight:700;cursor:pointer">Sign out</button></div>'
   +(CUR_USER.type==='test'?'<div style="padding:0 18px 10px"><button onclick="if(confirm(\'Clear all training data for '+CUR_USER.name+'?\')){localStorage.removeItem(\''+SK+'-'+CUR_USER.name+'\');loadS();renderToday();renderSettings();}" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.08);color:var(--purple);font-size:13px;font-weight:700;cursor:pointer">&#128465; Clear Test Data</button></div>':'')
+  +'<div class="sh">EQUIPMENT AVAILABLE</div>'
+  +'<div style="padding:0 18px 6px;font-size:11px;color:var(--txt3);line-height:1.5">Used by the mission debrief so it never prescribes kit you do not own.</div>'
+  +'<div style="padding:0 18px 10px;display:flex;flex-wrap:wrap;gap:7px">'
+  +[['dumbbells','Dumbbells'],['kettlebell','Kettlebell'],['barbell','Barbell'],
+    ['bands','Resistance bands'],['pullupBar','Pull-up bar'],['bench','Bench'],
+    ['box','Box / step'],['foamRoller','Foam roller'],['plates','Plates']].map(function(x){
+     var on=S.profile&&S.profile.equipment&&S.profile.equipment[x[0]];
+     return '<div onclick="toggleEquip(\''+x[0]+'\')" style="padding:7px 12px;border-radius:20px;cursor:pointer;font-size:11px;font-weight:700;border:1px solid '
+       +(on?'rgba(61,184,122,.45)':'var(--border)')+';background:'+(on?'rgba(61,184,122,.1)':'var(--bg3)')
+       +';color:'+(on?'var(--green)':'var(--txt3)')+'">'+(on?'\u2713 ':'')+x[1]+'</div>';
+   }).join('')
+  +'</div>'
   +'<div class="sh">DEFAULT LOADOUT</div>'
   +'<div style="padding:0 18px 6px;display:flex;gap:8px">'
   +['base','field'].map(function(m){
@@ -135,3 +147,10 @@ function doLogout(){S=null;CUR_USER=null;document.getElementById('app').style.di
 
 // ===========================================================
 // SESSION OVERVIEW
+
+
+function toggleEquip(k){
+  if(!S.profile.equipment)S.profile.equipment={};
+  S.profile.equipment[k]=!S.profile.equipment[k];
+  saveS();renderSettings();
+}
