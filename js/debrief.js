@@ -105,6 +105,13 @@ function runDebrief(date,type){
         +'<button onclick="runDebrief(\''+date+'\',\''+type+'\')" style="width:100%;margin-top:9px;padding:9px;border-radius:9px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.1);color:var(--purple);font-size:12px;font-weight:800;cursor:pointer">Retry Debrief</button></div>';
       return;
     }
+    // Autoregulation: move every work objective's RLI from its logged RPE.
+    // This is what makes the programme adapt rather than merely record.
+    if(typeof adaptMission==='function'&&typeof commitRLI==='function'){
+      var moved=adaptMission(type);
+      moved.forEach(function(m){if(m.delta!==0)commitRLI(m.exId,m.rli);});
+      d.__rli=moved.filter(function(m){return m.delta!==0;});
+    }
     if(!S.profile.assessmentLoads)S.profile.assessmentLoads={};
     if(!S.profile.overrides)S.profile.overrides={};
     var nLoads=0,nRepl=0;
@@ -143,6 +150,17 @@ function runDebrief(date,type){
         h+='<div style="font-size:11px;color:var(--txt2);padding:4px 0;border-bottom:1px solid var(--border)">'
           +'<strong style="color:'+(SESSIONS[c.mission]?SESSIONS[c.mission].col:'var(--txt)')+'">Mission '+c.mission+'</strong> \u00b7 '
           +c.exercise+': '+c.change+'</div>';
+      });
+    }
+    if(d.__rli&&d.__rli.length){
+      h+='<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin:12px 0 6px">AUTOREGULATION</div>';
+      d.__rli.forEach(function(m){
+        var p2=m.prescription||{};
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">'
+          +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--white)">'+(p2.name||m.exId)+'</div>'
+          +'<div style="font-size:10px;color:var(--txt3)">'+m.reason+(m.lastRpe!=null?' \u00b7 last RPE '+m.lastRpe:'')+'</div></div>'
+          +'<div style="font-size:12px;font-weight:800;color:'+(m.delta>0?'var(--green)':'var(--amber)')+';white-space:nowrap">'
+          +(m.delta>0?'+':'')+m.delta+' RLI</div></div>';
       });
     }
     h+='<div style="font-size:11px;color:var(--green);margin-top:11px">Applied to your future missions.</div></div>';
