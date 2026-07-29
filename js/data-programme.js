@@ -5,80 +5,77 @@
 // EXERCISE DATA \u2014 3 sessions, no landmine
 // ===========================================================
 var SESSIONS={
-A:{id:'A',name:'STRUCTURAL STRENGTH',icon:'&#128170;',col:'#E8A02A',hero:'hero-A',dur:'~45 min',after:'breathing',
+A:{id:'A',name:'STRENGTH',icon:'&#128170;',col:'#E8A02A',hero:'hero-A',dur:'~55 min',after:'breathing',
 blocks:[
 {id:'WU',n:'WARM-UP',col:'#4A9EDB',exs:[
-{id:'wu1',n:'Shoulder CARs',v:'2 \u00d7 5/arm',t:'r',s:2,rpp:5,rest:0,wt:false,cue:'Full shoulder circumduction \u2014 biggest circle possible. Zero speed. Directly addresses shoulder-spine junction stiffness.',yt:'shoulder CARs tutorial',feel:'A smooth, controlled range of motion around the shoulder joint. Should feel like greasing the joint, not straining it.'},
-{id:'wu2',n:'Wall Slide',v:'2 \u00d7 10',t:'r',s:2,rpp:10,rest:0,wt:false,cue:'Forearms flat on wall, elbows 90\u00b0. Slide up keeping contact. Lift off at top. Activates lower trapezius.',yt:'wall slide scapular exercise',feel:'A gentle squeeze behind the shoulder blades at the top. No pain \u2014 just activation.'},
-{id:'wu3',n:'Hip CARs',v:'2 \u00d7 5/side',t:'r',s:2,rpp:5,rest:0,wt:false,cue:'Standing. Biggest hip circle possible. Stabilising leg planted and braced.',yt:'hip CARs tutorial',feel:'Controlled range of motion in the hip socket. Stability leg should feel firm throughout.'}
-]},
-{id:'B1',n:'FOUNDATION PULL',col:'#E8A02A',exs:[
-{id:'scap-pu',n:'Scapular Pull-up',v:'3 \u00d7 8',t:'r',s:3,rpp:8,rest:60,wt:false,cue:'Dead hang. Without bending elbows \u2014 squeeze lats to lift body 3\u20135 cm. 3s lower. Gateway to your first full pull-up.',yt:'scapular pull up tutorial',feel:'A squeeze and lift sensation behind the shoulder blades without the arms bending. Lats engaging \u2014 like putting your shoulder blades into your back pockets.'},
-{id:'band-pa',n:'Band Pull-Apart',v:'3 \u00d7 15',t:'r',s:3,rpp:15,rest:45,wt:true,cue:'Arms at shoulder height. Pull apart until band touches chest. External rotation at end range. Builds posterior shoulder health.',yt:'band pull apart form tutorial',feel:'Tension across the back of your shoulders at end range. External rotation burn. If you only feel traps: slow down and pull lower.'},
-{id:'db-row',n:'Dumbbell Row',v:'3 \u00d7 10/side',t:'r',s:3,rpp:10,rest:60,wt:true,cue:'Brace on bench. Drive elbow back past torso. Full scapular retraction at end. Left side first each set.',yt:'dumbbell row form',feel:'A deep pull through the side of your back (lat) as the elbow passes your torso. Bicep assist is normal but should not dominate.'},
-{id:'dead-hang',n:'Dead Hang',v:'3 \u00d7 max hold (target: 20s \u2192 60s \u2192 2min over Phase 1)',t:'r',s:3,rpp:0,rest:90,wt:false,cue:'Jump to bar. Grip firmly, shoulders ACTIVE (slight engagement, not passive shrug). Breathe through the hold. Let the forearm pump accumulate \u2014 the moment your fingers want to open is the training stimulus. This is the direct fix for grip failing before your back during rows. Also decompresses your spine after the pressing and pulling.',yt:'dead hang grip strength endurance',feel:'Forearm pump building steadily. At the limit you feel the fingers wanting to open \u2014 that moment is the training. Gentle spinal traction throughout \u2014 the back should feel lengthened.'}
-]},
-{id:'B2',n:'PUSH',col:'#E35050',exs:[
-{id:'pushup',n:'Push-up',v:'3 \u00d7 max (stop before form breaks)',t:'r',s:3,rpp:0,rest:90,wt:false,cue:'Hands just outside shoulders. Chest to 1 cm from floor. Stop when hips drop. Week 1 target: 15. Week 8 target: 25+.',yt:'push up perfect form',feel:'Chest burn and tricep fatigue from rep 8 onwards. Core should feel braced throughout \u2014 if your lower back arches, stop the set.'},
-{id:'pike-pu',n:'Pike Push-up',v:'2 \u00d7 8',t:'r',s:2,rpp:8,rest:60,wt:false,cue:'Inverted V. Lower head toward floor between hands. Builds shoulder pressing strength without overhead load.',yt:'pike push up tutorial',feel:'Shoulder burn straight down through the front deltoid. Harder than it looks because all weight is forward.'}
-]},
-{id:'B3',n:'LOWER BODY',col:'#3DB87A',exs:[
-{id:'goblet',n:'Goblet Squat',v:'3 \u00d7 10',t:'r',s:3,rpp:10,rest:60,wt:true,cue:'Hold KB/DB at chest. Squat deep \u2014 elbows inside knees at bottom. Drive through heels. Back tall.',yt:'goblet squat tutorial',feel:'Burning across the front of your thighs as reps accumulate. Glutes fire on the drive up \u2014 if you only feel your lower back, check hip hinge.'},
-{id:'sl-hip',n:'Single-Leg Hip Thrust',v:'3 \u00d7 8/side',t:'r',s:3,rpp:8,rest:45,wt:false,cue:'Shoulders on bench, one foot on floor. Drive hips up through heel. 2s hold at top. Glute should burn.',yt:'single leg hip thrust tutorial',feel:'Intense glute contraction at the top. If you feel your lower back: squeeze glutes harder and tuck pelvis.'}
-]},
-{id:'PRE',n:'PREHAB',col:'#9B8DE8',exs:[
-{id:'tib',n:'Tibialis Raise',v:'2 \u00d7 20',t:'r',s:2,rpp:20,rest:30,wt:false,cue:'Heels elevated 5 cm. Pull toes to shin. 2s up / 3s slow lower. Shin splint prevention. Do this forever.',yt:'tibialis raise tutorial',feel:'Burn and pump in the muscle running up your outer shin. Should feel like it\'s about to cramp. That\'s correct.'},
-{id:'heel-d',n:'Eccentric Heel Drop',v:'2 \u00d7 12/leg',t:'r',s:2,rpp:12,rest:30,wt:false,cue:'On a step. Rise on BOTH feet. Lower on ONE \u2014 4 full seconds down. Achilles protection.',yt:'eccentric heel drop tutorial',feel:'Controlled eccentric stretch through the entire calf on the way down. The 4-second lowering is where adaptation happens.'},
-{id:'rev-curl',n:'Reverse Curl',v:'2 \u00d7 15 \u2014 start light (5\u20136 kg)',t:'r',s:2,rpp:15,rest:30,wt:true,cue:'Palms FACING DOWN (pronated grip). Curl as normal. These are the forearm extensors and brachioradialis \u2014 the muscles that stabilise your wrist during rows and give out first. Start much lighter than you expect. 2s up, 3s slow lower. Keep wrists neutral at the top \u2014 do not curl the wrist.',yt:'reverse curl forearm brachioradialis form',feel:'The outer forearm (brachioradialis) and the top of the wrist working hard on every rep. Burns faster than expected. If you feel nothing: weight is too light. If you feel it in your bicep more than your forearm: check that palms are fully DOWN.'}
-]},
-{id:'MF',n:'MENTAL FORTITUDE',col:'#4A9EDB',exs:[
-{id:'breath-mf',n:'Exhale Breath Hold',v:'3 rounds',t:'time',s:1,rest:0,wt:false,cue:'Breathe normally. Exhale all air. Hold on empty lungs until discomfort is real. 5 recovery breaths. \u00d7 3. Tap to open guided timer.',yt:'CO2 tolerance breathing',feel:'CO2 discomfort when holding. A tightness in the chest and urge to breathe. This is not dangerous. This is the point. Stay calm.'}
-]}
-]},
-B:{id:'B',name:'AEROBIC ENGINE + CARRY',icon:'&#127939;',col:'#4A9EDB',hero:'hero-B',dur:'~55 min',after:'journal',
+{id:'wu1',n:'Shoulder CARs',v:'2 \u00d7 5/arm',t:'r',s:2,rpp:5,rest:0,wt:false,intent:'support',cue:'Full shoulder circumduction, biggest circle you can draw. Zero speed. Directly addresses the elbow-shoulder junction stiffness.',yt:'shoulder CARs tutorial',feel:'Grinding spots are information, not damage. Move through them slowly.'},
+{id:'wu2',n:'Hip CARs',v:'2 \u00d7 5/side',t:'r',s:2,rpp:5,rest:0,wt:false,intent:'support',cue:'Stand tall, knee up, trace the largest circle the hip allows without the pelvis following.',yt:'hip CARs tutorial',feel:'Hip capsule working at end range. Pelvis stays still.'},
+{id:'wu3',n:'Wall Slide',v:'2 \u00d7 10',t:'r',s:2,rpp:10,rest:0,wt:false,intent:'support',cue:'Back to wall, forearms flat, slide overhead keeping contact. If contact breaks, that is your current ceiling.',yt:'wall slide shoulder mobility',feel:'Mid-back and rear shoulders engaging to keep the arms on the wall.'},
+{id:'wu4',n:'Glute Bridge',v:'2 \u00d7 12',t:'r',s:2,rpp:12,rest:0,wt:false,intent:'support',cue:'Drive through heels, squeeze at the top, ribs down. Wakes the glutes before they are asked to work.',yt:'glute bridge form',feel:'Glutes doing the work, not the lower back.'}]},
+{id:'B1',n:'HINGE',col:'#E8A02A',exs:[
+{id:'hinge',t:'r',s:3,rpp:8,rest:150,pattern:'hinge',intent:'strength',rli:0.55,cue:'THE PATTERN THE PROGRAMME WAS MISSING. Hips back, spine neutral, drive the floor away. BASE: trap bar or RDL. FIELD: single-leg RDL, slow and balanced. This is where posterior chain strength actually comes from.',yt:'trap bar deadlift form',feel:'Hamstrings loading on the way down, glutes finishing the lift. Lower back braced but not working.'},
+{id:'squat',t:'r',s:3,rpp:8,rest:150,pattern:'squat',intent:'strength',rli:0.86,cue:'Full depth, knees tracking over toes, chest up. BASE: leg press or goblet. FIELD: split squat rung matched to your load.',yt:'squat depth form',feel:'Quads and glutes under real tension. Bottom position should be controlled, never dropped into.'}]},
+{id:'B2',n:'PRESS',col:'#E35050',exs:[
+{id:'h-press',t:'r',s:4,rpp:8,rest:120,pattern:'h-press',intent:'strength',rli:0.62,cue:'BASE: DB bench, elbows around 45 degrees, full stretch at the bottom. FIELD: the push-up rung that matches the same load.',yt:'dumbbell bench press form',feel:'Chest stretching at the bottom, triceps finishing the press. Shoulders stay back and down.'},
+{id:'v-press',t:'r',s:3,rpp:8,rest:120,pattern:'v-press',intent:'strength',rli:0.45,cue:'BASE: machine overhead press, kinder to the shoulder junction than free weight. FIELD: pike push-up rung. Ribs down, no lower-back arch.',yt:'overhead press form',feel:'Shoulders and triceps. If it pinches at the top, reduce range before reducing load.'}]},
+{id:'B3',n:'PULL',col:'#3DB87A',exs:[
+{id:'h-pull',t:'r',s:4,rpp:10,rest:120,pattern:'h-pull',intent:'strength',rli:0.27,cue:'USE STRAPS on BASE so grip stops capping your back. Pull the elbow past the torso, squeeze, control the return.',yt:'chest supported row form',feel:'Deep pull through the lat. Bicep assists but should not dominate.'},
+{id:'v-pull',t:'r',s:4,rpp:6,rest:120,pattern:'v-pull',intent:'strength',rli:0.7,cue:'Straps on BASE. Lead with the elbows, chest to the bar. FIELD: assisted or negative pull-up rung.',yt:'pull up progression',feel:'Lats loading from a full stretch. Shoulders active at the bottom, never hanging dead.'}]},
+{id:'GRIP',n:'GRIP',col:'#9B8DE8',exs:[
+{id:'grip',t:'r',s:3,rpp:0,rest:90,pattern:'grip',intent:'hypertrophy',rli:1.0,cue:'LAST, deliberately. Grip trained here never limits your pulling earlier in the mission.',yt:'dead hang grip strength',feel:'Forearm pump building. The set ends when the fingers start to open.'}]},
+{id:'PRE',n:'PREHAB',col:'#4A9EDB',exs:[
+{id:'tib',n:'Tibialis Raise',v:'2 \u00d7 20',t:'r',s:2,rpp:20,rest:45,wt:false,intent:'support',cue:'Heels planted, toes lifted toward the shins. Direct shin splint insurance before the vertical work.',yt:'tibialis raise tutorial',feel:'Burn along the front of the shin. Should feel preventative, never sharp.'},
+{id:'heel-d',n:'Eccentric Heel Drop',v:'2 \u00d7 15',t:'r',s:2,rpp:15,rest:45,wt:false,intent:'support',cue:'Rise on both feet, lower on one over 4 slow seconds. The lowering is where the adaptation lives.',yt:'eccentric heel drop',feel:'Controlled stretch through the whole calf on the way down.'}]},
+{id:'MF',n:'MENTAL FORTITUDE',col:'#9B8DE8',exs:[
+{id:'breath-mf',n:'Exhale Breath Hold',v:'3 rounds',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Exhale fully, then hold. Sit with the urge to breathe. CO2 tolerance is trainable and transfers directly to composure under load.',yt:'CO2 tolerance breath hold',feel:'The urge arrives long before you actually need air. Sitting with it calmly is the skill.'}]}]},
+B:{id:'B',name:'VERTICAL',icon:'&#128507;',col:'#4A9EDB',hero:'hero-B',dur:'~50 min',after:'journal',
 blocks:[
 {id:'WU',n:'WARM-UP',col:'#4A9EDB',exs:[
-{id:'easy-w',n:'Easy Walk',v:'5 min \u2014 HR under 110 bpm',t:'time',s:1,rest:0,wt:false,cue:'Easy walking pace. HR under 110 bpm. Nasal breathing only. This is not a warmup exercise \u2014 it is arrival at the session. Let your body settle before the run.',yt:null,feel:'Completely comfortable. Breathing unhurried. Heart rate dropping from commute/travel to baseline.'}
-]},
-{id:'RUN',n:'ZONE 2 RUN',col:'#3DB87A',exs:[
-{id:'z2',n:'Zone 2 Run',v:'Phase target (see cue)',t:'time',s:1,rest:0,wt:false,cue:'Conversation pace. HR 130\u2013140. Mouth-breathing = slow down. Ph1: Wk1\u20132: 20min \u00b7 Wk3\u20134: 25min \u00b7 Wk5\u20136: 30min \u00b7 Wk7\u20138: 35min.',yt:'zone 2 running nasal breathing',feel:'Embarrassingly easy. You should be able to speak full sentences. This is correct. Zone 2 feels almost too slow.'},
-{id:'walk-r',n:'Walk Recovery',v:'5 min \u2014 wait until HR is below 110 bpm',t:'time',s:1,rest:0,wt:false,cue:'Walk until HR drops below 110 bpm before starting the carries. Do not start the suitcase carry while still breathing hard \u2014 it defeats the anti-lean cue.',yt:null,feel:'HR visibly dropping. Breathing returning to comfortable. You should feel ready before the carries, not rushed.'}
-]},
-{id:'CARRY',n:'LOADED CARRY',col:'#E8A02A',exs:[
-{id:'suitcase',n:'Suitcase Carry',v:'3 \u00d7 150m/side',t:'r',s:3,rpp:1,rest:120,wt:true,cue:'One hand. Walk tall. Resist ALL lateral lean. Switch at 75m. Start: 10 kg. Add 2 kg every 2 weeks.',yt:'suitcase carry tutorial',feel:'Anti-lean tension through your obliques on the loaded side. Traps working isometrically. If you are tilting: reduce weight.'},
-{id:'plate-pinch',n:'Plate Pinch',v:'2 \u00d7 30s per hand (no rest between hands)',t:'r',s:2,rpp:1,rest:60,wt:true,cue:'Pinch a weight plate (5\u201310kg) between thumb and all four fingers by the SMOOTH face \u2014 not the rim. Walk slowly or stand. Switch hands after 30s. No plate: grip a rolled gym towel loaded with weight. This trains exactly the muscles that failed before your back did.',yt:'plate pinch grip strength workout',feel:'Burning through all four fingers and the thumb pad by 15 seconds. Genuinely difficult to hold at 25\u201330s. If you make it to 30s easily: heavier plate next time.'}
-]},
-{id:'MOB',n:'MOBILITY CLOSE',col:'#4A9EDB',exs:[
-{id:'hip-fl',n:'Hip Flexor Stretch',v:'2 \u00d7 60s/side',t:'time',s:2,rest:0,wt:false,cue:'Kneeling lunge. Posterior pelvic tilt. Lean forward. Running shortens hip flexors.',yt:'kneeling hip flexor stretch',feel:'A deep pull in the front of the hip and upper thigh. Not pain \u2014 sustained tension. Breathe into it.'},
-{id:'foam-t',n:'Thoracic Foam Roll',v:'2 min',t:'time',s:1,rest:0,wt:false,cue:'Mid-back to shoulder blades only. 3 breaths at each tight spot.',yt:'thoracic foam rolling technique',feel:'Gentle release through the upper back. Should feel like relief, not pain.'}
-]},
+{id:'easy-w',n:'Easy Walk',v:'5 min \u2014 HR under 110',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Arrival, not a warm-up drill. Let the heart rate settle before you climb.',yt:null,feel:'Completely comfortable, breathing unhurried.'},
+{id:'ankle-p',n:'Ankle Prep',v:'2 \u00d7 15',t:'r',s:2,rpp:15,rest:0,wt:false,intent:'support',cue:'Ankle circles both directions, then calf raises. The ankle takes everything on a descent.',yt:'ankle mobility prep running',feel:'Loosening through the ankle and calf. No sharp shin sensation.'}]},
+{id:'CLIMB',n:'CLIMB INTERVALS',col:'#E8A02A',exs:[
+{id:'climb',n:'Uphill Interval',v:'6 \u00d7 3 min @ RPE 7-8 / 2 min easy',t:'r',s:6,rpp:1,rest:120,wt:false,intent:'endurance',cue:'THE MISSING PATTERN. BASE: treadmill 10-12 percent, or a stair machine. FIELD: any hill or stairwell. Three minutes hard, two minutes walking recovery. Your event is climbing.',yt:'uphill interval training trail running',feel:'Heavy breathing, speech in fragments only. Legs burning by minute two. Recovery should feel genuinely easy.'}]},
+{id:'DESC',n:'DESCENT',col:'#E35050',exs:[
+{id:'desc',n:'Eccentric Step-Down',v:'3 \u00d7 8/leg (4s lower)',t:'r',s:3,rpp:8,rest:90,wt:false,intent:'strength',cue:'Stand on a step, one foot on the edge. Lower the other heel toward the floor over 4 slow seconds, tap, drive back up. START LOW AND DO NOT ADD HEIGHT THIS WEEK. Quad soreness at 24-48h is expected. Shin pain is not \u2014 stop the block if you feel it.',yt:'eccentric step down descent training',feel:'Quad of the standing leg controlling the whole descent. This is the tissue that fails on long downhills.'}]},
+{id:'CARRY',n:'CARRY',col:'#9B8DE8',exs:[
+{id:'carry',t:'r',s:3,rpp:1,rest:120,pattern:'carry',intent:'strength',rli:0.3,cue:'ONE hand, not one per hand. Walk 75m, switch, walk back. Stay vertical \u2014 leaning means too heavy. FIELD: the side plank rung trains the identical anti-lateral-flexion quality.',yt:'suitcase carry tutorial',feel:'Obliques on the UNLOADED side working hardest. Felt in the lower back means you are leaning.'},
+{id:'grip-b',t:'r',s:2,rpp:0,rest:60,pattern:'grip',intent:'hypertrophy',rli:1.0,cue:'Straight after the carry, grip already taxed. That is the point.',yt:'dead hang grip endurance',feel:'Fails faster than in Mission 1. Correct.'}]},
+{id:'FLUSH',n:'ZONE 2 FLUSH',col:'#3DB87A',exs:[
+{id:'z2',n:'Zone 2 Flush',v:'10 min \u2014 HR 125-140',t:'time',s:1,rest:0,wt:false,intent:'endurance',cue:'Conversational pace. Full sentences without gasping. Max HR estimate 180, so Zone 2 is 126-140. Always after the hard work, never before.',yt:'zone 2 running nasal breathing',feel:'Embarrassingly easy. If it feels too slow it is probably correct.'}]},
+{id:'MOB',n:'MOBILITY',col:'#4A9EDB',exs:[
+{id:'hip-fs',n:'Hip Flexor Stretch',v:'2 \u00d7 45s/side',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Half-kneeling, tuck the pelvis, squeeze the back glute, then lean. The glute squeeze is what makes it work.',yt:'couch stretch hip flexor',feel:'Deep stretch at the front of the rear hip. Ribs stay down.'}]},
 {id:'MFS',n:'MENTAL FORESIGHT',col:'#9B8DE8',exs:[
-{id:'journal-b',n:'Post-Session Journal',v:'3 questions in Journal tab',t:'time',s:1,rest:0,wt:false,cue:'Open Journal tab. 3 questions. 5 minutes. How did I feel? What surprised me? What will I change?',yt:null,feel:'Clarity. The act of writing makes patterns visible.'}
-]}
-]},
-C:{id:'C',name:'EXPLOSIVE POWER',icon:'&#9889;',col:'#E35050',hero:'hero-C',dur:'~45 min',after:'breathing',
+{id:'vis',n:'Journal',v:'3 questions',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Body scan, one surprise, one intention. Two minutes. Soviet debrief protocol, and the most skipped pillar in any programme.',yt:null,feel:'Clarity about what the session actually cost you.'}]}]},
+C:{id:'C',name:'POWER',icon:'&#9889;',col:'#E35050',hero:'hero-C',dur:'~45 min',after:'breathing',
 blocks:[
 {id:'WU',n:'WARM-UP',col:'#4A9EDB',exs:[
-{id:'hip-sw',n:'Dynamic Hip Swings',v:'2 \u00d7 10/side',t:'r',s:2,rpp:10,rest:0,wt:false,cue:'Forward/back AND lateral. Full range. Wakes up hip joint before explosive loading.',yt:'hip swing warm up',feel:'Hip joint loosening. Fluid circular motion. No sharp sensations.'},
-{id:'gb-act',n:'Glute Bridge Activation',v:'2 \u00d7 15',t:'r',s:2,rpp:15,rest:0,wt:false,cue:'Squeeze glutes at top. 2s hold. Activates posterior chain before sprinting.',yt:'glute bridge activation',feel:'Glute contraction at the top. If you feel your lower back: squeeze harder through the heel.'},
-{id:'a-march',n:'A-March',v:'2 \u00d7 20m',t:'r',s:2,rpp:1,rest:0,wt:false,cue:'Exaggerated marching. Knee to hip height. Arms pump opposite. Teaches sprint mechanics.',yt:'A march sprint drill',feel:'Hip flexor driving the knee up. Arms counterbalancing. Coordination building.'}
-]},
-{id:'JUMP',n:'COMPLEX PAIRS \u2014 JUMP',col:'#E35050',exs:[
-{id:'box-step',n:'Box Step-up',v:'3 \u00d7 6/side',t:'r',s:3,rpp:6,rest:30,wt:false,cue:'COMPLEX PRIMER: Take ONLY 30 seconds rest after this set, then go immediately to Broad Jumps. The post-activation potentiation (PAP) window is 30\u201360 seconds \u2014 longer and the effect is lost. Full control up, drive knee to 90\u00b0, slow eccentric. The hip extensors fire hard here \u2014 that\'s the neural prime.',yt:'box step up complex training PAP',feel:'Front thigh and glute working together. The stepping leg does all the work.'},
-{id:'broad-j',n:'Broad Jump',v:'3 \u00d7 3',t:'r',s:3,rpp:3,rest:240,wt:false,cue:'COMPLEX POWER: Execute within 30 seconds of the Box Step-up set \u2014 your hip extensors are post-activated. Full arm swing, aggressive hip hinge, explode. Land soft, knees bent absorbing. After jumping: 4 FULL minutes before the next complex (CNS needs full recovery to express the same power again). If you don\'t feel more explosive than usual: rest after step-up was too long.',yt:'broad jump PAP complex training',feel:'Explosive hip extension \u2014 glutes and thighs firing simultaneously. Land soft \u2014 if you land stiff, too much effort and not enough hip.'}
-]},
-{id:'SPRINT',n:'SPRINT MECHANICS',col:'#E8A02A',exs:[
-{id:'a-skip',n:'A-Skip',v:'4 \u00d7 20m',t:'r',s:4,rpp:1,rest:90,wt:false,cue:'Rhythmic skip with exaggerated knee drive. Arm drives opposite. Master this before worrying about speed.',yt:'A skip sprint drill',feel:'Rhythmic hip flexor pull on each knee drive. Calves helping on the push-off. Stay light.'},
-{id:'accel',n:'Acceleration Run \u2014 40m',v:'4 \u00d7 40m @ 70\u201380%',t:'r',s:4,rpp:1,rest:240,wt:false,cue:'Gradual acceleration over 40m. 70\u201380% effort. FOUR FULL MINUTES between sets. Nervous system work \u2014 not cardio.',yt:'acceleration run mechanics',feel:'Hip drive and front knee lift. Controlled, not maximal. If your shins hurt: slow down and fix mechanics first.'}
-]},
-{id:'BOX',n:'BOXING POWER',col:'#9B8DE8',exs:[
-{id:'shadow',n:'Shadow Boxing',v:'3 \u00d7 2 min',t:'time',s:3,rest:60,wt:false,cue:'Jab-cross-hook. Hip rotation drives the punch \u2014 not arm strength. Stay light on feet.',yt:'shadow boxing beginners hip rotation',feel:'Hip rotation initiating each cross \u2014 obliques twisting, not just arms swinging. Stay loose.'}
-]},
-{id:'MF',n:'MENTAL FORTITUDE',col:'#4A9EDB',exs:[
-{id:'dead-hang-c',n:'Dead Hang (grip finisher \u2014 fatigued)',v:'3 \u00d7 max hold',t:'r',s:3,rpp:0,rest:90,wt:false,cue:'Dead hang AFTER the explosive session. Your grip is already taxed from the sprints and carries \u2014 this is deliberate. Training grip under CNS and neuromuscular fatigue builds endurance that controlled fresh-grip training cannot. Also decompresses the spine after impact work.',yt:'dead hang grip training',feel:'Grip fatigue arrives faster than in Session A because of accumulated session fatigue. This is the point. Push to the same threshold: fingers opening = set done.'},
-{id:'cold-s',n:'Cold Shower / CO2 Protocol',v:'Log completion',t:'time',s:1,rest:0,wt:false,cue:'Cold shower: 30s cold after normal shower. Build to 90s. OR: CO2 table \u00d7 5 rounds. Tap for breathing timer.',yt:'cold shower protocol',feel:'Cold shock: gasp, then settle. Consciously slow your breathing. After 10 seconds the shock fades. Nervous system learning.'}
-]}
-]},
+{id:'hip-sw',n:'Hip Swings',v:'2 \u00d7 10/side',t:'r',s:2,rpp:10,rest:0,wt:false,intent:'support',cue:'Front-to-back then lateral. Loosen the hip before asking it to produce force.',yt:'leg swing warm up',feel:'Hip loosening, range increasing each rep.'},
+{id:'a-march',n:'A-March',v:'2 \u00d7 20m',t:'r',s:2,rpp:1,rest:0,wt:false,intent:'support',cue:'Tall posture, drive the knee up, snap the foot down under the hip. Teaches the sprint mechanic slowly.',yt:'A march sprint drill',feel:'Hip flexors lifting, foot striking under you rather than in front.'}]},
+{id:'COMPLEX',n:'COMPLEX PAIRS',col:'#E35050',exs:[
+{id:'pap-primer',t:'r',s:3,rpp:5,rest:30,pattern:'squat',intent:'power',rli:0.86,cue:'COMPLEX PRIMER: drive up hard and fast. Then take ONLY 30 seconds before the jump \u2014 the post-activation window is 30-60s and closes fast.',yt:'post activation potentiation complex',feel:'Hip extensors loaded and primed. The jump straight after should feel springier.'},
+{id:'pap-power',t:'r',s:3,rpp:3,rest:240,pattern:'power',intent:'power',rli:0.9,cue:'COMPLEX POWER: execute within 30 seconds of the primer. Maximum intent every rep. Land SOFT. Then 4 FULL minutes before the next pair \u2014 the CNS needs it to express the same power again.',yt:'broad jump post activation potentiation',feel:'Noticeably more explosive than a cold jump. If not, the rest after the primer was too long.'}]},
+{id:'SPRINT',n:'SPRINT',col:'#E8A02A',exs:[
+{id:'hill-sp',n:'Hill Sprint',v:'6 \u00d7 20s @ max / 90s walk down',t:'r',s:6,rpp:1,rest:90,wt:false,intent:'power',cue:'Steep hill, maximum effort for 20 seconds, walk down as recovery. Hills are safer than flat sprints for a shin splint history \u2014 shorter stride, softer landing, less eccentric load.',yt:'hill sprint training',feel:'Full-body effort. Legs heavy by rep four. Walk down fully recovered, never jog it.'}]},
+{id:'BOX',n:'COMBAT',col:'#9B8DE8',exs:[
+{id:'shadow',n:'Shadow Boxing',v:'3 \u00d7 2 min',t:'r',s:3,rpp:1,rest:60,wt:false,intent:'endurance',cue:'Hands up, move the feet, breathe out on every strike. Agility and coordination under fatigue.',yt:'shadow boxing footwork',feel:'Shoulders burning by round two. Feet should never stop moving.'}]},
+{id:'GRIP',n:'GRIP',col:'#3DB87A',exs:[
+{id:'grip-c',t:'r',s:3,rpp:0,rest:90,pattern:'grip',intent:'hypertrophy',rli:1.0,cue:'Fatigued finisher. Grip under CNS fatigue builds endurance fresh grip work cannot.',yt:'dead hang grip training',feel:'Fails faster than Mission 1. Push to the same threshold.'}]},
+{id:'MF',n:'MENTAL FORTITUDE',col:'#9B8DE8',exs:[
+{id:'cold-s',n:'Cold Shower',v:'2 min',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Cold as you can hold, 2 minutes, breathing slow and controlled. Deliberate discomfort with a clear purpose.',yt:'cold exposure protocol',feel:'The first 20 seconds are the fight. After that it is just cold.'}]}]},
+D:{id:'D',name:'LONG RANGE',icon:'&#127956;',col:'#3DB87A',hero:'hero-D',dur:'75-120 min',after:'journal',
+blocks:[
+{id:'WU',n:'WARM-UP',col:'#4A9EDB',exs:[
+{id:'easy-w2',n:'Easy Walk',v:'10 min',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Long day. Start slower than feels necessary.',yt:null,feel:'Unhurried. The pace should feel almost lazy at the start.'}]},
+{id:'LONG',n:'LONG CLIMB',col:'#E8A02A',exs:[
+{id:'long-climb',n:'Long Climb',v:'Phase 1: 45-60 min continuous',t:'time',s:1,rest:0,wt:false,intent:'endurance',cue:'THE MISSION THAT ACTUALLY PREPARES YOU FOR FINLAND X. Continuous climbing, Zone 2, HR 125-140. Builds 45 min in Phase 1 toward 3 hours by Phase 4. Practise fuelling here, not on race day.',yt:'long trail run training ultra',feel:'Sustainable for hours. If you cannot speak in sentences, slow down \u2014 this is duration, not intensity.'}]},
+{id:'CARRY',n:'LOADED CARRY',col:'#9B8DE8',exs:[
+{id:'carry-long',t:'r',s:1,rpp:1,rest:0,pattern:'carry',intent:'endurance',rli:0.3,cue:'Toward the 30kg x 5km goal. Build distance before load. BASE: pack or suitcase carry. FIELD: loaded pack, or extended side plank holds if nothing is available.',yt:'rucking training',feel:'Steady, sustainable. Shoulders and core, not the lower back.'}]},
+{id:'FUEL',n:'RACE SKILLS',col:'#3DB87A',exs:[
+{id:'fuel',n:'Fuelling Practice',v:'Log what you ate and when',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Eat and drink on the move at a set interval. The gut is trainable and race day is the wrong place to discover it is not.',yt:'ultra running nutrition strategy',feel:'Note any stomach discomfort. That is data for race day.'}]},
+{id:'MOB',n:'MOBILITY',col:'#4A9EDB',exs:[
+{id:'post-mob',n:'Post-Long Mobility',v:'8 min',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Calves, quads, hip flexors, glutes. 45-60s each, breathing out into what is tight.',yt:'post run mobility routine',feel:'Easing rather than stretching. Do not force anything after a long effort.'}]},
+{id:'MFS',n:'MENTAL FORESIGHT',col:'#9B8DE8',exs:[
+{id:'vis-d',n:'Visualisation',v:'5 min',t:'time',s:1,rest:0,wt:false,intent:'support',cue:'Eyes closed. Rehearse the hardest part of the event in detail \u2014 the climb that hurts, the descent when the quads are gone. Soviet sports psychology treated this as training, not decoration.',yt:'visualisation athletes mental training',feel:'Vivid enough to raise your heart rate slightly. That is the marker.'}]}]},
 REST:{id:'REST',name:'ACTIVE RECOVERY',icon:'&#127807;',col:'#3A5570',hero:'hero-REST',dur:'25\u201340 min',after:null,
 blocks:[
 {id:'R',n:'RECOVERY',col:'#3A5570',exs:[
