@@ -361,15 +361,19 @@ function showRest(secs,doneEx,nextEx,cb){
 function skipRest(){clearInterval(RS_INT);document.getElementById('rest-screen').classList.remove('show');if(RS_CB)RS_CB();RS_CB=null;}
 
 // -- AI COACH -------------------------------------------------------------------
-async function callAI(key,prompt,onOK,onErr){
+async function callAI(key,prompt,onOK,onErr,maxTok){
+  var MT=maxTok||500;
   try{
     var res,data,txt;
     if(key.startsWith('gsk_')){
-      res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],max_tokens:500,temperature:0.4})});
+      res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],max_tokens:MT,temperature:0.3})});
       if(!res.ok){var e=await res.json();throw new Error((e.error&&e.error.message)||'Groq error '+res.status);}
-      data=await res.json();txt=data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+      data=await res.json();
+      var ch=data.choices&&data.choices[0];
+      txt=ch&&ch.message&&ch.message.content;
+      if(ch&&ch.finish_reason==='length')txt=(txt||'')+'\n[[TRUNCATED]]';
     } else {
-      res=await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:500,temperature:0.4}})});
+      res=await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:MT,temperature:0.3}})});
       if(!res.ok){var e2=await res.json();throw new Error((e2.error&&e2.error.message)||'Gemini error '+res.status);}
       data=await res.json();txt=data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text;
     }
