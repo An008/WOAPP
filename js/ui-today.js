@@ -123,7 +123,7 @@ function pickSession(t){
   if(p.mode==='train'&&t===p.type){beginSession();return;}
   var msg=t===p.next
     ? SESSIONS[t].name+' is the next authorised mission, but today is '+(p.mode==='done'?'already executed':'a stand-down day')+'.\n\n'+p.reason
-    : SESSIONS[t].name+' is not authorised yet.\n\nMissions run A then B then C in order. The next one is released when the current mission is executed.';
+    : SESSIONS[t].name+' is not authorised yet.\n\nMissions run A, B, C then D in order. The next one is released when the current mission is executed.';
   alert(msg);
 }
 
