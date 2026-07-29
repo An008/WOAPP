@@ -33,7 +33,7 @@ function muscleRecovery(){
     if(days<0||days>14)return;
     Object.keys(s.exercises).forEach(function(exId){
       var ed=s.exercises[exId];
-      var worked=ed&&(ed.comp||((ed.sets||[]).some(function(x){return x.done;})));
+      var worked=ed&&!ed.skipped&&(((ed.sets||[]).some(function(x){return x.done&&x.rpe!=null;}))||(ed.comp&&(!ed.sets||!ed.sets.length)));
       if(!worked)return;
       var mm=MM[exId];
       if(!mm)return;
