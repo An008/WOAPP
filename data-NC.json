@@ -345,8 +345,22 @@
     "2026-07-29|REST": {
       "type": "REST",
       "date": "2026-07-29",
-      "exercises": {},
-      "started": "2026-07-29T06:21:56.659Z"
+      "exercises": {
+        "easy-walk": {
+          "sets": [],
+          "comp": true
+        },
+        "foam-full": {
+          "sets": [],
+          "comp": true
+        },
+        "box-br": {
+          "sets": [],
+          "comp": false
+        }
+      },
+      "started": "2026-07-29T06:21:56.659Z",
+      "mode": "base"
     }
   },
   "journal": {},
@@ -356,8 +370,8 @@
       "i": "&#127939;",
       "g": "Run 5km non-stop (any pace)",
       "p": "Aerobic",
-      "done": false,
-      "achievedDate": null
+      "done": true,
+      "achievedDate": "2026-07-29"
     },
     {
       "id": "l2",
