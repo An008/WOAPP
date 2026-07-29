@@ -4,11 +4,11 @@
 // order advances only on completion, and rest between sessions is enforced.
 // ASCII-ONLY: no byte above 0x7F may appear in this file.
 
-var TRAIN_SEQ=['A','B','C'];
+var TRAIN_SEQ=['A','B','C','D'];
 var MIN_REST_DAYS=1;   // clear days required between training sessions
-var MAX_PER_WEEK=3;    // training sessions per rolling 7 days
+var MAX_PER_WEEK=4;    // training missions per rolling 7 days
 
-function isTraining(type){return type==='A'||type==='B'||type==='C';}
+function isTraining(type){return TRAIN_SEQ.indexOf(type)>=0;}
 
 // Dates of completed TRAINING sessions, oldest first
 function trainingDates(){
@@ -51,7 +51,7 @@ function planToday(){
             title:'Mission accomplished',
             reason:'Today\'s mission is executed. Recovery ops are optional and light.'};
   }
-  if(gap<=MIN_REST_DAYS){
+  if(gap<=MIN_REST_DAYS&&type!=='B'){
     return {mode:'recover',type:'REST',next:type,unlocks:1-gap+1,
             title:'Stand down',
             reason:'Adaptation happens between missions, not during them. '+
