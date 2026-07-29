@@ -79,7 +79,9 @@ function buildDebriefPrompt(rep){
    +'"summary":"2-3 sentences on how the mission actually went",'
    +'"priority":"the single most important correction",'
    +'"watch":"the main injury or overload risk"}\n\n'
-   +'Use the exact ids given. Weights in kg as integers.';
+   +'Use the exact ids given. Weights in kg as integers.\n'
+   +'BE TERSE. Only include objectives that actually change - omit anything already correct. '
+   +'Cap notes and cues at 12 words. Maximum 6 entries in loads, 4 in replacements, 3 in crossMission.';
 }
 
 function runDebrief(date,type){
@@ -93,8 +95,14 @@ function runDebrief(date,type){
   callAI(key,buildDebriefPrompt(rep),function(txt){
     var d=extractJSON(txt);
     if(!d){
-      if(el)el.innerHTML='<div style="background:var(--bg3);border-radius:11px;padding:13px;font-size:12px;color:var(--txt);line-height:1.65">'
-        +txt.replace(/</g,'&lt;').replace(/\n/g,'<br>')+'</div>';
+      var cut=txt.indexOf('[[TRUNCATED]]')>-1;
+      if(el)el.innerHTML='<div style="background:rgba(227,80,80,.08);border:1px solid rgba(227,80,80,.25);border-radius:11px;padding:13px">'
+        +'<div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:5px">'
+        +(cut?'Debrief was cut short by the model':'Could not read the debrief')+'</div>'
+        +'<div style="font-size:11px;color:var(--txt2);line-height:1.55">'
+        +(cut?'The response ran past its length limit. Tap again \u2014 the request now asks for a shorter reply.'
+             :'The coach did not return usable structure. Tap again to retry.')+'</div>'
+        +'<button onclick="runDebrief(\''+date+'\',\''+type+'\')" style="width:100%;margin-top:9px;padding:9px;border-radius:9px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.1);color:var(--purple);font-size:12px;font-weight:800;cursor:pointer">Retry Debrief</button></div>';
       return;
     }
     if(!S.profile.assessmentLoads)S.profile.assessmentLoads={};
@@ -141,5 +149,5 @@ function runDebrief(date,type){
     if(el)el.innerHTML=h;
   },function(err){
     if(el)el.innerHTML='<div style="padding:11px;background:rgba(227,80,80,.1);border-radius:10px;font-size:12px;color:var(--red)">Error: '+err+'</div>';
-  });
+  },3000);
 }
