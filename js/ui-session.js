@@ -212,8 +212,8 @@ function fcSkip(){
   }
   if(last<FC_CARDS.length-1){FC_IDX=last+1;renderFC();}
   else{
-    var o=['A','B','C'],ix=o.indexOf(curSessType);
-    if(ix>=0)S.next=o[(ix+1)%3];
+    var o=TRAIN_SEQ,ix=o.indexOf(curSessType);
+    if(ix>=0)S.next=o[(ix+1)%o.length];
     saveS();autoSyncToGH();showComplete();
   }
 }
@@ -257,9 +257,9 @@ function fcDone(){
     } else {
       // Recovery is not part of the A-B-C rotation: completing it must not
       // reset the training queue back to A.
-      var o=['A','B','C'];
+      var o=TRAIN_SEQ;
       var i=o.indexOf(curSessType);
-      if(i>=0)S.next=o[(i+1)%3];
+      if(i>=0)S.next=o[(i+1)%o.length];
       saveS();
       autoSyncToGH();
       showComplete();
