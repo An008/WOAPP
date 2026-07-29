@@ -16,93 +16,93 @@ var PATTERNS={
    base:[{n:'DB Bench Press',unit:'kg',perSide:true},
          {n:'Barbell Bench Press',unit:'kg'},
          {n:'Machine Chest Press',unit:'kg'}],
-   field:[{n:'Wall Push-up',rli:0.15,v:'3 \u00d7 15'},
-          {n:'Incline Push-up (bench height)',rli:0.35,v:'3 \u00d7 12'},
-          {n:'Knee Push-up',rli:0.45,v:'3 \u00d7 12'},
-          {n:'Standard Push-up',rli:0.64,v:'4 \u00d7 8-12'},
-          {n:'Feet-Elevated Push-up (30cm)',rli:0.70,v:'4 \u00d7 8'},
-          {n:'Feet-Elevated Push-up (60cm)',rli:0.75,v:'4 \u00d7 6-8'},
-          {n:'Archer Push-up',rli:0.80,v:'4 \u00d7 5/side'},
-          {n:'Deep Push-up, 3s pause',rli:0.85,v:'4 \u00d7 5'},
-          {n:'One-Arm Push-up Eccentric',rli:1.00,v:'4 \u00d7 3/side'}]},
+   field:[{n:'Wall Push-up',rli:0.15,v:'3 \u00d7 15',s:3,rpp:15},
+          {n:'Incline Push-up (bench height)',rli:0.35,v:'3 \u00d7 12',s:3,rpp:12},
+          {n:'Knee Push-up',rli:0.45,v:'3 \u00d7 12',s:3,rpp:12},
+          {n:'Standard Push-up',rli:0.64,v:'4 \u00d7 8-12',s:4,rpp:10},
+          {n:'Feet-Elevated Push-up (30cm)',rli:0.70,v:'4 \u00d7 8',s:4,rpp:8},
+          {n:'Feet-Elevated Push-up (60cm)',rli:0.75,v:'4 \u00d7 6-8',s:4,rpp:7},
+          {n:'Archer Push-up',rli:0.80,v:'4 \u00d7 5/side',s:4,rpp:5},
+          {n:'Deep Push-up, 3s pause',rli:0.85,v:'4 \u00d7 5',s:4,rpp:5},
+          {n:'One-Arm Push-up Eccentric',rli:1.00,v:'4 \u00d7 3/side',s:4,rpp:3}]},
 
  'v-press':{name:'Vertical Press',primary:['shoulders','triceps'],secondary:['traps','abs'],
    base:[{n:'Machine Overhead Press',unit:'kg'},
          {n:'DB Overhead Press',unit:'kg',perSide:true},
          {n:'Landmine Press',unit:'kg'}],
-   field:[{n:'Seated Pike Press',rli:0.30,v:'3 \u00d7 12'},
-          {n:'Pike Push-up',rli:0.47,v:'3 \u00d7 8-10'},
-          {n:'Elevated Pike Push-up',rli:0.60,v:'3 \u00d7 8'},
-          {n:'Wall Handstand Push-up (partial)',rli:0.75,v:'3 \u00d7 5'},
-          {n:'Wall Handstand Push-up',rli:0.90,v:'3 \u00d7 3-5'},
-          {n:'Freestanding HSPU',rli:1.05,v:'3 \u00d7 2-3'}]},
+   field:[{n:'Seated Pike Press',rli:0.30,v:'3 \u00d7 12',s:3,rpp:12},
+          {n:'Pike Push-up',rli:0.47,v:'3 \u00d7 8-10',s:3,rpp:9},
+          {n:'Elevated Pike Push-up',rli:0.60,v:'3 \u00d7 8',s:3,rpp:8},
+          {n:'Wall Handstand Push-up (partial)',rli:0.75,v:'3 \u00d7 5',s:3,rpp:5},
+          {n:'Wall Handstand Push-up',rli:0.90,v:'3 \u00d7 3-5',s:3,rpp:4},
+          {n:'Freestanding HSPU',rli:1.05,v:'3 \u00d7 2-3',s:3,rpp:3}]},
 
  'h-pull':{name:'Horizontal Pull',primary:['lats','rhomboids'],secondary:['biceps','rear_delt','forearms'],
    base:[{n:'Chest-Supported Row',unit:'kg'},
          {n:'DB Row',unit:'kg',perSide:true},
          {n:'Seated Cable Row',unit:'kg'}],
-   field:[{n:'Prone Swimmer Pull',rli:0.20,v:'3 \u00d7 10'},
-          {n:'Inverted Row, feet under',rli:0.40,v:'4 \u00d7 10'},
-          {n:'Inverted Row, feet forward',rli:0.55,v:'4 \u00d7 8-10'},
-          {n:'Inverted Row, feet elevated',rli:0.70,v:'4 \u00d7 8'},
-          {n:'Archer Inverted Row',rli:0.85,v:'4 \u00d7 5/side'},
-          {n:'One-Arm Inverted Row',rli:1.00,v:'4 \u00d7 4/side'}]},
+   field:[{n:'Prone Swimmer Pull',rli:0.20,v:'3 \u00d7 10',s:3,rpp:10},
+          {n:'Inverted Row, feet under',rli:0.40,v:'4 \u00d7 10',s:4,rpp:10},
+          {n:'Inverted Row, feet forward',rli:0.55,v:'4 \u00d7 8-10',s:4,rpp:9},
+          {n:'Inverted Row, feet elevated',rli:0.70,v:'4 \u00d7 8',s:4,rpp:8},
+          {n:'Archer Inverted Row',rli:0.85,v:'4 \u00d7 5/side',s:4,rpp:5},
+          {n:'One-Arm Inverted Row',rli:1.00,v:'4 \u00d7 4/side',s:4,rpp:4}]},
 
  'v-pull':{name:'Vertical Pull',primary:['lats','biceps'],secondary:['forearms','rhomboids'],
-   base:[{n:'Lat Pulldown',unit:'kg'},
-         {n:'Assisted Pull-up',unit:'kg'},
+   base:[{n:'Assisted Pull-up',unit:'kg'},
+         {n:'Lat Pulldown',unit:'kg'},
          {n:'Weighted Pull-up',unit:'kg'}],
-   field:[{n:'Scapular Pull-up',rli:0.20,v:'3 \u00d7 10'},
-          {n:'Band-Assisted Pull-up',rli:0.55,v:'4 \u00d7 6'},
-          {n:'Negative Pull-up, 5s lower',rli:0.95,v:'4 \u00d7 4'},
-          {n:'Pull-up',rli:1.00,v:'4 \u00d7 max'},
-          {n:'Weighted Pull-up',rli:1.15,v:'4 \u00d7 5'}]},
+   field:[{n:'Scapular Pull-up',rli:0.20,v:'3 \u00d7 10',s:3,rpp:10},
+          {n:'Band-Assisted Pull-up',rli:0.55,v:'4 \u00d7 6',s:4,rpp:6},
+          {n:'Negative Pull-up, 5s lower',rli:0.95,v:'4 \u00d7 4',s:4,rpp:4},
+          {n:'Pull-up',rli:1.00,v:'4 \u00d7 max',s:4,rpp:5},
+          {n:'Weighted Pull-up',rli:1.15,v:'4 \u00d7 5',s:4,rpp:5}]},
 
  'squat':{name:'Squat',primary:['quads','glutes'],secondary:['abs','calves'],
-   base:[{n:'Leg Press',unit:'kg'},
-         {n:'Goblet Squat',unit:'kg'},
+   base:[{n:'Goblet Squat',unit:'kg'},
+         {n:'Leg Press',unit:'kg'},
          {n:'Barbell Back Squat',unit:'kg'},
          {n:'Trap Bar Squat',unit:'kg'}],
-   field:[{n:'Bodyweight Squat',rli:0.65,v:'3 \u00d7 20'},
-          {n:'Tempo Squat, 5s down',rli:0.72,v:'3 \u00d7 12'},
-          {n:'Split Squat',rli:0.85,v:'3 \u00d7 10/side'},
-          {n:'Bulgarian Split Squat',rli:0.95,v:'3 \u00d7 8/side'},
-          {n:'Shrimp Squat',rli:1.10,v:'3 \u00d7 5/side'},
-          {n:'Pistol Squat',rli:1.30,v:'3 \u00d7 3/side'}]},
+   field:[{n:'Bodyweight Squat',rli:0.65,v:'3 \u00d7 20',s:3,rpp:20},
+          {n:'Tempo Squat, 5s down',rli:0.72,v:'3 \u00d7 12',s:3,rpp:12},
+          {n:'Split Squat',rli:0.85,v:'3 \u00d7 10/side',s:3,rpp:10},
+          {n:'Bulgarian Split Squat',rli:0.95,v:'3 \u00d7 8/side',s:3,rpp:8},
+          {n:'Shrimp Squat',rli:1.10,v:'3 \u00d7 5/side',s:3,rpp:5},
+          {n:'Pistol Squat',rli:1.30,v:'3 \u00d7 3/side',s:3,rpp:3}]},
 
  'hinge':{name:'Hinge',primary:['hamstrings','glutes'],secondary:['lats','forearms'],
    base:[{n:'Trap Bar Deadlift',unit:'kg'},
          {n:'Romanian Deadlift',unit:'kg'},
          {n:'Kettlebell Swing',unit:'kg'},
          {n:'Hip Thrust',unit:'kg'}],
-   field:[{n:'Bodyweight Good Morning',rli:0.30,v:'3 \u00d7 15'},
-          {n:'Single-Leg Hip Thrust',rli:0.65,v:'3 \u00d7 12/side'},
-          {n:'Single-Leg RDL',rli:0.75,v:'3 \u00d7 10/side'},
-          {n:'Sliding Leg Curl',rli:0.95,v:'3 \u00d7 8'},
-          {n:'Nordic Curl Negative',rli:1.20,v:'3 \u00d7 5'}]},
+   field:[{n:'Bodyweight Good Morning',rli:0.30,v:'3 \u00d7 15',s:3,rpp:15},
+          {n:'Single-Leg Hip Thrust',rli:0.65,v:'3 \u00d7 12/side',s:3,rpp:12},
+          {n:'Single-Leg RDL',rli:0.75,v:'3 \u00d7 10/side',s:3,rpp:10},
+          {n:'Sliding Leg Curl',rli:0.95,v:'3 \u00d7 8',s:3,rpp:8},
+          {n:'Nordic Curl Negative',rli:1.20,v:'3 \u00d7 5',s:3,rpp:5}]},
 
  'carry':{name:'Loaded Carry',primary:['abs','traps','forearms'],secondary:['glutes','quads'],
    base:[{n:'Suitcase Carry',unit:'kg'},
          {n:'Farmer Carry',unit:'kg',perSide:true},
          {n:'Rucksack March',unit:'kg'}],
-   field:[{n:'Side Plank',rli:0.35,v:'3 \u00d7 45s/side'},
-          {n:'Side Plank, top leg raised',rli:0.50,v:'3 \u00d7 30s/side'},
-          {n:'Suitcase Hold, loaded pack',rli:0.70,v:'3 \u00d7 60s/side'},
-          {n:'Single-Arm Overhead Hold',rli:0.85,v:'3 \u00d7 40s/side'}]},
+   field:[{n:'Side Plank',rli:0.35,v:'3 \u00d7 45s/side',s:3,rpp:1},
+          {n:'Side Plank, top leg raised',rli:0.50,v:'3 \u00d7 30s/side',s:3,rpp:1},
+          {n:'Suitcase Hold, loaded pack',rli:0.70,v:'3 \u00d7 60s/side',s:3,rpp:1},
+          {n:'Single-Arm Overhead Hold',rli:0.85,v:'3 \u00d7 40s/side',s:3,rpp:1}]},
 
  'grip':{name:'Grip',primary:['forearms'],secondary:[],
-   base:[{n:'Plate Pinch',unit:'kg'},{n:'Farmer Hold',unit:'kg'},{n:'Dead Hang',unit:'kg'}],
-   field:[{n:'Fingertip Plank',rli:0.55,v:'3 \u00d7 max'},
-          {n:'Dead Hang',rli:1.00,v:'3 \u00d7 max'},
-          {n:'One-Arm Hang Assist',rli:1.40,v:'3 \u00d7 15s/side'}]},
+   base:[{n:'Dead Hang',unit:'kg'},{n:'Farmer Hold',unit:'kg'},{n:'Plate Pinch',unit:'kg'}],
+   field:[{n:'Fingertip Plank',rli:0.55,v:'3 \u00d7 max',s:3,rpp:0},
+          {n:'Dead Hang',rli:1.00,v:'3 \u00d7 max',s:3,rpp:0},
+          {n:'One-Arm Hang Assist',rli:1.40,v:'3 \u00d7 15s/side',s:3,rpp:1}]},
 
  'power':{name:'Explosive',primary:['quads','glutes'],secondary:['calves','hamstrings'],
    base:[{n:'Trap Bar Jump',unit:'kg'},{n:'Kettlebell Swing',unit:'kg'},{n:'Box Jump',unit:'kg'}],
-   field:[{n:'Squat Jump',rli:0.65,v:'5 \u00d7 3'},
-          {n:'Split Squat Jump',rli:0.85,v:'5 \u00d7 4/side'},
-          {n:'Broad Jump',rli:0.90,v:'5 \u00d7 3'},
-          {n:'Tuck Jump',rli:1.00,v:'5 \u00d7 5'},
-          {n:'Depth Jump (30cm)',rli:1.30,v:'5 \u00d7 3'}]}
+   field:[{n:'Squat Jump',rli:0.65,v:'5 \u00d7 3',s:5,rpp:3},
+          {n:'Split Squat Jump',rli:0.85,v:'5 \u00d7 4/side',s:5,rpp:4},
+          {n:'Broad Jump',rli:0.90,v:'5 \u00d7 3',s:5,rpp:3},
+          {n:'Tuck Jump',rli:1.00,v:'5 \u00d7 5',s:5,rpp:5},
+          {n:'Depth Jump (30cm)',rli:1.30,v:'5 \u00d7 3',s:5,rpp:3}]}
 };
 
 // --- CONVERSION --------------------------------------------------------------
@@ -115,7 +115,7 @@ function athleteBW(){
 // athlete's own mass the movement already carries (a squat carries most of it,
 // a bench press carries none).
 var BW_CARRIED={'squat':0.65,'hinge':0.15,'h-press':0,'v-press':0,
-                'h-pull':0,'v-pull':0,'carry':0,'grip':0,'power':0.65};
+                'h-pull':0,'v-pull':1.00,'carry':0,'grip':1.00,'power':0.65};
 
 function baseToRLI(patternId,loadKg){
   var bw=athleteBW();
@@ -153,15 +153,20 @@ function stepRung(patternId,rli,delta){
 }
 
 // The single entry point: given a pattern and a target RLI, what do I do today?
-function prescribe(patternId,rli,loadout){
+function prescribe(patternId,rli,loadout,sets,reps){
   var p=PATTERNS[patternId];
   if(!p)return null;
   if(loadout==='field'){
     var r=fieldRung(patternId,rli);
-    return {name:r.n,v:r.v,rli:r.rli,weighted:false,pattern:patternId,
-            patternName:p.name,ladder:'field'};
+    var st=r.s||sets||3, rp=r.rpp!==undefined?r.rpp:(reps||10);
+    return {name:r.n,v:r.v,rli:r.rli,weighted:false,sets:st,reps:rp,
+            pattern:patternId,patternName:p.name,ladder:'field'};
   }
   var kg=rliToBase(patternId,rli);
-  return {name:p.base[0].n,v:kg+'kg',rli:rli,weighted:true,load:kg,
+  var st2=sets||3, rp2=reps||8;
+  var vol=rp2>0?(st2+' \u00d7 '+rp2):(st2+' \u00d7 max hold');
+  return {name:p.base[0].n,
+          v:vol+(kg>0?' @ +'+kg+'kg':' @ bodyweight'),
+          rli:rli,weighted:true,load:kg,sets:st2,reps:rp2,
           pattern:patternId,patternName:p.name,ladder:'base'};
 }
