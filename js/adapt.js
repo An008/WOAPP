@@ -26,8 +26,8 @@ function rliDelta(achieved,target){
   if(gap>=4)return 0.14;      // trivially easy - large jump
   if(gap>=2)return 0.08;
   if(gap>=1)return 0.04;
-  if(achieved<=target.hi)return 0.02;   // in band - creep up
-  if(achieved<=target.hi+1)return 0;    // at the ceiling - hold
+  if(achieved<target.hi)return 0.02;    // strictly inside band - creep up
+  if(achieved<=target.hi+1)return 0;    // at or just past ceiling - hold
   return -0.07;                          // over the ceiling - reduce
 }
 
