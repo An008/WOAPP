@@ -9,7 +9,7 @@ function renderSettings(){
   +'<div class="sh">PROFILE</div>'
   +'<div style="background:var(--bg3);border:1px solid var(--bord2);border-radius:12px;margin:0 18px 10px;padding:14px;display:flex;align-items:center;gap:12px">'
   +'<div style="width:44px;height:44px;border-radius:12px;background:rgba(232,160,42,.18);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900">'+CUR_USER.name.substring(0,2).toUpperCase()+'</div>'
-  +'<div style="flex:1"><div style="font-size:16px;font-weight:700;color:var(--white)">'+CUR_USER.name+'</div><div style="font-size:11px;color:var(--txt2);margin-top:2px">'+CUR_USER.type.toUpperCase()+' profile</div></div>'
+  +'<div style="flex:1"><div style="font-size:16px;font-weight:700;color:var(--white)">'+CUR_USER.name+'</div><div style="font-size:11px;color:var(--txt2);margin-top:2px">'+(CUR_USER.type||'training').toUpperCase()+' profile</div></div>'
   +'<button onclick="doLogout()" style="padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--txt2);font-size:13px;font-weight:700;cursor:pointer">Sign out</button></div>'
   +(CUR_USER.type==='test'?'<div style="padding:0 18px 10px"><button onclick="if(confirm(\'Clear all training data for '+CUR_USER.name+'?\')){localStorage.removeItem(\''+SK+'-'+CUR_USER.name+'\');loadS();renderToday();renderSettings();}" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(155,141,232,.3);background:rgba(155,141,232,.08);color:var(--purple);font-size:13px;font-weight:700;cursor:pointer">&#128465; Clear Test Data</button></div>':'')
   +'<div class="sh">EQUIPMENT AVAILABLE</div>'
