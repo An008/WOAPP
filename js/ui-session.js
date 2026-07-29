@@ -127,14 +127,14 @@ function renderFC(){
     var rpeB=[1,2,3,4,5,6,7,8,9,10].map(function(v){return '<div class="rpe-b '+(setData.rpe===v?'on':'')+'" data-v="'+v+'" onclick="fcRpe('+v+')">'+v+'</div>';}).join('');
     var prefill=(setData.wt!=null?setData.wt:(al&&al.weight?al.weight:''));
     inputsHtml='<div class="fc-inp-box"><div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px">'
-      +(ex.wt?'<div class="fc-ig"><div class="fc-il">Weight (kg)</div><input class="fc-if" type="number" inputmode="decimal" id="fc-wt" placeholder="'+(al&&al.weight?al.weight+' kg (AI rec)':'BW')+'" value="'+prefill+'" oninput="fcWt(this.value)"></div>':'<div class="fc-ig"><div class="fc-il">Actions completed'+(ex.rpp?' / '+ex.rpp:'')+'</div><input class="fc-if" type="number" inputmode="numeric" id="fc-rp" placeholder="'+(ex.rpp||'Max')+'" value="'+(setData.rp!=null?setData.rp:'')+'" oninput="fcRp(this.value)"></div>')
+      +(ex.wt?'<div class="fc-ig"><div class="fc-il">Load (kg)</div><input class="fc-if" type="number" inputmode="decimal" id="fc-wt" placeholder="'+(al&&al.weight?al.weight+' kg':'0 = bodyweight')+'" value="'+prefill+'" oninput="fcWt(this.value)"></div>':'')+'<div class="fc-ig"><div class="fc-il">Actions completed'+(ex.rpp?' / '+ex.rpp:'')+'</div><input class="fc-if" type="number" inputmode="numeric" id="fc-rp" placeholder="'+(ex.rpp||'Max')+'" value="'+(setData.rp!=null?setData.rp:'')+'" oninput="fcRp(this.value)"></div>'
       +'</div><div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:5px">Effort (RPE)</div>'
       +'<div class="rpe-g" id="fc-rpe">'+rpeB+'</div></div>';
   }
   var html='<div class="fc-blk" style="color:'+card.blkCol+'">'+card.blkName+'</div>'
     +'<div class="fc-name">'+ex.n+'</div>'
     +(card.dl?'<div style="display:inline-block;padding:2px 8px;background:rgba(74,158,219,.15);border:1px solid rgba(74,158,219,.3);border-radius:4px;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:6px">DELOAD WEEK \u2014 same weight, 1 fewer set</div>':'')
-  +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+'<span style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">OBJECTIVE '+(FC_IDX+1)+' OF '+FC_CARDS.length+'</span>'+(ex.fieldVariant?'<span style="font-size:8px;font-weight:800;letter-spacing:.12em;color:#4A9EDB;background:rgba(74,158,219,.12);border:1px solid rgba(74,158,219,.3);border-radius:4px;padding:2px 6px">FIELD</span>':'')+'</div>'+'<div class="fc-set">'+(isTimed?ex.v:'Serial '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' actions':'Max actions')+(ex.rest>0?' \xb7 '+ex.rest+'s regroup':''))+'</div>'
+  +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+'<span style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">OBJECTIVE '+(FC_IDX+1)+' OF '+FC_CARDS.length+'</span>'+(ex.fieldVariant?'<span style="font-size:8px;font-weight:800;letter-spacing:.12em;color:#4A9EDB;background:rgba(74,158,219,.12);border:1px solid rgba(74,158,219,.3);border-radius:4px;padding:2px 6px">FIELD</span>':'')+(ex.aiReplaced?'<span style="font-size:8px;font-weight:800;letter-spacing:.12em;color:var(--purple);background:rgba(155,141,232,.12);border:1px solid rgba(155,141,232,.3);border-radius:4px;padding:2px 6px">AI ADJUSTED</span>':'')+'</div>'+'<div class="fc-set">'+(isTimed?ex.v:'Serial '+(card.si+1)+' of '+card.totalSets+' \xb7 '+(ex.rpp?ex.rpp+' actions':'Max actions')+(ex.rest>0?' \xb7 '+ex.rest+'s regroup':''))+'</div>'
     +alHtml+rpiHtml
     +mmHtml
     +(ytHtml?ytHtml+'<br>':'')
@@ -146,6 +146,7 @@ function renderFC(){
     +(prevEx?'<div class="fc-np-item"><div class="fc-np-l">&#8592; Prev</div><div class="fc-np-n">'+prevEx.n+'</div></div>':'<div class="fc-np-item" style="opacity:.3"><div class="fc-np-l">Start</div><div class="fc-np-n">Beginning</div></div>')
     +(nextEx?'<div class="fc-np-item"><div class="fc-np-l">Next &#8594;</div><div class="fc-np-n">'+nextEx.n+'</div></div>':'<div class="fc-np-item" style="opacity:.3"><div class="fc-np-l">Next</div><div class="fc-np-n">Session done</div></div>')
     +'</div>'
+    +'<div id="fc-gate" style="display:none;text-align:center;padding:8px 12px;margin-top:8px;background:rgba(232,160,42,.1);border:1px solid rgba(232,160,42,.28);border-radius:10px;font-size:12px;font-weight:700;color:var(--amber)"></div>'
     +'<div style="text-align:center;padding:12px 0 4px">'
     +'<span onclick="fcSkip()" style="font-size:12px;font-weight:700;color:var(--txt3);cursor:pointer;border-bottom:1px dashed var(--bord2);padding-bottom:2px">Cannot execute \u2014 skip objective</span></div>'
   ;
@@ -154,15 +155,18 @@ function renderFC(){
   var btn=document.getElementById('fc-done-btn');
   // textContent does NOT decode HTML entities - use real characters
   btn.style.display='';
+  var _miss=isDone?[]:serialMissing(ex,setData);
   btn.textContent=isDone?'\u2713 OBJECTIVE SECURED \u2014 NEXT'
-                        :'\u2713 LOG '+(isTimed?'ACTIVITY':'SERIAL '+(card.si+1));
-  btn.style.background=isDone?'rgba(61,184,122,.25)':'var(--green)';
+                        :(_miss.length?'Needs '+_miss.join(' + ')
+                                      :'\u2713 LOG '+(isTimed?'ACTIVITY':'SERIAL '+(card.si+1)));
+  btn.style.background=isDone?'rgba(61,184,122,.25)':(_miss.length?'rgba(255,255,255,.08)':'var(--green)');
   btn.style.border=isDone?'1px solid rgba(61,184,122,.4)':'none';
+  btn.style.color=(!isDone&&_miss.length)?'var(--txt3)':'';
 }
 
-function fcWt(v){var c=FC_CARDS[FC_IDX];ensureSet(c.exId,c.si).wt=v?parseFloat(v):null;saveS();}
-function fcRp(v){var c=FC_CARDS[FC_IDX];ensureSet(c.exId,c.si).rp=v?parseInt(v):null;saveS();}
-function fcRpe(v){
+function _fcWt_orig(v){var c=FC_CARDS[FC_IDX];ensureSet(c.exId,c.si).wt=v?parseFloat(v):null;saveS();}
+function _fcRp_orig(v){var c=FC_CARDS[FC_IDX];ensureSet(c.exId,c.si).rp=v?parseInt(v):null;saveS();}
+function _fcRpe_orig(v){
   var c=FC_CARDS[FC_IDX];ensureSet(c.exId,c.si).rpe=v;saveS();
   var g=document.getElementById('fc-rpe');
   if(g)g.querySelectorAll('.rpe-b').forEach(function(b){b.classList.toggle('on',parseInt(b.dataset.v)===v);});
@@ -182,6 +186,17 @@ function ensureSet(exId,si){
 // Skip an objective that cannot be executed today. Recorded as skipped, never
 // as done: the mission can still finish, but merit and volume only credit work
 // actually performed.
+
+// A serial only counts if it carries real data. Marking work done with nothing
+// logged corrupts volume, recovery, macros and every downstream calculation.
+function serialMissing(ex,setData){
+  if(ex.t==='time')return [];            // timed work is an acknowledgement
+  var miss=[];
+  if(setData.rp==null||setData.rp===''||Number(setData.rp)<=0)miss.push('actions');
+  if(setData.rpe==null)miss.push('RPE');
+  return miss;
+}
+
 function fcSkip(){
   var card=FC_CARDS[FC_IDX],ex=card.ex;
   if(!confirm('Skip '+ex.n+'?\n\nIt will be recorded as skipped, not completed. The mission can still be finished.'))return;
@@ -205,6 +220,18 @@ function fcSkip(){
 
 function fcDone(){
   var card=FC_CARDS[FC_IDX],ex=card.ex,isTimed=ex.t==='time';
+  var _sess0=getOrCreate(curSessDate,curSessType);
+  var _ed0=_sess0.exercises[ex.id]||{sets:[]};
+  var _sd0=(_ed0.sets&&_ed0.sets[card.si])||{done:false,wt:null,rp:null,rpe:null};
+  var _already=isTimed?_ed0.comp:_sd0.done;
+  if(!_already){
+    var miss=serialMissing(ex,_sd0);
+    if(miss.length){
+      var w=document.getElementById('fc-gate');
+      if(w){w.textContent='Log '+miss.join(' and ')+' before securing this objective, or skip it below.';w.style.display='';}
+      return;
+    }
+  }
   if(resolvedFor(curSessDate,curSessType).pct>=100&&FC_IDX===FC_CARDS.length-1){
     showComplete();return;
   }
@@ -258,7 +285,7 @@ function showComplete(){
     +'<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px">'
     +(sd.after==='breathing'?'<button class="btn" style="background:rgba(74,158,219,.15);border:1px solid rgba(74,158,219,.25)" onclick="openBreath()">&#127756; Breathing Protocol</button>':'')
     +(sd.after==='journal'?'<button class="btn" style="background:rgba(155,141,232,.15);border:1px solid rgba(155,141,232,.25)" onclick="openJournalEntry();closeOv(\'v-flashcard\')">&#128214; Mission Debrief</button>':'')
-    +'<button class="btn" style="background:rgba(155,141,232,.12);border:1px solid rgba(155,141,232,.2);color:var(--purple)" onclick="analyzeSession()">&#129504; Request Debrief \u2014 AI Command</button>'
+    +'<button class="btn" style="background:rgba(155,141,232,.12);border:1px solid rgba(155,141,232,.2);color:var(--purple)" onclick="runDebrief(curSessDate,curSessType)">&#129504; Request Mission Debrief</button>'
     +'<button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--txt2)" onclick="closeOv(\'v-flashcard\');showTab(\'today\')">&#8592; Return to Base</button>'
     +'</div><div id="ai-resp-fc" style="margin-top:16px;width:100%;max-width:360px;text-align:left"></div></div>';
 }
@@ -349,3 +376,26 @@ async function callAI(key,prompt,onOK,onErr){
     onOK(txt||'No response received.');
   }catch(e){onErr(e.message);}
 }
+
+
+// Re-evaluate the gate on every input so the button state is always truthful
+function _refreshGate(){
+  var card=FC_CARDS[FC_IDX],ex=card.ex;
+  var sess=getOrCreate(curSessDate,curSessType);
+  var ed=sess.exercises[ex.id]||{sets:[]};
+  var sd=(ed.sets&&ed.sets[card.si])||{done:false,wt:null,rp:null,rpe:null};
+  var isDone=ex.t==='time'?ed.comp:sd.done;
+  var miss=isDone?[]:serialMissing(ex,sd);
+  var g=document.getElementById('fc-gate');
+  if(g&&!miss.length){g.style.display='none';}
+  var btn=document.getElementById('fc-done-btn');
+  if(!btn)return;
+  btn.textContent=isDone?'\u2713 OBJECTIVE SECURED \u2014 NEXT'
+                        :(miss.length?'Needs '+miss.join(' + ')
+                                     :'\u2713 LOG '+(ex.t==='time'?'ACTIVITY':'SERIAL '+(card.si+1)));
+  btn.style.background=isDone?'rgba(61,184,122,.25)':(miss.length?'rgba(255,255,255,.08)':'var(--green)');
+  btn.style.color=(!isDone&&miss.length)?'var(--txt3)':'';
+}
+function fcWt(v){_fcWt_orig(v);_refreshGate();}
+function fcRp(v){_fcRp_orig(v);_refreshGate();}
+function fcRpe(v){_fcRpe_orig(v);_refreshGate();}
