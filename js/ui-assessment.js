@@ -38,17 +38,60 @@ function renderAsComplete(){
 function addDays(dateStr,n){var d=new Date(dateStr+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];}
 function daysUntil(dateStr){return Math.ceil((new Date(dateStr+'T12:00:00')-new Date())/86400000);}
 function extractJSON(txt){
-  txt=txt.replace(/```json\s*/g,'').replace(/```\s*/g,'');
+  if(!txt)return null;
+  var trunc=txt.indexOf('[[TRUNCATED]]')>-1;
+  txt=txt.replace('[[TRUNCATED]]','').replace(/```json\s*/g,'').replace(/```\s*/g,'');
   try{return JSON.parse(txt.trim());}catch(e){}
   var start=txt.indexOf('{');
   if(start===-1)return null;
-  var depth=0;
+  // Walk with string awareness - braces inside quoted values must not count
+  var depth=0,inStr=false,esc=false;
   for(var i=start;i<txt.length;i++){
-    if(txt[i]==='{')depth++;
-    else if(txt[i]==='}'){depth--;if(depth===0){try{return JSON.parse(txt.substring(start,i+1));}catch(e2){return null;}}}
+    var ch=txt[i];
+    if(esc){esc=false;continue;}
+    if(ch==='\\'){esc=true;continue;}
+    if(ch==='"'){inStr=!inStr;continue;}
+    if(inStr)continue;
+    if(ch==='{')depth++;
+    else if(ch==='}'){
+      depth--;
+      if(depth===0){try{return JSON.parse(txt.substring(start,i+1));}catch(e2){break;}}
+    }
+  }
+  // Truncated mid-object: close what is still open and salvage the complete keys
+  var frag=txt.substring(start);
+  if(inStr)frag+='"';
+  var d2=0,s2=false,e2b=false;
+  for(var j=0;j<frag.length;j++){
+    var c2=frag[j];
+    if(e2b){e2b=false;continue;}
+    if(c2==='\\'){e2b=true;continue;}
+    if(c2==='"'){s2=!s2;continue;}
+    if(s2)continue;
+    if(c2==='{')d2++; else if(c2==='}')d2--;
+  }
+  frag=frag.replace(/,\s*$/,'');
+  for(var k=0;k<d2;k++)frag+='}';
+  try{return JSON.parse(frag);}catch(e3){}
+  // Last resort: cut back to the final complete top-level entry
+  var cut=frag.lastIndexOf('},');
+  if(cut>0){
+    var head=frag.substring(0,cut+1);
+    var d3=0,s3=false,e3b=false;
+    for(var m=0;m<head.length;m++){
+      var c3=head[m];
+      if(e3b){e3b=false;continue;}
+      if(c3==='\\'){e3b=true;continue;}
+      if(c3==='"'){s3=!s3;continue;}
+      if(s3)continue;
+      if(c3==='{')d3++; else if(c3==='}')d3--;
+    }
+    for(var n=0;n<d3;n++)head+='}';
+    try{return JSON.parse(head);}catch(e4){}
   }
   return null;
 }
+
 
 function submitAssessment(){
   var key=getApiKey(),el=document.getElementById('as-ai-resp');
