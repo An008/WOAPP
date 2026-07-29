@@ -182,8 +182,9 @@ function developmentMap(){
     Object.keys(s.exercises).forEach(function(exId){
       var ed=s.exercises[exId];
       if(!ed)return;
-      var sets=(ed.sets||[]).filter(function(x){return x.done;}).length;
-      if(!sets&&ed.comp)sets=1;
+      // only serials carrying an RPE count as verified work
+      var sets=(ed.sets||[]).filter(function(x){return x.done&&x.rpe!=null;}).length;
+      if(!sets&&ed.comp&&(!ed.sets||!ed.sets.length))sets=1;
       if(!sets)return;
       var mm=MM[exId];
       if(!mm)return;
