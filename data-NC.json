@@ -6,7 +6,7 @@
     "height": 164,
     "age": 40,
     "apiKey": "",
-    "loadout": "base",
+    "loadout": "field",
     "remindTime": "18:00",
     "activity": 1.35,
     "bfReferences": [
@@ -388,6 +388,12 @@
       },
       "started": "2026-07-29T06:21:56.659Z",
       "mode": "base"
+    },
+    "2026-07-30|A": {
+      "type": "A",
+      "date": "2026-07-30",
+      "exercises": {},
+      "started": "2026-07-30T21:23:26.534Z"
     }
   },
   "journal": {},
