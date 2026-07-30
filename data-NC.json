@@ -393,7 +393,8 @@
       "type": "A",
       "date": "2026-07-30",
       "exercises": {},
-      "started": "2026-07-30T21:23:26.534Z"
+      "started": "2026-07-30T21:23:26.534Z",
+      "mode": "field"
     }
   },
   "journal": {},
