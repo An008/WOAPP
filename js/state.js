@@ -83,6 +83,14 @@ function totalPlannedSessions(){
 }
 function goalPct(){
   var t=totalPlannedSessions();
+  if(!t)return 0;
+  // Progress toward the goal is a READINESS measure and erodes with inactivity.
+  // Missions Run is the historical record and never changes.
+  var d=(typeof meritDecay==='function')?meritDecay():{pct:0};
+  return Math.min(100,Math.round(completedSessions()/t*(1-(d.pct||0))*1000)/10);
+}
+function goalPctRaw(){
+  var t=totalPlannedSessions();
   return t?Math.min(100,Math.round(completedSessions()/t*1000)/10):0;
 }
 function isPhaseEnd(){return getPhaseWk()>=PHASES[getPhase()].weeks;}
