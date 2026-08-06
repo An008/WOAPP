@@ -82,15 +82,58 @@ function xpBreakdown(){
   return b;
 }
 
-function levelState(){
-  var total=xpBreakdown().total, lvl=1, spent=0;
-  while(total-spent>=xpToNext(lvl)&&lvl<99){spent+=xpToNext(lvl);lvl++;}
-  var into=total-spent, need=xpToNext(lvl);
-  var rank='NOVICE';
-  RANKS.forEach(function(r){if(lvl>=r.min)rank=r.name;});
-  return {level:lvl,into:into,need:need,total:total,rank:rank,
-          pct:Math.min(100,Math.round(into/need*100))};
+
+// --- DETRAINING DECAY --------------------------------------------------------
+// Merit records work PERFORMED. Effective merit records CURRENT capability.
+// Detraining is real, so effective merit erodes with inactivity. Like every
+// other number here it is DERIVED at read time - nothing is stored, nothing is
+// permanently taken, and a single mission restores the entire loss.
+//
+// The 5-day grace is deliberate: the plan itself creates gaps of up to 3 days
+// through enforced rest, so a shorter grace would punish correct adherence.
+var DECAY_GRACE=5;      // days of inactivity before any erosion
+var DECAY_BLOCK=3;      // days per decay step
+var DECAY_RATE=0.03;    // 3 per cent per step
+var DECAY_MAX=0.40;     // floor - never erode more than 40 per cent
+
+function meritDecay(){
+  if(typeof trainingDates!=='function')return {active:false,pct:0,blocks:0,days:0};
+  if(!trainingDates().length)return {active:false,pct:0,blocks:0,days:0};
+  var days=daysSinceTraining();
+  if(days<0)days=0;
+  if(days<=DECAY_GRACE)return {active:false,pct:0,blocks:0,days:days,
+                               nextIn:DECAY_GRACE-days+1};
+  var blocks=Math.floor((days-DECAY_GRACE)/DECAY_BLOCK)+1;
+  var pct=Math.min(DECAY_MAX,blocks*DECAY_RATE);
+  return {active:true,pct:pct,blocks:blocks,days:days,
+          capped:pct>=DECAY_MAX,
+          nextIn:DECAY_BLOCK-((days-DECAY_GRACE)%DECAY_BLOCK)};
 }
+function effectiveMerit(){
+  var d=meritDecay();
+  return Math.round(xpBreakdown().total*(1-d.pct));
+}
+function levelFromMerit(total){
+  var lvl=1,spent=0;
+  while(total-spent>=xpToNext(lvl)&&lvl<99){spent+=xpToNext(lvl);lvl++;}
+  return {level:lvl,into:total-spent,need:xpToNext(lvl)};
+}
+
+function levelState(){
+  var earned=xpBreakdown().total;
+  var d=meritDecay();
+  var eff=Math.round(earned*(1-d.pct));
+  var cur=levelFromMerit(eff), peak=levelFromMerit(earned);
+  // Rank reads from PEAK - earned and never lost. Tier reads from effective,
+  // so it falls back with inactivity. That is what makes decay visible.
+  var rank='RECRUIT',note='';
+  RANKS.forEach(function(r){if(peak.level>=r.min){rank=r.name;note=r.note;}});
+  return {level:cur.level,into:cur.into,need:cur.need,total:eff,
+          earned:earned,peak:peak.level,decayed:peak.level-cur.level,
+          decay:d,rank:rank,note:note,
+          pct:Math.min(100,Math.round(cur.into/cur.need*100))};
+}
+
 
 // Compact level strip for the Today screen
 function xpBar(){
@@ -248,6 +291,18 @@ function renderDevelopment(){
    +'<div style="font-size:17px;font-weight:900;color:var(--white);font-variant-numeric:tabular-nums;line-height:1.2">'+(sus?sustainmentDays()+'d':L.total.toLocaleString())+'</div>'
    +'<div style="font-size:9px;color:var(--txt3)">'+(sus?'since qualification':L.into+' / '+L.need+' to next')+'</div></div>'
    +'</div>'
+   +(L.decay&&L.decay.active
+     ?'<div style="margin-top:9px;padding:10px 12px;background:rgba(227,80,80,.08);border:1px solid rgba(227,80,80,.22);border-radius:12px">'
+      +'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--red)">DETRAINING</div>'
+      +'<div style="font-size:11px;color:var(--txt2);margin-top:3px;line-height:1.5">'
+      +L.decay.days+' days inactive \u00b7 '+L.decay.blocks+' step'+(L.decay.blocks!==1?'s':'')
+      +' \u00b7 '+Math.round(L.decay.pct*100)+'% eroded'+(L.decay.capped?' (floor)':'')
+      +'<br>Earned '+L.earned.toLocaleString()+' merit, holding '+L.total.toLocaleString()
+      +'. Rank is never lost \u2014 one mission restores the rest.</div></div>'
+     :'<div style="margin-top:9px;padding:9px 12px;background:rgba(61,184,122,.07);border:1px solid rgba(61,184,122,.2);border-radius:12px">'
+      +'<div style="font-size:10px;color:var(--green);font-weight:700">No detraining'
+      +(L.decay&&L.decay.nextIn?' \u00b7 '+L.decay.nextIn+' day'+(L.decay.nextIn!==1?'s':'')+' grace left':'')
+      +'</div></div>')
    +attributeBand()
    +'<div style="font-size:10px;color:var(--txt3);line-height:1.55;margin-top:11px">'
    +(sus
