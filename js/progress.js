@@ -142,7 +142,7 @@ function xpBar(){
     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">'
     +'<div style="display:flex;align-items:baseline;gap:8px;min-width:0">'
     +'<span style="font-size:14px;font-weight:900;color:var(--amber);letter-spacing:-.01em;white-space:nowrap">'+L.rank+'</span>'
-    +'<span style="font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--txt3)">T'+L.level+'</span></div>'
+    +'<span style="font-size:9px;font-weight:800;letter-spacing:.14em;color:'+(L.decayed>0?'var(--red)':'var(--txt3)')+'">T'+L.level+(L.decayed>0?' \u2193 from T'+L.peak:'')+'</span></div>'
     +'<span style="font-size:9px;font-weight:800;letter-spacing:.12em;color:'+R.state.col+';white-space:nowrap">'+R.state.short+' '+R.score+'%</span>'
     +'</div>'
     +'<div style="display:flex;gap:3px">'
@@ -153,6 +153,13 @@ function xpBar(){
     +'</div>'
     +'<div style="font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--txt3);margin-top:6px">'
     +(sus?'SUSTAINMENT \u00b7 HOLD READINESS':'MERIT '+L.into+' / '+L.need+' TO NEXT RANK')+'</div>'
+    +(L.decay&&L.decay.active
+      ?'<div style="margin-top:8px;padding:8px 10px;background:rgba(227,80,80,.09);border:1px solid rgba(227,80,80,.22);border-radius:9px">'
+       +'<div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--red)">DETRAINING \u00b7 '+Math.round(L.decay.pct*100)+'% ERODED</div>'
+       +'<div style="font-size:10px;color:var(--txt2);margin-top:2px">'+L.decay.days+' days since last mission'
+       +(L.decayed>0?' \u00b7 down '+L.decayed+' tier'+(L.decayed!==1?'s':''):'')
+       +'. One mission restores it.</div></div>'
+      :'')
     +'</div>';
 }
 
