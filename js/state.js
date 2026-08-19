@@ -19,9 +19,45 @@ var AS_IDX=0, AS_RES={};
 
 function today(){return new Date().toISOString().split('T')[0];}
 function fmtDate(s){var d=new Date(s+'T12:00:00');return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
-function getPhase(){var w=Math.floor((new Date()-new Date(S.profile.start))/604800000);return w<8?0:w<20?1:w<36?2:3;}
-function getPhaseWk(){var w=Math.floor((new Date()-new Date(S.profile.start))/604800000),ph=getPhase(),off=0;for(var i=0;i<ph;i++)off+=PHASES[i].weeks;return Math.max(1,w-off+1);}
-function isDeloadWeek(){return S&&S.profile&&S.profile.start&&(getPhaseWk()%4===0);}
+// --- PROGRAMME PROGRESSION ---------------------------------------------------
+// Progression is EARNED, not elapsed. The programme week is the lesser of the
+// calendar week and the week your completed missions have paid for, so:
+//   - it cannot run ahead of you during a hiatus
+//   - it cannot be rushed faster than the body adapts
+// A detraining hiatus walks the earned week backwards, so returning after a
+// long break puts you at a difficulty you can actually meet.
+var MISSIONS_PER_WEEK=4;
+
+function calendarWeeks(){
+  if(!S||!S.profile||!S.profile.start)return 0;
+  return Math.max(0,Math.floor((new Date()-new Date(S.profile.start))/604800000));
+}
+function earnedWeeks(){
+  var done=(typeof completedSessions==='function')?completedSessions():0;
+  return done/MISSIONS_PER_WEEK;
+}
+function programmeWeeks(){
+  var e=earnedWeeks();
+  var d=(typeof meritDecay==='function')?meritDecay():{pct:0,active:false};
+  if(d.active)e=e*(1-(d.pct||0));      // detraining regresses the programme
+  return Math.max(0,Math.min(calendarWeeks(),Math.floor(e)));
+}
+function getPhase(){var w=programmeWeeks();return w<8?0:w<20?1:w<36?2:3;}
+function getPhaseWk(){
+  var w=programmeWeeks(),ph=getPhase(),off=0;
+  for(var i=0;i<ph;i++)off+=PHASES[i].weeks;
+  return Math.max(1,w-off+1);
+}
+// Deload only makes sense once there is real accumulated work to unload from
+function isDeloadWeek(){
+  if(!S||!S.profile||!S.profile.start)return false;
+  if(completedSessions()<MISSIONS_PER_WEEK*3)return false;
+  return getPhaseWk()%4===0;
+}
+// True when the calendar has run ahead of the work actually done
+function progressionStalled(){
+  return calendarWeeks()>programmeWeeks()+1;
+}
 // --- SESSION KEYS -------------------------------------------------------------
 // Sessions are keyed "YYYY-MM-DD|TYPE" so every session type stays reachable on
 // any day. Keying by date alone locked the type once a record existed, which is
