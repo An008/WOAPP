@@ -260,6 +260,20 @@ function renderToday(){
    +tile('P'+(ph+1),'','Phase \u00b7 Wk '+phWk)
    +'</div>';
 
+  if(typeof progressionStalled==='function'&&progressionStalled()){
+    h+='<div style="margin:11px 16px 0;padding:11px 14px;background:rgba(232,160,42,.07);border:1px solid rgba(232,160,42,.22);border-radius:14px">'
+     +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)">PROGRAMME HELD</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:3px;line-height:1.5">Week '+(programmeWeeks()+1)+' of the programme, calendar week '+(calendarWeeks()+1)+'. '
+     +'Difficulty advances on missions completed, never on time passed \u2014 nothing has run ahead of you.</div></div>';
+  }
+  if(S.__regressionNotice){
+    var _r=S.__regressionNotice;
+    h+='<div style="margin:11px 16px 0;padding:11px 14px;background:rgba(74,158,219,.08);border:1px solid rgba(74,158,219,.25);border-radius:14px">'
+     +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">LOADS REGRESSED</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:3px;line-height:1.5">After '+_r.days+' days out, '+_r.moved.length
+     +' objective'+(_r.moved.length!==1?'s':'')+' stepped back '+Math.round(_r.loss*100)+'%. '
+     +'Ease in \u2014 your RPE will climb them back within a few missions.</div></div>';
+  }
   if(isDeloadWeek()){
     h+='<div style="margin:11px 16px 0;padding:11px 14px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.2);border-radius:16px">'
      +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK</div>'
