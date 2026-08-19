@@ -6,7 +6,7 @@
     "height": 164,
     "age": 40,
     "apiKey": "",
-    "loadout": "field",
+    "loadout": "base",
     "remindTime": "18:00",
     "activity": 1.35,
     "bfReferences": [
@@ -401,6 +401,12 @@
       "date": "2026-08-04",
       "exercises": {},
       "started": "2026-08-04T06:04:10.616Z"
+    },
+    "2026-08-19|A": {
+      "type": "A",
+      "date": "2026-08-19",
+      "exercises": {},
+      "started": "2026-08-19T15:16:27.195Z"
     }
   },
   "journal": {},
@@ -418,8 +424,8 @@
       "i": "&#128170;",
       "g": "20 consecutive push-ups, full ROM",
       "p": "Strength",
-      "done": false,
-      "achievedDate": null
+      "done": true,
+      "achievedDate": "2026-08-19"
     },
     {
       "id": "l3",
