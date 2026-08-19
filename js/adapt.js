@@ -85,6 +85,39 @@ function nextPrescription(obj){
           reason:adj.reason,delta:adj.delta,lastRpe:adj.lastRpe};
 }
 
+
+// --- RETURN FROM HIATUS ------------------------------------------------------
+// Detraining costs strength. Returning to the load you left at is how people
+// get hurt, so a hiatus walks every stored RLI back once, permanently, and
+// autoregulation climbs it again from your logged RPE.
+var RLI_REGRESSION=0.5;   // fraction of the merit decay applied to load
+
+function pendingRegression(){
+  var d=(typeof meritDecay==='function')?meritDecay():{active:false,pct:0};
+  if(!d.active)return null;
+  var loss=Math.round(d.pct*RLI_REGRESSION*100)/100;
+  if(loss<=0)return null;
+  var last=(S.profile&&S.profile.lastRegression)||null;
+  if(last&&last.days>=d.days)return null;      // already applied for this gap
+  return {loss:loss,days:d.days,decay:d.pct};
+}
+
+// Applied once when a mission is started after a hiatus
+function applyRegression(){
+  var r=pendingRegression();
+  if(!r)return null;
+  if(!S.profile.rli)S.profile.rli={};
+  var moved=[];
+  Object.keys(S.profile.rli).forEach(function(id){
+    var was=S.profile.rli[id];
+    var now=Math.max(0.10,Math.round(was*(1-r.loss)*100)/100);
+    if(now!==was){S.profile.rli[id]=now;moved.push({id:id,from:was,to:now});}
+  });
+  S.profile.lastRegression={date:today(),days:r.days,loss:r.loss,count:moved.length};
+  saveS();
+  return {loss:r.loss,days:r.days,moved:moved};
+}
+
 // Commit the new RLI after a mission debrief
 function commitRLI(exId,rli){
   if(!S.profile.rli)S.profile.rli={};
