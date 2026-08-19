@@ -10,6 +10,11 @@ function beginSession(forceType,forceDate){
   // date+type if one exists, otherwise creates it.
   if(forceType){curSessType=forceType;}
   else{var _p=planToday();curSessType=_p.mode==='train'?_p.type:'REST';}
+  // Returning after a hiatus: walk the loads back before building any cards
+  if(typeof applyRegression==='function'){
+    var _rg=applyRegression();
+    if(_rg&&_rg.moved.length)S.__regressionNotice=_rg;
+  }
   getOrCreate(td,curSessType);
   MISSION_MODE=loadoutFor(td,curSessType);
   saveS();
@@ -268,6 +273,7 @@ function fcDone(){
 }
 function confirmExit(){if(confirm('Exit session? Your logged sets are saved.'))closeOv('v-flashcard');}
 function showComplete(){
+  if(S)delete S.__regressionNotice;
   var sd=SESSIONS[curSessType];
   // Null-guarded: a single missing element must never abort the whole screen.
   var _btn=document.getElementById('fc-done-btn');
