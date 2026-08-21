@@ -204,14 +204,20 @@ function serialMissing(ex,setData){
 }
 
 function fcSkip(){
+  if(typeof showSkipSheet==='function')showSkipSheet();
+}
+
+function confirmSkip(reason){
+  var el=document.getElementById('skip-sheet');
+  if(el)el.remove();
   var card=FC_CARDS[FC_IDX],ex=card.ex;
-  if(!confirm('Skip '+ex.n+'?\n\nIt will be recorded as skipped, not completed. The mission can still be finished.'))return;
   var sess=getOrCreate(curSessDate,curSessType);
   if(!sess.exercises[ex.id])sess.exercises[ex.id]={sets:[],comp:false};
   sess.exercises[ex.id].skipped=true;
   sess.exercises[ex.id].comp=false;
+  sess.exercises[ex.id].skipReason=reason||'unlabelled';
   stampLoadout();saveS();
-  // jump past every remaining serial of this objective
+  // No regroup pause: nothing was performed, so there is nothing to recover from
   var last=FC_IDX;
   for(var i=FC_IDX;i<FC_CARDS.length;i++){
     if(FC_CARDS[i].exId===ex.id)last=i; else break;
@@ -223,6 +229,7 @@ function fcSkip(){
     saveS();autoSyncToGH();showComplete();
   }
 }
+
 
 function fcDone(){
   var card=FC_CARDS[FC_IDX],ex=card.ex,isTimed=ex.t==='time';
