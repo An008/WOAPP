@@ -559,6 +559,17 @@
             }
           ],
           "comp": true
+        },
+        "h-pull": {
+          "sets": [
+            {
+              "done": true,
+              "wt": 10,
+              "rp": 12,
+              "rpe": 4
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
