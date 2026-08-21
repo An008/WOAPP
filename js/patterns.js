@@ -170,3 +170,26 @@ function prescribe(patternId,rli,loadout,sets,reps){
           rli:rli,weighted:true,load:kg,sets:st2,reps:rp2,
           pattern:patternId,patternName:p.name,ladder:'base'};
 }
+
+// --- MUSCLE MAP BRIDGE -------------------------------------------------------
+// Pattern-driven objectives (v3.0.0) have no hand-written MM entry, so muscle
+// recovery and development volume were silently ignoring every main work
+// objective. Patterns already declare their movers - derive the map from them.
+function mmFor(exId,ex){
+  if(typeof MM!=='undefined'&&MM[exId])return MM[exId];
+  var pid=(ex&&ex.pattern)||null;
+  if(!pid&&typeof SESSIONS!=='undefined'){
+    for(var t in SESSIONS){
+      var sd=SESSIONS[t];
+      if(!sd||!sd.blocks)continue;
+      for(var i=0;i<sd.blocks.length;i++){
+        var exs=sd.blocks[i].exs||[];
+        for(var j=0;j<exs.length;j++)if(exs[j].id===exId&&exs[j].pattern){pid=exs[j].pattern;break;}
+        if(pid)break;
+      }
+      if(pid)break;
+    }
+  }
+  if(pid&&PATTERNS[pid])return {f:PATTERNS[pid].primary||[],b:PATTERNS[pid].secondary||[]};
+  return null;
+}
