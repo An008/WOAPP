@@ -436,9 +436,19 @@
               "wt": null,
               "rp": 5,
               "rpe": 2
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 2
             }
           ],
           "comp": true
+        },
+        "wu3": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
