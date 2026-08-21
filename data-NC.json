@@ -18,7 +18,7 @@
       }
     ]
   },
-  "next": "A",
+  "next": "B",
   "sessions": {
     "2026-07-25|A": {
       "type": "A",
@@ -597,9 +597,36 @@
               "wt": 0,
               "rp": 6,
               "rpe": 9
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 6,
+              "rpe": 10
             }
           ],
-          "comp": true
+          "comp": false,
+          "skipped": true
+        },
+        "grip": {
+          "sets": [],
+          "comp": false,
+          "skipped": true
+        },
+        "tib": {
+          "sets": [],
+          "comp": false,
+          "skipped": true
+        },
+        "heel-d": {
+          "sets": [],
+          "comp": false,
+          "skipped": true
+        },
+        "breath-mf": {
+          "sets": [],
+          "comp": false,
+          "skipped": true
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
