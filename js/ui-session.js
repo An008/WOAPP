@@ -265,7 +265,15 @@ function fcDone(){
   if(nowDone){
     if(FC_IDX<FC_CARDS.length-1){
       var rest=ex.rest||0;
-      if(rest>0){showRest(rest,ex.n,(FC_CARDS[FC_IDX+1].ex.n),function(){FC_IDX++;renderFC();});}
+      var _rpe=null;
+      try{
+        var _s=S.sessions[sessKey(curSessDate,curSessType)];
+        var _e=_s&&_s.exercises[ex.id];
+        var _st=_e&&_e.sets&&_e.sets[card.si];
+        if(_st&&_st.rpe!=null)_rpe=_st.rpe;
+      }catch(e){}
+      rest=dynamicRest(ex,_rpe);
+      if(rest>0){showRest(rest,ex.n,(FC_CARDS[FC_IDX+1].ex.n),function(){FC_IDX++;renderFC();},_rpe,ex);}
       else{FC_IDX++;renderFC();}
     } else {
       // Recovery is not part of the A-B-C rotation: completing it must not
@@ -348,8 +356,9 @@ var MM={
 var FG={'shoulders':[5,19,36,9],'chest':[12,18,22,13],'abs':[14,31,18,18],'biceps':[2,25,7,16],'forearms':[1,41,6,13],'hip_flex':[14,49,18,8],'quads':[10,57,26,22],'tibialis':[11,79,6,14]};
 var BG={'traps':[[9,16,26,12]],'rear_delt':[[2,20,9,8],[33,20,9,8]],'lats':[[4,25,12,20],[28,25,12,20]],'rhomboids':[[15,24,14,13]],'triceps':[[2,25,7,15],[35,25,7,15]],'glutes':[[9,55,10,11],[25,55,10,11]],'hamstrings':[[9,65,11,20],[24,65,11,20]],'calves':[[10,84,8,13],[26,84,8,13]]};
 
-function buildMuscleThumb(exId){
-  var mm=MM[exId];if(!mm)return '';
+function buildMuscleThumb(exId,ex){
+  var mm=(typeof mmFor==='function')?mmFor(exId,ex):MM[exId];
+  if(!mm)return '';
   var AM='#E8A02A', DM='rgba(255,255,255,.07)';
   var f='<svg width="40" height="87" viewBox="0 0 46 100" xmlns="http://www.w3.org/2000/svg"><ellipse cx="23" cy="7" rx="8" ry="7" fill="'+DM+'"/><rect x="19" y="14" width="8" height="5" rx="2" fill="'+DM+'"/>';
   Object.keys(FG).forEach(function(k){var r=FG[k];f+='<rect x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" rx="3" fill="'+(mm.f.indexOf(k)>=0?AM:DM)+'"/>';});
@@ -376,7 +385,23 @@ function restBrief(idx){
     +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">NEXT OBJECTIVE</div>'
     +'<div style="font-size:16px;font-weight:800;color:var(--white);margin-top:3px;line-height:1.2">'+ex.n+'</div>'
     +(vol?'<div style="font-size:11px;color:var(--txt2);margin-top:2px">'+vol+'</div>':'');
-  if(ex.cue)h+='<div style="font-size:12px;color:var(--txt);line-height:1.6;margin-top:9px">'+ex.cue+'</div>';
+  // What it works - the regroup is a good moment to know where it should land
+  var mm=(typeof mmFor==='function')?mmFor(ex.id,ex):((typeof MM!=='undefined')&&MM[ex.id]);
+  if(mm){
+    var nm=(typeof MUSCLE_NAMES!=='undefined')?MUSCLE_NAMES:{};
+    var prim=(mm.f||[]).map(function(k){return nm[k]||k;});
+    var sec=(mm.b||[]).map(function(k){return nm[k]||k;});
+    var thumb=(typeof buildMuscleThumb==='function')?buildMuscleThumb(ex.id,ex):'';
+    h+='<div style="display:flex;gap:12px;align-items:flex-start;margin-top:11px;padding-top:11px;border-top:1px solid var(--border)">'
+      +(thumb?'<div style="flex-shrink:0;display:flex;gap:3px">'+thumb+'</div>':'')
+      +'<div style="flex:1;min-width:0">'
+      +(prim.length?'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)">PRIME MOVERS</div>'
+        +'<div style="font-size:12px;color:var(--txt);margin-top:1px;line-height:1.4">'+prim.join(', ')+'</div>':'')
+      +(sec.length?'<div style="font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--txt3);margin-top:7px">SUPPORTING</div>'
+        +'<div style="font-size:11px;color:var(--txt2);margin-top:1px;line-height:1.4">'+sec.join(', ')+'</div>':'')
+      +'</div></div>';
+  }
+  if(ex.cue)h+='<div style="font-size:12px;color:var(--txt);line-height:1.6;margin-top:11px">'+ex.cue+'</div>';
   if(ex.feel)h+='<div style="font-size:11px;color:var(--txt3);line-height:1.55;margin-top:7px;font-style:italic">'+ex.feel+'</div>';
   if(ex.yt)h+='<a href="'+ytSearch(ex.yt)+'" target="_blank" rel="noopener" '
     +'style="display:block;margin-top:11px;padding:10px;border-radius:10px;text-align:center;text-decoration:none;'
@@ -385,16 +410,53 @@ function restBrief(idx){
   return h+'</div>';
 }
 
-function showRest(secs,doneEx,nextEx,cb){
+
+// --- DYNAMIC REGROUP ---------------------------------------------------------
+// Rest is scaled by how hard the serial actually was. An RPE 4 set has barely
+// touched the phosphagen system, so 150s is dead time.
+//
+// POWER WORK IS EXEMPT. A broad jump SHOULD read RPE 6 - it is never taken to
+// failure - and its rest exists for CNS recovery so the next rep is equally
+// explosive, not for metabolic clearance. Shortening it destroys the quality
+// the block exists to build.
+var REST_FLOOR=30;
+
+function restScale(rpe){
+  if(rpe==null)return 1;
+  if(rpe<=4)return 0.50;
+  if(rpe<=5)return 0.65;
+  if(rpe<=6)return 0.80;
+  if(rpe<=8)return 1.00;
+  return 1.15;                 // RPE 9-10 earned more, not less
+}
+
+function dynamicRest(ex,rpe){
+  var base=ex.rest||0;
+  if(base<=0)return 0;
+  var intent=ex.intent||'strength';
+  if(intent==='power'||intent==='support')return base;
+  var secs=Math.round(base*restScale(rpe)/5)*5;
+  return Math.max(REST_FLOOR,Math.min(base,secs));
+}
+
+function showRest(secs,doneEx,nextEx,cb,rpe,doneObj){
   clearInterval(RS_INT);
   RS_TOTAL=secs;RS_CB=cb;
+  RS_RPE=(rpe==null?null:rpe);
+  RS_FULL=(doneObj&&doneObj.rest)||secs;
   // Deadline-based, not a decrementing counter: mobile browsers throttle
   // setInterval in background tabs, so watching a video would otherwise stall
   // or desynchronise the timer.
   RS_END=Date.now()+secs*1000;
   RS_LEFT=secs;
   document.getElementById('rs-t').textContent=secs+'s';
-  document.getElementById('rs-ex').textContent='\u2713 '+doneEx+' secured';
+  var _lbl=document.getElementById('rs-ex');
+  if(_lbl){
+    var trimmed=(RS_FULL>secs);
+    _lbl.innerHTML='\u2713 '+doneEx+' secured'
+      +(trimmed?'<div style="font-size:11px;color:var(--green);font-weight:700;margin-top:3px">'
+        +'Regroup trimmed '+RS_FULL+'s \u2192 '+secs+'s'+(RS_RPE!=null?' \u00b7 RPE '+RS_RPE:'')+'</div>':'');
+  }
   document.getElementById('rs-bf').style.width='100%';
   var brief=document.getElementById('rs-brief');
   if(brief)brief.innerHTML=restBrief(FC_IDX+1);
