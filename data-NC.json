@@ -585,8 +585,15 @@
           "skipped": true
         },
         "v-pull": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": 0,
+              "rp": 3,
+              "rpe": 8
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
