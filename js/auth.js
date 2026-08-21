@@ -90,6 +90,7 @@ document.addEventListener('visibilitychange',function(){
 // ===========================================================
 var TABS=['today','history','journal','metrics','settings'];
 function showTab(id){
+  if(typeof wakeRelease==='function')wakeRelease();
   TABS.forEach(function(t){document.getElementById('v-'+t).classList.toggle('on',t===id);var nb=document.getElementById('nb-'+t);if(nb)nb.classList.toggle('on',t===id);});
   document.getElementById('nb-session').classList.remove('on');
   if(id==='today')renderToday();
