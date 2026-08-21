@@ -35,7 +35,7 @@ function missionReport(date,type){
         id:ex.id,name:ex.n,block:blk.id,blockName:blk.n,
         work:WORK_BLOCKS_AI.indexOf(blk.id)>=0,
         prescribed:ex.v,targetSets:ex.s||1,targetReps:ex.rpp||null,weighted:!!ex.wt,
-        skipped:!!ed.skipped,completed:!!ed.comp,
+        skipped:!!ed.skipped,skipReason:ed.skipReason||null,completed:!!ed.comp,
         setsLogged:sets.length,setsRated:rated.length,
         avgRpe:avgRpe,loads:loads,reps:reps,
         unverified:(sets.length>0&&rated.length===0)
@@ -50,7 +50,7 @@ function missionReport(date,type){
 
 function buildDebriefPrompt(rep){
   var lines=rep.rows.map(function(r){
-    var actual = r.skipped ? 'SKIPPED - could not execute'
+    var actual = r.skipped ? ('SKIPPED ('+(r.skipReason||'no reason given')+')')
       : r.setsLogged===0 ? 'NOT PERFORMED - no data logged'
       : r.unverified ? 'logged without RPE - treat as unverified'
       : (r.setsLogged+' serials'
@@ -69,7 +69,7 @@ function buildDebriefPrompt(rep){
    +'RULES:\n'
    +'1. Only adjust objectives marked [WORK]. [SUPPORT] items are warm-up, mobility, prehab or breathing - a low RPE there is CORRECT and must never trigger a load increase.\n'
    +'2. RPE guidance for [WORK]: below 3 = far too easy, make a large jump or replace the exercise with a harder variant. 4-5 = increase meaningfully. 6-8 = correct, progress slightly. 9-10 = reduce.\n'
-   +'3. SKIPPED, NOT PERFORMED or unverified objectives: work out why and REPLACE them with something achievable using ONLY the equipment listed above. Never prescribe equipment that is not listed.\n'
+   +'3. Act on the SKIP REASON, not the skip alone: "no equipment" means REPLACE using only the equipment listed above; "too easy" means the load was so low it was not worth doing, so raise it sharply or pick a harder variant; "too hard" means reduce; "pain" means replace with something that does not load the painful tissue and NEVER add load.\n'
    +'4. If an objective needs equipment the athlete lacks, replace it outright - do not restate it.\n'
    +'5. Apply the same correction to the SAME muscle group in the other missions where relevant, via crossMission.\n\n'
    +'Return ONLY raw JSON, nothing outside the braces:\n'
