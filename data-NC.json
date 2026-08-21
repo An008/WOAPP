@@ -509,8 +509,15 @@
           "comp": true
         },
         "h-press": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": 20,
+              "rp": 8,
+              "rpe": 6
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
