@@ -631,6 +631,12 @@
       },
       "started": "2026-08-21T15:00:18.372Z",
       "mode": "base"
+    },
+    "2026-08-21|REST": {
+      "type": "REST",
+      "date": "2026-08-21",
+      "exercises": {},
+      "started": "2026-08-21T17:32:55.584Z"
     }
   },
   "journal": {},
@@ -664,8 +670,8 @@
       "i": "&#127947;",
       "g": "Carry 15kg × 1km non-stop",
       "p": "Carry",
-      "done": false,
-      "achievedDate": null
+      "done": true,
+      "achievedDate": "2026-08-21"
     },
     {
       "id": "l5",
@@ -680,8 +686,8 @@
       "i": "&#127756;",
       "g": "60s exhale breath hold, 3 rounds",
       "p": "Fortitude",
-      "done": false,
-      "achievedDate": null
+      "done": true,
+      "achievedDate": "2026-08-21"
     },
     {
       "id": "l7",
