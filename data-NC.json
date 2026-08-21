@@ -447,6 +447,23 @@
           "comp": true
         },
         "wu3": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 10,
+              "rpe": 5
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 10,
+              "rpe": 6
+            }
+          ],
+          "comp": true
+        },
+        "wu4": {
           "sets": [],
           "comp": false
         }
