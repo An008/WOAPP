@@ -413,8 +413,15 @@
       "date": "2026-08-21",
       "exercises": {
         "wu1": {
-          "sets": [],
-          "comp": false
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 5,
+              "rpe": 2
+            }
+          ],
+          "comp": true
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
