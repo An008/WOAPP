@@ -341,6 +341,31 @@ function renderDevelopment(){
       +'<div style="font-size:9px;color:var(--txt3)">'+d.vol+' sets</div></div></div>';
   }).join('')+'</div>';
 
+  // Skip pattern - what the athlete keeps walking away from, and why
+  if(typeof skipFlags==='function'){
+    var sf=skipFlags();
+    if(sf.length){
+      h+='<div class="sh">SKIP PATTERN</div><div style="padding:0 16px">';
+      h+='<div style="font-size:11px;color:var(--txt2);line-height:1.5;padding-bottom:8px">'
+        +'Repeatedly skipped objectives. The reason decides the correction \u2014 these feed the next debrief.</div>';
+      sf.forEach(function(x){
+        var col=x.action==='escalate'?'#E8A02A':x.action==='replace'?'#4A9EDB'
+               :x.action==='freeze'?'#E35050':x.action==='reduce'?'#E35050':'#8B95A6';
+        var verdict=x.action==='escalate'?'Load raised sharply'
+                   :x.action==='replace'?'Queued for replacement'
+                   :x.action==='freeze'?'Load frozen \u2014 needs a substitute'
+                   :x.action==='reduce'?'Load reduced'
+                   :'No programme change';
+        h+='<div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)">'
+          +'<div style="width:3px;height:32px;border-radius:2px;background:'+col+';flex-shrink:0"></div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--white)">'+x.exId+'</div>'
+          +'<div style="font-size:10px;color:var(--txt3);margin-top:1px">'+x.label+' \u00b7 '+x.count+' of '+x.total+' skips \u00b7 '+verdict+'</div></div>'
+          +'<div style="font-size:13px;font-weight:900;color:'+col+'">'+x.total+'</div></div>';
+      });
+      h+='</div>';
+    }
+  }
+
   // XP ledger - shows exactly where every point came from
   var rows=[
     ['Missions executed',c.sessions,XP.session,b.sessions],
