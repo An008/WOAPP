@@ -13,7 +13,7 @@ var S=null;
 var CUR_USER=null;
 var curSessType='A', curSessDate='';
 var FC_CARDS=[], FC_IDX=0, FC_MSG=0;
-var RS_INT=null, RS_TOTAL=60, RS_LEFT=60, RS_CB=null;
+var RS_INT=null, RS_TOTAL=60, RS_LEFT=60, RS_CB=null, RS_END=0;
 var _brInt=null;
 var AS_IDX=0, AS_RES={};
 
