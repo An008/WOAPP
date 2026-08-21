@@ -18,6 +18,7 @@ function beginSession(forceType,forceDate){
   getOrCreate(td,curSessType);
   MISSION_MODE=loadoutFor(td,curSessType);
   saveS();
+  if(typeof wakeAcquire==='function')wakeAcquire();
   var sd=SESSIONS[curSessType];
   document.getElementById('ov-ttl').textContent=sd.name;
   document.getElementById('ov-sub').textContent=sd.dur;
@@ -274,6 +275,7 @@ function fcDone(){
 function confirmExit(){if(confirm('Exit session? Your logged sets are saved.'))closeOv('v-flashcard');}
 function showComplete(){
   if(S)delete S.__regressionNotice;
+  if(typeof wakeRelease==='function')wakeRelease();
   var sd=SESSIONS[curSessType];
   // Null-guarded: a single missing element must never abort the whole screen.
   var _btn=document.getElementById('fc-done-btn');
