@@ -550,6 +550,12 @@
               "wt": 39,
               "rp": 8,
               "rpe": 6
+            },
+            {
+              "done": true,
+              "wt": 41,
+              "rp": 5,
+              "rpe": 7
             }
           ],
           "comp": true
