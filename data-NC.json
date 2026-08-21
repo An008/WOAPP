@@ -16,7 +16,8 @@
         "waist": 93.5,
         "method": "DEXA"
       }
-    ]
+    ],
+    "keepAwake": true
   },
   "next": "B",
   "sessions": {
@@ -747,6 +748,10 @@
       "date": "2026-08-18",
       "weight": 73.1,
       "waist": 92
+    },
+    {
+      "date": "2026-08-21",
+      "weight": 73.4
     }
   ],
   "macros": {},
