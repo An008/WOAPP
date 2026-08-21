@@ -482,6 +482,11 @@
         },
         "hinge": {
           "sets": [],
+          "comp": false,
+          "skipped": true
+        },
+        "squat": {
+          "sets": [],
           "comp": false
         }
       },
