@@ -236,7 +236,7 @@ function developmentMap(){
       var sets=(ed.sets||[]).filter(function(x){return x.done&&x.rpe!=null;}).length;
       if(!sets&&ed.comp&&(!ed.sets||!ed.sets.length))sets=1;
       if(!sets)return;
-      var mm=MM[exId];
+      var mm=(typeof mmFor==='function')?mmFor(exId):MM[exId];
       if(!mm)return;
       (mm.f||[]).forEach(function(g){if(vol[g]!==undefined)vol[g]+=sets;});
       (mm.b||[]).forEach(function(g){if(vol[g]!==undefined)vol[g]+=sets*0.6;});
