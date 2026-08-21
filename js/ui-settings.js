@@ -86,6 +86,20 @@ function renderSettings(){
   })()
   +'<div class="sh">TIMELINE</div>'
   +'<div style="padding:14px 18px;background:var(--card);margin:0 18px;border-radius:12px;border:1px solid var(--border);font-size:14px;color:var(--txt2);line-height:1.85">Phase 1 Foundation: <span style="color:var(--white);font-weight:700">Weeks 1\u20138</span><br>Phase 2 Development: <span style="color:var(--white);font-weight:700">Weeks 9\u201320</span><br>Phase 3 Integration: <span style="color:var(--white);font-weight:700">Weeks 21\u201336</span><br>Phase 4 Readiness: <span style="color:var(--white);font-weight:700">Weeks 37\u201348</span><br><div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Finland X: <span style="color:var(--amber);font-weight:700">~12 months</span></div></div>'
+  +'<div class="sh">SCREEN</div>'
+  +'<div class="sr"><div class="sr-l">Keep screen awake during missions</div>'
+  +'<div onclick="toggleWake()" style="width:46px;height:26px;border-radius:14px;cursor:pointer;position:relative;background:'
+  +((S.profile&&S.profile.keepAwake!==false)?'rgba(61,184,122,.45)':'var(--bord2)')+'">'
+  +'<div style="position:absolute;top:3px;left:'+((S.profile&&S.profile.keepAwake!==false)?'23px':'3px')
+  +';width:20px;height:20px;border-radius:10px;background:var(--white);transition:left .2s"></div></div></div>'
+  +(function(){
+    var w=(typeof wakeStatus==='function')?wakeStatus():{supported:false};
+    return '<div style="padding:2px 18px 12px;font-size:11px;color:var(--txt3);line-height:1.55">'
+      +(w.supported?'Held only while a mission is running, released the moment it ends \u2014 it will not drain the battery on other screens.'
+                   :'Screen Wake Lock is not supported in this browser. On Android use Chrome.')
+      +(w.error?'<br><span style="color:var(--amber)">last: '+w.error+'</span>':'')
+      +'</div>';
+  })()
   +'<div class="sh">REMINDERS</div>'
   +'<div class="sr"><div class="sr-l">Daily training reminder</div><input class="sr-i" type="time" value="'+(S.profile.remindTime||'18:00')+'" onchange="S.profile.remindTime=this.value;saveS()"></div>'
   +('Notification' in window?
@@ -153,4 +167,13 @@ function toggleEquip(k){
   if(!S.profile.equipment)S.profile.equipment={};
   S.profile.equipment[k]=!S.profile.equipment[k];
   saveS();renderSettings();
+}
+
+
+function toggleWake(){
+  if(!S.profile)S.profile={};
+  S.profile.keepAwake=(S.profile.keepAwake===false);
+  saveS();
+  if(S.profile.keepAwake===false&&typeof wakeRelease==='function')wakeRelease();
+  renderSettings();
 }
