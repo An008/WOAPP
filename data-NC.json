@@ -567,6 +567,12 @@
               "wt": 10,
               "rp": 12,
               "rpe": 4
+            },
+            {
+              "done": true,
+              "wt": 15,
+              "rp": 12,
+              "rpe": 5
             }
           ],
           "comp": true
