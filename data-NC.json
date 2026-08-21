@@ -407,6 +407,18 @@
       "date": "2026-08-19",
       "exercises": {},
       "started": "2026-08-19T15:16:27.195Z"
+    },
+    "2026-08-21|A": {
+      "type": "A",
+      "date": "2026-08-21",
+      "exercises": {
+        "wu1": {
+          "sets": [],
+          "comp": false
+        }
+      },
+      "started": "2026-08-21T15:00:18.372Z",
+      "mode": "base"
     }
   },
   "journal": {},
