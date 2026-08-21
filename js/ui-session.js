@@ -361,19 +361,85 @@ function buildMuscleThumb(exId){
 }
 
 // -- REST TIMER -----------------------------------------------------------------
-function showRest(secs,doneEx,nextEx,cb){
-  clearInterval(RS_INT);RS_TOTAL=RS_LEFT=secs;RS_CB=cb;
-  document.getElementById('rs-t').textContent=secs+'s';
-  document.getElementById('rs-ex').textContent='\u2713 '+doneEx+' secured \u2014 Next objective: '+nextEx;
-  document.getElementById('rs-bf').style.width='100%';
-  document.getElementById('rest-screen').classList.add('show');
-  RS_INT=setInterval(function(){
-    RS_LEFT--;
-    if(RS_LEFT<=0){clearInterval(RS_INT);document.getElementById('rest-screen').classList.remove('show');if(navigator.vibrate)navigator.vibrate([200,100,200]);if(RS_CB)RS_CB();}
-    else{document.getElementById('rs-t').textContent=RS_LEFT+'s';var p=RS_LEFT/RS_TOTAL*100;var f=document.getElementById('rs-bf');f.style.width=p+'%';f.style.background=RS_LEFT>10?'var(--green)':'var(--red)';}
-  },1000);
+function ytSearch(q){
+  return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q);
 }
-function skipRest(){clearInterval(RS_INT);document.getElementById('rest-screen').classList.remove('show');if(RS_CB)RS_CB();RS_CB=null;}
+
+// Technique brief for the objective coming up next - the regroup is dead time,
+// so use it to arrive at the next objective already knowing what it asks for.
+function restBrief(idx){
+  var c=FC_CARDS&&FC_CARDS[idx];
+  if(!c)return '';
+  var ex=c.ex;
+  var vol=(c.totalSets>1?'Serial '+(c.si+1)+' of '+c.totalSets:ex.v||'');
+  var h='<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 15px">'
+    +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--txt3)">NEXT OBJECTIVE</div>'
+    +'<div style="font-size:16px;font-weight:800;color:var(--white);margin-top:3px;line-height:1.2">'+ex.n+'</div>'
+    +(vol?'<div style="font-size:11px;color:var(--txt2);margin-top:2px">'+vol+'</div>':'');
+  if(ex.cue)h+='<div style="font-size:12px;color:var(--txt);line-height:1.6;margin-top:9px">'+ex.cue+'</div>';
+  if(ex.feel)h+='<div style="font-size:11px;color:var(--txt3);line-height:1.55;margin-top:7px;font-style:italic">'+ex.feel+'</div>';
+  if(ex.yt)h+='<a href="'+ytSearch(ex.yt)+'" target="_blank" rel="noopener" '
+    +'style="display:block;margin-top:11px;padding:10px;border-radius:10px;text-align:center;text-decoration:none;'
+    +'background:rgba(227,80,80,.1);border:1px solid rgba(227,80,80,.28);color:#E35050;font-size:12px;font-weight:800">'
+    +'\u25b6 Watch the technique</a>';
+  return h+'</div>';
+}
+
+function showRest(secs,doneEx,nextEx,cb){
+  clearInterval(RS_INT);
+  RS_TOTAL=secs;RS_CB=cb;
+  // Deadline-based, not a decrementing counter: mobile browsers throttle
+  // setInterval in background tabs, so watching a video would otherwise stall
+  // or desynchronise the timer.
+  RS_END=Date.now()+secs*1000;
+  RS_LEFT=secs;
+  document.getElementById('rs-t').textContent=secs+'s';
+  document.getElementById('rs-ex').textContent='\u2713 '+doneEx+' secured';
+  document.getElementById('rs-bf').style.width='100%';
+  var brief=document.getElementById('rs-brief');
+  if(brief)brief.innerHTML=restBrief(FC_IDX+1);
+  document.getElementById('rest-screen').classList.add('show');
+  RS_INT=setInterval(restTick,250);
+  restTick();
+}
+
+function restTick(){
+  var left=Math.max(0,Math.ceil((RS_END-Date.now())/1000));
+  RS_LEFT=left;
+  if(left<=0){
+    clearInterval(RS_INT);
+    var rs=document.getElementById('rest-screen');
+    if(rs)rs.classList.remove('show');
+    var br=document.getElementById('rs-brief');
+    if(br)br.innerHTML='';
+    if(navigator.vibrate)navigator.vibrate([200,100,200]);
+    var cb=RS_CB;RS_CB=null;
+    if(cb)cb();
+    return;
+  }
+  var t=document.getElementById('rs-t');
+  if(t)t.textContent=left+'s';
+  var f=document.getElementById('rs-bf');
+  if(f){f.style.width=(left/RS_TOTAL*100)+'%';
+        f.style.background=left>10?'var(--green)':'var(--red)';}
+}
+
+// Catch up immediately on returning from a backgrounded tab
+if(typeof document!=='undefined'&&document.addEventListener){
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&RS_CB&&RS_END)restTick();
+  });
+}
+
+function skipRest(){
+  clearInterval(RS_INT);
+  var rs=document.getElementById('rest-screen');
+  if(rs)rs.classList.remove('show');
+  var br=document.getElementById('rs-brief');
+  if(br)br.innerHTML='';
+  var cb=RS_CB;RS_CB=null;
+  if(cb)cb();
+}
 
 // -- AI COACH -------------------------------------------------------------------
 async function callAI(key,prompt,onOK,onErr,maxTok){
