@@ -498,6 +498,12 @@
               "wt": 10,
               "rp": 8,
               "rpe": 4
+            },
+            {
+              "done": true,
+              "wt": 10,
+              "rp": 8,
+              "rpe": 3
             }
           ],
           "comp": true
