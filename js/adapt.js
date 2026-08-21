@@ -57,6 +57,23 @@ function objectiveHistory(exId,type,limit){
 function nextRLI(exId,patternId,type,intent,currentRLI){
   var t=RPE_TARGET[intent||'strength'];
   if(intent==='support')return {rli:currentRLI,reason:'Support work - held by design',delta:0};
+  // Skip reasons outrank RPE - "too easy" means it was not worth doing at all,
+  // and pain must never be answered with more load.
+  if(typeof skipSignal==='function'){
+    var sg=skipSignal(exId);
+    if(sg&&sg.count>=2&&sg.reason==='too-easy'){
+      return {rli:Math.round((currentRLI+0.14)*100)/100,delta:0.14,
+              reason:'Skipped as too easy '+sg.count+'x - large increase',lastRpe:null,target:t};
+    }
+    if(sg&&sg.reason==='pain'){
+      return {rli:currentRLI,delta:0,
+              reason:'Skipped for pain - load frozen pending replacement',lastRpe:null,target:t};
+    }
+    if(sg&&sg.count>=2&&sg.reason==='too-hard'){
+      return {rli:Math.max(0.10,Math.round((currentRLI-0.10)*100)/100),delta:-0.10,
+              reason:'Skipped as too hard '+sg.count+'x - reduced',lastRpe:null,target:t};
+    }
+  }
   var h=objectiveHistory(exId,type,3);
   if(!h.length)return {rli:currentRLI,reason:'No rated history yet',delta:0};
   var recent=h[0];
