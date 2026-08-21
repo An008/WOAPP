@@ -35,7 +35,7 @@ function muscleRecovery(){
       var ed=s.exercises[exId];
       var worked=ed&&!ed.skipped&&(((ed.sets||[]).some(function(x){return x.done&&x.rpe!=null;}))||(ed.comp&&(!ed.sets||!ed.sets.length)));
       if(!worked)return;
-      var mm=MM[exId];
+      var mm=(typeof mmFor==='function')?mmFor(exId):MM[exId];
       if(!mm)return;
       [['f',1],['b',0.6]].forEach(function(pair){
         (mm[pair[0]]||[]).forEach(function(k){
