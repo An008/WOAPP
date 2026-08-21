@@ -527,9 +527,19 @@
               "wt": 20,
               "rp": 8,
               "rpe": 5
+            },
+            {
+              "done": true,
+              "wt": 20,
+              "rp": 8,
+              "rpe": 6
             }
           ],
           "comp": true
+        },
+        "v-press": {
+          "sets": [],
+          "comp": false
         }
       },
       "started": "2026-08-21T15:00:18.372Z",
