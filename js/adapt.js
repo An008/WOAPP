@@ -103,6 +103,29 @@ function nextPrescription(obj){
 }
 
 
+
+// Seed stored RLI from the programme defaults the first time each objective is
+// seen. Without this profile.rli stays empty, so applyRegression() has nothing
+// to walk back after a hiatus and autoregulation has no baseline to move from.
+function seedRLI(){
+  if(typeof SESSIONS==='undefined')return 0;
+  if(!S.profile)S.profile={};
+  if(!S.profile.rli)S.profile.rli={};
+  var n=0;
+  Object.keys(SESSIONS).forEach(function(t){
+    var sd=SESSIONS[t];
+    if(!sd||!sd.blocks)return;
+    sd.blocks.forEach(function(blk){
+      (blk.exs||[]).forEach(function(ex){
+        if(!ex.pattern||ex.rli==null)return;
+        if(S.profile.rli[ex.id]==null){S.profile.rli[ex.id]=ex.rli;n++;}
+      });
+    });
+  });
+  if(n)saveS();
+  return n;
+}
+
 // --- RETURN FROM HIATUS ------------------------------------------------------
 // Detraining costs strength. Returning to the load you left at is how people
 // get hurt, so a hiatus walks every stored RLI back once, permanently, and
