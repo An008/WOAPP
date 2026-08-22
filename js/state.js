@@ -6,8 +6,22 @@
 var SK='iron-v2';
 // --- API KEY \u2014 persists independently of profile data ------------------------
 var AI_KEY_STORE='iron-ai-key';
-function getApiKey(){return localStorage.getItem(AI_KEY_STORE)||(S&&S.profile&&S.profile.apiKey)||'';}
-function setApiKey(k){localStorage.setItem(AI_KEY_STORE,k);if(S&&S.profile){S.profile.apiKey=k;saveS();}}
+// The API key lives in device-local storage ONLY. It is deliberately never
+// written into S, because S is uploaded to a PUBLIC GitHub repo - storing it
+// there would publish the key. Nothing that syncs may ever carry it.
+function getApiKey(){
+  try{return localStorage.getItem(AI_KEY_STORE)||'';}catch(e){return '';}
+}
+function setApiKey(k){
+  k=(k||'').trim();
+  try{
+    if(k)localStorage.setItem(AI_KEY_STORE,k);
+    else localStorage.removeItem(AI_KEY_STORE);
+  }catch(e){}
+  if(S&&S.profile&&S.profile.apiKey){delete S.profile.apiKey;saveS();}
+  return k;
+}
+function hasApiKey(){return !!getApiKey();}
 
 var S=null;
 var CUR_USER=null;
@@ -136,7 +150,7 @@ function getOrCreate(date,type){
   if(!S.sessions[k])S.sessions[k]={type:type,date:date,exercises:{},started:new Date().toISOString()};
   return S.sessions[k];
 }
-function defaultState(){return{profile:{name:'',start:today(),apiKey:'',height:164,age:40},next:'A',sessions:{},journal:{},landmarks:LM.map(function(l){return Object.assign({},l,{done:false});}),measurements:[]};}
+function defaultState(){return{profile:{name:'',start:today(),height:164,age:40},next:'A',sessions:{},journal:{},landmarks:LM.map(function(l){return Object.assign({},l,{done:false});}),measurements:[]};}
 
 // --- LANDMARK SYNC ------------------------------------------------------------
 // PERMANENT ENCODING FIX: display text (i/g/p) is NEVER trusted from storage.
@@ -156,7 +170,7 @@ function syncLandmarks(){
   });
 }
 
-function loadS(){var d=localStorage.getItem(SK+'-'+(CUR_USER?CUR_USER.name:''));S=d?JSON.parse(d):defaultState();if(!S.sessions)S.sessions={};migrateSessions();syncLandmarks();if(!S.profile)S.profile={};if(!S.profile.apiKey)S.profile.apiKey=localStorage.getItem(AI_KEY_STORE)||'';if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;if(!S.profile.start)S.profile.start=today();
+function loadS(){var d=localStorage.getItem(SK+'-'+(CUR_USER?CUR_USER.name:''));S=d?JSON.parse(d):defaultState();if(!S.sessions)S.sessions={};migrateSessions();syncLandmarks();if(!S.profile)S.profile={};if(S.profile.apiKey)delete S.profile.apiKey;if(CUR_USER&&!S.profile.name)S.profile.name=CUR_USER.name;if(!S.profile.start)S.profile.start=today();
   if(!S.profile.height)S.profile.height=164;
   if(!S.profile.age)S.profile.age=40;
   if(!S.measurements)S.measurements=[];}
