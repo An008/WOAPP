@@ -12,7 +12,8 @@ var WORK_BLOCKS_AI=['B1','B2','B3','JUMP','SPRINT','BOX','CARRY','RUN','COMPLEX'
 function equipmentList(){
   var e=(S.profile&&S.profile.equipment)||{};
   var have=Object.keys(e).filter(function(k){return e[k];});
-  return have.length?have.join(', '):'none declared';
+  return have.length?have.join(', ')
+    :'NONE - bodyweight only. Prescribe no exercise requiring any equipment whatsoever: no dumbbells, barbells, kettlebells, bands, plates, pull-up bar, bench, box or foam roller. A body and a floor.';
 }
 
 // Everything the coach needs: prescription, reality, and the gap between them
