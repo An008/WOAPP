@@ -56,7 +56,14 @@ function missionStarted(key){
   });
   return any;
 }
+// No equipment declared means no equipment available: prescribe bodyweight only.
+function hasEquipment(){
+  var e=(S&&S.profile&&S.profile.equipment)||{};
+  for(var k in e)if(e[k])return true;
+  return false;
+}
 function loadoutFor(date,type){
+  if(!hasEquipment())return 'field';
   var k=sessKey(date,type), s=S.sessions[k];
   // Only honour a stamped mode once real work exists. Before that the toggle
   // must always win, or simply opening the mission would lock you in.
