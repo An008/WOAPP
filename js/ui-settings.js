@@ -71,7 +71,10 @@ function renderSettings(){
 +(S.profile&&S.profile.assessmentDate?'&#128202; Re-run Assessment':'&#128202; Run Assessment')+'</button></div>'
 +'<div class="sh">AI COACH</div>'
   +'<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2);line-height:1.6">Free Groq key at <strong style="color:var(--white)">console.groq.com</strong> (keys start with gsk_). Also accepts Google AI keys (AIza).</div>'
-  +'<div class="sr"><div class="sr-l">API Key</div><input class="sr-i" type="password" value="'+getApiKey()+'" placeholder="gsk_ or AIza..." onchange="setApiKey(this.value);renderSettings()" style="width:180px;font-size:12px"></div>'
+  +'<div class="sr"><div class="sr-l">API Key</div><input class="sr-i" type="password" value="'+getApiKey()+'" placeholder="gsk_ or AIza..." oninput="setApiKey(this.value);markKeySaved()" autocomplete="off" style="width:180px;font-size:12px"></div>'
+  +'<div id="key-state" style="padding:2px 18px 10px;font-size:11px;color:'+(hasApiKey()?'var(--green)':'var(--txt3)')+'">'
+  +(hasApiKey()?'\u2713 Key stored on this device \u2014 never uploaded, never synced':'No key stored. Paste it above; it saves as you type.')
+  +'</div>'
   +(getApiKey()?'<div style="padding:4px 18px 10px;font-size:12px;color:var(--green)">&#10003; '+(getApiKey().startsWith('gsk_')?'Groq connected':'Gemini connected')+'</div>':'')
   +'<div class="sh">OVERRIDE NEXT SESSION</div>'
   +(function(){
@@ -176,4 +179,16 @@ function toggleWake(){
   saveS();
   if(S.profile.keepAwake===false&&typeof wakeRelease==='function')wakeRelease();
   renderSettings();
+}
+
+
+// Live confirmation without re-rendering - re-rendering mid-edit is exactly what
+// destroyed the input and lost the key before it could be written
+function markKeySaved(){
+  var el=document.getElementById('key-state');
+  if(!el)return;
+  var has=hasApiKey();
+  el.style.color=has?'var(--green)':'var(--txt3)';
+  el.textContent=has?'\u2713 Key stored on this device \u2014 never uploaded, never synced'
+                    :'No key stored. Paste it above; it saves as you type.';
 }
