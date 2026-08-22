@@ -274,6 +274,12 @@ function renderToday(){
      +' objective'+(_r.moved.length!==1?'s':'')+' stepped back '+Math.round(_r.loss*100)+'%. '
      +'Ease in \u2014 your RPE will climb them back within a few missions.</div></div>';
   }
+  if(typeof hasEquipment==='function'&&!hasEquipment()){
+    h+='<div style="margin:11px 16px 0;padding:11px 14px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.22);border-radius:14px">'
+     +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">BODYWEIGHT ONLY</div>'
+     +'<div style="font-size:11px;color:var(--txt2);margin-top:3px;line-height:1.5">No equipment declared, so every objective is prescribed bodyweight. '
+     +'Declare what you have in Setup to unlock loaded work.</div></div>';
+  }
   if(isDeloadWeek()){
     h+='<div style="margin:11px 16px 0;padding:11px 14px;background:rgba(74,158,219,.07);border:1px solid rgba(74,158,219,.2);border-radius:16px">'
      +'<div style="font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)">DELOAD WEEK</div>'
