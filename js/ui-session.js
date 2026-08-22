@@ -10,6 +10,7 @@ function beginSession(forceType,forceDate){
   // date+type if one exists, otherwise creates it.
   if(forceType){curSessType=forceType;}
   else{var _p=planToday();curSessType=_p.mode==='train'?_p.type:'REST';}
+  if(typeof seedRLI==='function')seedRLI();
   // Returning after a hiatus: walk the loads back before building any cards
   if(typeof applyRegression==='function'){
     var _rg=applyRegression();
