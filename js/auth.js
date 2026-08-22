@@ -73,7 +73,10 @@ async function autoSyncToGH(){
   try{
     var shaRes=await fetch(_gh_url(path),{headers:{'Authorization':'token '+tk}});
     var sha=shaRes.ok?(await shaRes.json()).sha:null;
-    var body={message:'Auto-sync '+CUR_USER.name+' '+today(),content:btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))))};
+    // The repo is PUBLIC - never upload the API key, whatever put it in S
+    var _up=JSON.parse(JSON.stringify(S));
+    if(_up.profile){delete _up.profile.apiKey;delete _up.profile.aiKey;}
+    var body={message:'Auto-sync '+CUR_USER.name+' '+today(),content:btoa(unescape(encodeURIComponent(JSON.stringify(_up,null,2))))};
     if(sha)body.sha=sha;
     await fetch(_gh_url(path),{method:'PUT',headers:{'Authorization':'token '+tk,'Content-Type':'application/json'},body:JSON.stringify(body)});
   }catch(e){}
