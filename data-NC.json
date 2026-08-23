@@ -5,7 +5,6 @@
     "start": "2026-07-25",
     "height": 164,
     "age": 40,
-    "apiKey": "",
     "loadout": "base",
     "remindTime": "18:00",
     "activity": 1.35,
@@ -17,7 +16,22 @@
         "method": "DEXA"
       }
     ],
-    "keepAwake": true
+    "keepAwake": true,
+    "rli": {
+      "hinge": 0.55,
+      "squat": 0.86,
+      "h-press": 0.62,
+      "v-press": 0.45,
+      "h-pull": 0.27,
+      "v-pull": 0.7,
+      "grip": 1,
+      "carry": 0.3,
+      "grip-b": 1,
+      "pap-primer": 0.86,
+      "pap-power": 0.9,
+      "grip-c": 1,
+      "carry-long": 0.3
+    }
   },
   "next": "B",
   "sessions": {
@@ -638,6 +652,39 @@
       "date": "2026-08-21",
       "exercises": {},
       "started": "2026-08-21T17:32:55.584Z"
+    },
+    "2026-08-23|B": {
+      "type": "B",
+      "date": "2026-08-23",
+      "exercises": {
+        "easy-w": {
+          "sets": [],
+          "comp": true
+        },
+        "ankle-p": {
+          "sets": [
+            {
+              "done": true,
+              "wt": null,
+              "rp": 15,
+              "rpe": 4
+            },
+            {
+              "done": true,
+              "wt": null,
+              "rp": 15,
+              "rpe": 5
+            }
+          ],
+          "comp": true
+        },
+        "climb": {
+          "sets": [],
+          "comp": false
+        }
+      },
+      "started": "2026-08-23T05:38:09.634Z",
+      "mode": "field"
     }
   },
   "journal": {},
@@ -752,6 +799,11 @@
     {
       "date": "2026-08-21",
       "weight": 73.4
+    },
+    {
+      "date": "2026-08-23",
+      "weight": 73.4,
+      "waist": 91.5
     }
   ],
   "macros": {},
