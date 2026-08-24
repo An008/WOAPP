@@ -746,6 +746,38 @@
         }
       },
       "started": "2026-08-24T16:57:08.069Z",
+      "mode": "base"
+    },
+    "2026-08-24|REST": {
+      "type": "REST",
+      "date": "2026-08-24",
+      "exercises": {
+        "easy-walk": {
+          "sets": [],
+          "comp": true
+        },
+        "foam-full": {
+          "sets": [],
+          "comp": true
+        },
+        "box-br": {
+          "sets": [],
+          "comp": true
+        },
+        "grip-work": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "vis": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        }
+      },
+      "started": "2026-08-24T16:58:35.538Z",
       "mode": "field"
     }
   },
