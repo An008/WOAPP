@@ -33,7 +33,7 @@
       "carry-long": 0.3
     }
   },
-  "next": "B",
+  "next": "C",
   "sessions": {
     "2026-07-25|A": {
       "type": "A",
@@ -684,6 +684,68 @@
         }
       },
       "started": "2026-08-23T05:38:09.634Z",
+      "mode": "field"
+    },
+    "2026-08-24|B": {
+      "type": "B",
+      "date": "2026-08-24",
+      "exercises": {
+        "easy-w": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "ankle-p": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "climb": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "desc": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "carry": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "grip-b": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "z2": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "hip-fs": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        },
+        "vis": {
+          "sets": [],
+          "comp": false,
+          "skipped": true,
+          "skipReason": "time"
+        }
+      },
+      "started": "2026-08-24T16:57:08.069Z",
       "mode": "field"
     }
   },
