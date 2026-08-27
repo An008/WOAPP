@@ -306,18 +306,20 @@ function renderToday(){
      +'<div style="font-size:17px;color:var(--purple)">\u203a</div></div>';
   }
 
-  var active=getActiveLandmarks().filter(function(l){return !l.done;});
+  if(typeof migrateStandards==='function')migrateStandards();
+  var active=(typeof openStandards==='function')?openStandards():[];
   h+='<div class="sh">STANDARDS TO MEET</div>';
   if(!active.length){
-    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:16px;padding:13px 15px;font-size:12px;color:var(--green);font-weight:700">\u2713 All phase standards met \u2014 see Operator file</div></div>';
+    h+='<div style="padding:0 16px 10px"><div style="background:rgba(61,184,122,.09);border:1px solid rgba(61,184,122,.22);border-radius:16px;padding:13px 15px;font-size:12px;color:var(--green);font-weight:700">\u2713 Every standard met \u2014 see Operator file</div></div>';
   }else{
-    h+='<div style="padding:0 16px">'+active.slice(0,3).map(function(lm){
-      return '<div class="lm" onclick="toggleLm(\''+lm.id+'\')"><i>'+lm.i+'</i>'
-        +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--white)">'+lm.g+'</div>'
-        +'<div style="font-size:10px;color:var(--txt2)">'+lm.p+'</div></div><div class="lm-c">\u25cb</div></div>';
+    h+='<div style="padding:0 16px">'+active.slice(0,3).map(function(st){
+      return '<div class="lm" onclick="claimStandard(\''+st.trackId+'\')"><i>'+st.i+'</i>'
+        +'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--white)">'+st.g+'</div>'
+        +'<div style="font-size:10px;color:var(--txt2)">'+st.p+' \u00b7 '+st.track+' tier '+(st.tier+1)+' of '+st.total+'</div></div>'
+        +'<div class="lm-c">\u25cb</div></div>';
     }).join('')
     +'<div style="text-align:center;padding:8px 0"><span style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--txt3)">'
-    +active.length+' OUTSTANDING IN PHASE '+(ph+1)+(active.length>3?' \u00b7 SHOWING 3':'')+'</span></div></div>';
+    +clearedTiers()+' OF '+totalTiers()+' STANDARDS MET'+(active.length>3?' \u00b7 SHOWING 3':'')+'</span></div></div>';
   }
 
   h+='</div>';
