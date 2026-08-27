@@ -76,7 +76,8 @@ function xpBreakdown(){
     if(p>=100){full++;b.sessions+=XP.session;}
     else if(p>=50){part++;b.partial+=XP.partial;}
   });
-  var goals=(S.landmarks||[]).filter(function(l){return l.done;}).length;
+  var goals=(typeof clearedTiers==='function')?clearedTiers()
+            :(S.landmarks||[]).filter(function(l){return l.done;}).length;
   var asmt=(S.assessmentHistory||[]).length;
   var meas=(S.measurements||[]).length;
   var jrnl=Object.keys(S.journal||{}).length;
