@@ -129,7 +129,9 @@ function renderMetrics(){
   form+='<div id="ms-confirm" style="padding:4px 18px;font-size:12px;color:var(--green);min-height:20px"></div>';
 
   // -- ACHIEVEMENTS ---------------------------------------------------------
-  var achieved=S.landmarks.filter(function(l){return l.done;});
+  if(typeof migrateStandards==='function')migrateStandards();
+  var achieved=(typeof achievedStandards==='function')?achievedStandards()
+              :S.landmarks.filter(function(l){return l.done;});
   var achHtml='<div class="sh">ACHIEVEMENTS</div>';
   if(achieved.length===0){
     achHtml+='<div style="padding:0 18px 10px;font-size:13px;color:var(--txt2)">No achievements yet. Complete goals on the Today screen.</div>';
@@ -138,7 +140,7 @@ function renderMetrics(){
       return '<div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)">'
         +'<div style="font-size:20px;flex-shrink:0">'+lm.i+'</div>'
         +'<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--white)">'+lm.g+'</div>'
-        +'<div style="font-size:11px;color:var(--txt2)">'+lm.p+'</div></div>'
+        +'<div style="font-size:11px;color:var(--txt2)">'+lm.p+(lm.track?' \u00b7 '+lm.track+' tier '+(lm.tier+1):'')+'</div></div>'
         +'<div style="color:var(--green);font-size:18px;font-weight:900">&#10003;</div>'
         +'</div>';
     }).join('');
