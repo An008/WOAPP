@@ -47,7 +47,10 @@ function calendarWeeks(){
   return Math.max(0,Math.floor((new Date()-new Date(S.profile.start))/604800000));
 }
 function earnedWeeks(){
-  var done=(typeof completedSessions==='function')?completedSessions():0;
+  // Recovery days are prescribed work but they are not training missions -
+  // counting them advanced the programme and paid phase merit for resting.
+  var done=(typeof completedTraining==='function')?completedTraining()
+          :(typeof completedSessions==='function')?completedSessions():0;
   return done/MISSIONS_PER_WEEK;
 }
 function programmeWeeks(){
@@ -137,11 +140,13 @@ function goalPct(){
   // Progress toward the goal is a READINESS measure and erodes with inactivity.
   // Missions Run is the historical record and never changes.
   var d=(typeof meritDecay==='function')?meritDecay():{pct:0};
-  return Math.min(100,Math.round(completedSessions()/t*(1-(d.pct||0))*1000)/10);
+  var done=(typeof completedTraining==='function')?completedTraining():completedSessions();
+  return Math.min(100,Math.round(done/t*(1-(d.pct||0))*1000)/10);
 }
 function goalPctRaw(){
   var t=totalPlannedSessions();
-  return t?Math.min(100,Math.round(completedSessions()/t*1000)/10):0;
+  var done=(typeof completedTraining==='function')?completedTraining():completedSessions();
+  return t?Math.min(100,Math.round(done/t*1000)/10):0;
 }
 function isPhaseEnd(){return getPhaseWk()>=PHASES[getPhase()].weeks;}
 
