@@ -5,7 +5,17 @@
 // input/performance signal; this file is strictly a mirror of what was done.
 // ASCII-ONLY: no byte above 0x7F may appear in this file.
 
-var XP={session:100,partial:40,goal:250,assessment:150,measurement:25,journal:15,phase:500};
+// MERIT IS EARNED BY EXECUTED WORK, NOTHING ELSE.
+//
+// The old scale was inverted: ticking five goal checkboxes paid 1250 while a
+// completed mission paid 100, so rank climbed from weighing yourself and
+// self-certifying milestones. Logging is not effort.
+//
+//   missions   -> the unit of merit
+//   goals      -> small recognition; the training that earned them already paid
+//   assessment -> a physical test, so it counts as work
+//   measuring / journalling / phase -> ZERO (records, or already counted)
+var XP={session:100,partial:40,goal:50,assessment:50,measurement:0,journal:0,phase:0};
 
 var RANKS=[
   {min:1, name:'RECRUIT',        note:'In processing. Building the base.'},
@@ -70,12 +80,12 @@ function xpBreakdown(){
   var asmt=(S.assessmentHistory||[]).length;
   var meas=(S.measurements||[]).length;
   var jrnl=Object.keys(S.journal||{}).length;
-  var phases=getPhase();
+  var phases=0;
   b.goals=goals*XP.goal;
   b.assessments=asmt*XP.assessment;
   b.measurements=meas*XP.measurement;
   b.journal=jrnl*XP.journal;
-  b.phases=phases*XP.phase;
+  b.phases=0;
   b.counts={sessions:full,partial:part,goals:goals,assessments:asmt,
             measurements:meas,journal:jrnl,phases:phases};
   b.total=b.sessions+b.partial+b.goals+b.assessments+b.measurements+b.journal+b.phases;
@@ -371,10 +381,7 @@ function renderDevelopment(){
     ['Missions executed',c.sessions,XP.session,b.sessions],
     ['Missions partial',c.partial,XP.partial,b.partial],
     ['Standards met',c.goals,XP.goal,b.goals],
-    ['Assessments',c.assessments,XP.assessment,b.assessments],
-    ['Measurements logged',c.measurements,XP.measurement,b.measurements],
-    ['Journal entries',c.journal,XP.journal,b.journal],
-    ['Phases completed',c.phases,XP.phase,b.phases]
+    ['Assessments',c.assessments,XP.assessment,b.assessments]
   ].filter(function(r){return r[1]>0;});
 
   h+='<div class="sh">READINESS BREAKDOWN</div><div style="padding:0 16px">'
@@ -404,6 +411,7 @@ function renderDevelopment(){
       +'<div style="font-size:15px;font-weight:900;color:var(--amber);font-variant-numeric:tabular-nums">'+b.total.toLocaleString()+' MERIT</div></div>';
   }
   h+='<div style="font-size:10px;color:var(--txt3);line-height:1.6;padding:8px 0 4px">'
+   +(c.measurements||c.journal?'Measurements ('+c.measurements+') and journal entries ('+c.journal+') earn no merit \u2014 they are records, not work.<br>':'')
    +'Merit is recalculated from your mission log every time this screen opens. It records what you have executed \u2014 it is not a score to chase. '
    +'RPE remains the only measure of how hard the work actually was.</div>';
   h+='</div>';
