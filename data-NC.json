@@ -906,9 +906,27 @@
     {
       "date": "2026-08-26",
       "weight": 73.3
+    },
+    {
+      "date": "2026-08-28",
+      "weight": 71.8
     }
   ],
   "macros": {},
   "assessmentHistory": [],
-  "__resetSeen": "2026-07-25T15:47:47Z"
+  "__resetSeen": "2026-07-25T15:47:47Z",
+  "standards": {
+    "push": 1,
+    "pull": 1,
+    "legs": 0,
+    "run": 1,
+    "z2": 0,
+    "vert": 0,
+    "carry": 1,
+    "grip": 0,
+    "power": 0,
+    "breath": 1,
+    "trail": 0
+  },
+  "__stdMigrated": true
 }
